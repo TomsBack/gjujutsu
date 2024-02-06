@@ -266,7 +266,6 @@ hook.Add("CalcView", "gJujutsu_ThirdPerson", function(ply, pos, ang, fov)
 		end
 	end
 	
-	
 	local trace = util.TraceHull({
 		start = pos,
 		endpos = endPos,
@@ -296,6 +295,9 @@ local hudToHide = {
 
 hook.Add("HUDShouldDraw", "gJujutsu_NoDefaultHUD", function(currentElement)
 	local ply = LocalPlayer()
+
+	if not ply:IsValid() then return true end
+
 	local weapon = ply:GetActiveWeapon()
 
 	if not weapon:IsValid() then return true end

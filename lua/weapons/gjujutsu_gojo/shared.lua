@@ -525,7 +525,7 @@ function SWEP:HollowPurpleFire()
 		end
 
 		if hollowPurple:GetFullOutput() then
-			owner:EmitSound(Sound("gjujutsu_kaisen/gojo/voice/murasaki_200.wav"))
+			owner:EmitSound(Sound("gjujutsu_kaisen/gojo/voice/purple_voice_02.wav"))
 
 			timer.Simple(0.8, function()
 				if not owner:IsValid() then return end

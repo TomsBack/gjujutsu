@@ -18,21 +18,21 @@ if CLIENT then
 	net.Receive("jjk.LoadNombat", function()
 		hook.Add("PlayerSwitchWeapon", "gjujutsuNombatCompatibility", function(ply, owep, wep)
 			if NOMBAT and wep:IsValid() and string.StartWith(wep:GetClass(), "gjujutsu_") then
-				NOMBAT:SetCombatSong( "nombat/gjujutsu/"..wep:GetClass()..".wav", NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".wav")) )
-				NOMBAT.GetCombatTimeout = CurTime() + NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".wav"))
+				NOMBAT:SetCombatSong( "nombat/gjujutsu/"..wep:GetClass()..".wav", NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".mp3")) )
+				NOMBAT.GetCombatTimeout = CurTime() + NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".mp3"))
 			end
 		end)
 		hook.Add("HUDWeaponPickedUp", "gjujutsuNombatCompatibility", function(wep)
 			if NOMBAT and wep:IsValid() and string.StartWith(wep:GetClass(), "gjujutsu_") then
-				NOMBAT:SetCombatSong( "nombat/gjujutsu/"..wep:GetClass()..".wav", NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".wav")) )
-				NOMBAT.GetCombatTimeout = CurTime() + NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".wav"))
+				NOMBAT:SetCombatSong( "nombat/gjujutsu/"..wep:GetClass()..".mp3", NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".mp3")) )
+				NOMBAT.GetCombatTimeout = CurTime() + NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".mp3"))
 			end
 		end)
 		hook.Add("Think", "gjujutsuNombatCompatibility", function(ply, wep)
 			local wep = LocalPlayer():GetActiveWeapon()
 			if NOMBAT and wep:IsValid() and string.StartWith(wep:GetClass(), "gjujutsu_") and CurTime() >= NOMBAT.GetCombatTimeout then
-				NOMBAT:SetCombatSong( "nombat/gjujutsu/"..wep:GetClass()..".wav", NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".wav")) )
-				NOMBAT.GetCombatTimeout = CurTime() + NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".wav"))
+				NOMBAT:SetCombatSong( "nombat/gjujutsu/"..wep:GetClass()..".mp3", NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".mp3")) )
+				NOMBAT.GetCombatTimeout = CurTime() + NiceDuration(SoundDuration("nombat/gjujutsu/"..wep:GetClass()..".mp3"))
 			end
 		end)
 	end)
