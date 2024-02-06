@@ -1,0 +1,9 @@
+SpriteCard
+{
+	$basetexture "particles/trace_01"
+	$translucent 1
+	$vertexalpha 1
+	$vertexcolor 1
+	$overbrightfactor 65
+	$additive 1
+}

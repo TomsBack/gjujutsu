@@ -1,0 +1,5 @@
+vertexlitgeneric
+{
+	$basetexture "models\chromeda\malevolent_shrine\mouth_d"
+	$bumpmap "models\chromeda\malevolent_shrine\mouth_n"
+}

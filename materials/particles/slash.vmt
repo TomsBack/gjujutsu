@@ -1,0 +1,9 @@
+UnlitGeneric
+{
+	$basetexture "particles/slash"
+	$translucent 1
+	$vertexalpha 1
+	$vertexcolor 1
+	$overbrightfactor 65
+	$additive 1
+}

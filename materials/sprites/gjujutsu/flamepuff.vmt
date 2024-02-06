@@ -1,0 +1,6 @@
+"Spritecard"
+{
+	"$basetexture" "sprites/gjujutsu/flamepuff"
+	"$translucent" 1
+	"$addself" "50"
+}

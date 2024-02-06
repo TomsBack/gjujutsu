@@ -1,0 +1,26 @@
+vertexlitgeneric
+{
+	$basetexture "models\chromeda\darling\arrow\basecol"
+
+	$detail "models\chromeda\darling\arrow\basecol"
+	$detailscale 1
+	$detailblendmode 5
+	$allowalphatocoverage 1
+	$translucent 1
+	$additive 0
+proxies
+{
+	texturescroll
+	{
+	texturescrollvar $detailtexturetransform
+	texturescrollrate .2
+	texturescrollangle 240
+	}
+	texturescroll
+	{
+	texturescrollvar $basetexturetransform
+	texturescrollrate .03
+	texturescrollangle 240
+	}
+}
+}

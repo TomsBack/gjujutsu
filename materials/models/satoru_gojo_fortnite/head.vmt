@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/satoru_gojo_fortnite/Head"
+	"$lightwarptexture" "models/satoru_gojo_fortnite/lightwarpshader"
+}

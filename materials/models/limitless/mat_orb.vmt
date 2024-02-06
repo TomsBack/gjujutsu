@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "limitless/mat_orb"
+	"$sprite" "1"
+	"$spriterendermode" "9"
+	"$ignorez" "0"
+	"$nofog" "0"
+}

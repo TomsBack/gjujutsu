@@ -1,0 +1,8 @@
+"SpriteCard" 
+{
+	$additive    1
+	$vertexalpha 1
+	$vertexcolor 1
+    $basetexture "sprites/gjujutsu/ori_orb_anim"
+	"$overbrightfactor" "5"
+}

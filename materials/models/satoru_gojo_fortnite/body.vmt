@@ -1,0 +1,16 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/satoru_gojo_fortnite/Body"
+	$lightwarptexture "models/satoru_gojo_fortnite/lightwarpshader"
+	$bumpmap "models/satoru_gojo_fortnite/body_n"
+	$phongexponenttexture "models/satoru_gojo_fortnite/body_expo"
+	
+	$phong 1
+	$phongalbedotint 1
+	$phongboost 5
+	$phongfresnelranges "[0.5 1 1]"
+	
+	$rimlight 1
+    $rimlightexponent 3
+    $rimlightboost 4
+}

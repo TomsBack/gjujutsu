@@ -1,0 +1,17 @@
+"SpriteCard"
+{
+	"$basetexture" "sprites/gjujutsu/comball_d"
+	"$additive" 1
+	"$overbrightfactor" "2"
+	"$translucent" 1
+	"$vertexcolor" 1
+	"Proxies"
+		{
+			"AnimatedOffsetTexture"
+			{
+				"animatedtexturevar" "$basetexture"
+				"animatedtextureframenumvar" "$frame"
+				"animatedtextureframerate" 40.00
+			}
+}
+}

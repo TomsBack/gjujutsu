@@ -1,0 +1,10 @@
+"SpriteCard"
+{
+	"$basetexture" "sprites/gjujutsu/energy_flare_03"
+	$depthblend 1
+	$depthblendscale 16
+	$overbrightfactor 4
+	$vertexalpha 1
+	$vertexcolor 1
+	$additive 	1
+}

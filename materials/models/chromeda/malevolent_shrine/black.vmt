@@ -1,0 +1,6 @@
+UnlitGeneric
+{
+	$basetexture "vgui\white"
+	$color2 "[ 0 0 0 ]"
+	$translucent 1
+}

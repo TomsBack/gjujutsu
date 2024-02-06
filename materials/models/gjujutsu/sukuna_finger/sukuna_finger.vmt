@@ -1,0 +1,11 @@
+"VertexlitGeneric"
+{
+	$basetexture "models/gjujutsu/sukuna_finger/sukuna_finger"
+	$bumpmap "models/gjujutsu/sukuna_finger/sukuna_finger_normal"
+	$phongexponenttexture "models/gjujutsu/sukuna_finger/sukuna_finger_expo"
+	
+	$phong 1
+	$phongalbedotint 1
+	$phongboost 2
+	$phongfresnelranges "[1 1 1]"
+}

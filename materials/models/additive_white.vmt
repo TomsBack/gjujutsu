@@ -1,0 +1,7 @@
+VertexLitGeneric
+{
+	$basetexture "models/additive_white"
+	$translucent 1
+	$vertexcolor 1
+	$additive 1
+}

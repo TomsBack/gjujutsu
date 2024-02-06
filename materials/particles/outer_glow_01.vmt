@@ -1,0 +1,8 @@
+SpriteCard
+{
+	$basetexture "particles/outer_glow_01"
+	$translucent 1
+	$vertexalpha 1
+	$vertexcolor 1
+	$overbrightfactor 3
+}

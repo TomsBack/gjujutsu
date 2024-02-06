@@ -1,0 +1,6 @@
+"SpriteCard"
+{
+	$basetexture "sprites/gjujutsu/mex_anomaly_01"
+	$overbrightfactor 10
+	$additive 1
+}

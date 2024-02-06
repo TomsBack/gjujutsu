@@ -1,0 +1,5 @@
+"UnlitGeneric"
+{
+	"$basetexture" "vgui/entities/gjujutsu_sukuna"
+	"$translucent" 1
+}

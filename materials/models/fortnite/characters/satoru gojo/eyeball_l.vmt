@@ -1,0 +1,13 @@
+"EyeRefract"
+{
+	"$Iris"   "models\Fortnite\Characters\Satoru Gojo\Eye_d"
+	//"$Envmap"             "engine/eye-reflection-cubemap-" 
+	"$glossiness"	 "0"
+	"$AmbientOcclTexture" "models\Fortnite\Characters\Satoru Gojo\Eye_ao"
+	"$CorneaTexture"      "models\Fortnite\Characters\Satoru Gojo\UniversalNormal"
+	"$EyeballRadius" "0.8"// Default 0.5
+	"$AmbientOcclColor" "[1 1 1]"	// Default 0.33, 0.33, 0.33
+	"$Dilation" ".5"					// Default 0.5
+	"$ParallaxStrength" "0.25"          // Default 0.25
+	"$CorneaBumpStrength" "1"   // Default 1.0
+}

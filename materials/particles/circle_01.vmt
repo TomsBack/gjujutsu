@@ -1,0 +1,10 @@
+SpriteCard
+{
+	$basetexture "particles/circle_01"
+	$translucent 1
+	$vertexalpha 1
+	$vertexcolor 1
+	$depthblend 1
+	$overbrightfactor 2
+	$additive 1
+}

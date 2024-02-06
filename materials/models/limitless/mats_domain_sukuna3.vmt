@@ -1,0 +1,13 @@
+UnlitGeneric
+{
+	$basetexture "models/limitless/mats_domain_sukuna3"
+	$alpha 1
+	$model 1
+	$translucent 1
+	$vertexcolor 1
+	$vertexalpha 1
+	$ignorez 1
+    $texscale 1
+	
+
+}

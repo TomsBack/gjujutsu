@@ -1,0 +1,7 @@
+"SpriteCard"
+{
+	"$basetexture" "sprites/gjujutsu/rockettrail"
+	"$vertexcolor" "1"
+	"$translucent" "1"
+	"$addself" "100"
+}
