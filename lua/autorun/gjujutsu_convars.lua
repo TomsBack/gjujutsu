@@ -17,3 +17,4 @@ CreateClientConVar("gjujutsu_secondary_key", 108, true, true, "Sets the secondar
 
 -- Gojo convars
 CreateConVar("gjujutsu_gojo_unrestricted_teleport", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to teleport while holding other cursed techniques", 0, 1)
+CreateConVar("gjujutsu_gojo_detonate_purple", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to detonate hollow purple when you press the button again", 0, 1)

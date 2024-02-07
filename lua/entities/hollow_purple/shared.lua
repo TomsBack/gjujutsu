@@ -229,7 +229,7 @@ function ENT:PredictedThink()
         self:SetNetworkOrigin(self:GetPos() + self:GetFireVelocity() * finalSpeed)
     end
 
-	if not owner:Alive() and not self:GetFired() then
+	if not owner:gebLib_ValidAndAlive() and not self:GetFired() then
 		self:Explode()
 	end
     

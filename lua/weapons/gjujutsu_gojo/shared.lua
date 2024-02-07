@@ -64,23 +64,30 @@ SWEP.AbilitiesUp = {
 SWEP.DefaultHealth = 10000
 SWEP.DefaultMaxHealth = 10000
 
-SWEP.Ability3CD = 2
-SWEP.Ability4CD = 2
-SWEP.Ability5CD = 1
+SWEP.PrimaryCD = 0
+SWEP.SecondaryCD = 3
+SWEP.Ability3CD = 5
+SWEP.Ability4CD = 10
+SWEP.Ability5CD = 25
 SWEP.Ability6CD = 0.5
 SWEP.Ability7CD = 0.5
 SWEP.Ability8CD = 0.5
 SWEP.UltimateCD = 50
 SWEP.TauntCD = 0
 
+SWEP.PrimaryCost = 0
+SWEP.SecondaryCost = {Min = 25, Max = 250}
 SWEP.Ability3Cost = 100
 SWEP.Ability4Cost = 500
-SWEP.Ability5Cost = 1000
+SWEP.Ability5Cost = {Min = 1000, Max = 2500}
 SWEP.Ability6Cost = 25
 SWEP.Ability7Cost = 0
 SWEP.Ability8Cost = 0
 SWEP.UltimateCost = 1500
 SWEP.TauntCost = 0
+
+SWEP.TeleportDistance = 3000
+SWEP.TeleportIndicator = NULL
 
 SWEP.InfinityRadius = 175
 
@@ -88,7 +95,7 @@ SWEP.DefaultCursedEnergy = 8000
 SWEP.DefaultMaxCursedEnergy = 8000
 
 SWEP.SixEyesMaxCursedEnergy = 12000
-SWEP.SixEyesCursedEnergyRegen = 0.6
+SWEP.SixEyesCursedEnergyRegen = 0.25
 SWEP.SixEyesHealthGain = 6
 SWEP.SixEyesDamageMultiplier = 2
 
@@ -101,6 +108,7 @@ gebLib.ImportFile("includes/cinematics.lua")
 gebLib.ImportFile("includes/hollow_purple.lua")
 
 local unrestrictedTeleport = GetConVar("gjujutsu_gojo_unrestricted_teleport")
+local detonatePurple = GetConVar("gjujutsu_gojo_detonate_purple")
 
 function SWEP:SetupDataTables()
 	self:DefaultDataTables()
@@ -132,8 +140,6 @@ function SWEP:PostInitialize()
 
 	if owner:IsValid() then
 		owner:SetBodygroup(1, 0)
-
-		owner.gJujutsu_TeleportIndicator = NULL
 	end
 end
 
@@ -204,6 +210,7 @@ function SWEP:Think()
 	self:EventThink()
 	self:ReversedActionClearThink()
 	self:TeleportIndicatorThink()
+	self:DomainClearThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -219,6 +226,15 @@ function SWEP:SecondaryAttack()
 	return false
 end
 
+function SWEP:OnRemove()
+	if CLIENT then
+		if self.TeleportIndicator:IsValid() then
+			self.TeleportIndicator:Remove()
+		end
+
+	end
+end
+
 -- Ability3
 function SWEP:LapseBlue()
 	if CurTime() < self:GetNextAbility3() then return end
@@ -230,6 +246,7 @@ function SWEP:LapseBlue()
 	self:EmitSound(self.BlueActivateSound)
 
 	self:BlueSpawn(owner:KeyDown(IN_SPEED))
+	self:RemoveCursedEnergy(self.Ability3Cost)
 	return true
 end
 
@@ -257,9 +274,9 @@ end
 -- Ability5
 function SWEP:HollowPurple()
 	if not self:GetSixEyes() then return end
-	if CurTime() < self:GetNextAbility5() then return end
-	if self:GetBusy() then return end
-	if self:GetCursedEnergy() < self.Ability5Cost then return end
+	if CurTime() < self:GetNextAbility5() and not detonatePurple:GetBool() then return end
+	if self:GetBusy() and not detonatePurple:GetBool() then return end
+	if self:GetCursedEnergy() < self.Ability5Cost.Min then return end
 	if self:GetHoldingPurple() then return end
 
 	local hollowPurple = self:GetHollowPurple()
@@ -314,6 +331,10 @@ function SWEP:SixEyesActivate()
 
 		self:SetMaxCursedEnergy(self.SixEyesMaxCursedEnergy)
 		self:SetCursedEnergyRegen(self.SixEyesCursedEnergyRegen)
+		
+		if self:GetCursedEnergy() >= self.DefaultMaxCursedEnergy then
+			self:SetCursedEnergy(self.SixEyesMaxCursedEnergy)
+		end
 	else
 		owner:SetBodygroup(1, 0)
 
@@ -341,11 +362,12 @@ end
 
 -- Ultimate
 function SWEP:DomainExpansion()
-	if not self:GetSixEyes() then return end
-	if CurTime() < self:GetNextUltimate() then return end
-	if self:GetBusy() then return end
-	if self:GetCursedEnergy() < self.UltimateCost then return end
 	local domain = self:GetDomain()
+
+	if not self:GetSixEyes() and not domain:IsValid() then return end
+	if CurTime() < self:GetNextUltimate() and not domain:IsValid() then return end
+	if self:GetBusy() then return end
+	if self:GetCursedEnergy() < self.UltimateCost and not domain:IsValid() then return end
 
 	local owner = self:GetOwner()
 
@@ -359,7 +381,6 @@ function SWEP:DomainExpansion()
 		if SERVER then
 			domain:Remove()
 		end
-
 		return
 	end
 
@@ -378,8 +399,9 @@ function SWEP:DomainExpansion()
 		domain:Activate()
 	end
 
-	self:SetNextUltimate(CurTime() + 1)
+	self:RemoveCursedEnergy(self.UltimateCost)
 	
+	-- Cooldowns are managed in each domain
 	return true
 end
 
@@ -411,7 +433,7 @@ function SWEP:TeleportHold()
 			cam.IgnoreZ(false)
 		end
 
-		owner.gJujutsu_TeleportIndicator = indicator
+		self.TeleportIndicator = indicator
 	end
 
 	return true
@@ -429,13 +451,13 @@ function SWEP:Teleport()
 	if not owner:IsValid() then return end
 	if owner:InVehicle() then return end
 	if owner:Gjujutsu_IsInDomain() then return end
-	if self:GetCursedEnergy() < 100 then return end
+	if self:GetCursedEnergy() < self.SecondaryCost.Min then return end
 
 	local startPos = owner:EyePos()
 
 	local traceData = {
 		start = startPos,
-		endpos = startPos + owner:GetAimVector() * 3000,
+		endpos = startPos + owner:GetAimVector() * self.TeleportDistance,
 		filter = owner,
 		mask = MASK_NPCWORLDSTATIC
 	}
@@ -446,19 +468,20 @@ function SWEP:Teleport()
 	owner:SetPos(teleportPos)
 	self:EmitSound(self.TeleportSound)
 
-	self:SetCursedEnergy(math.max(0, self:GetCursedEnergy() - 100))
+	local finalCost = math.Remap(math.max(startPos:Distance(tr.HitPos), 0), 0, self.TeleportDistance, self.SecondaryCost.Min, self.SecondaryCost.Max)
+	self:RemoveCursedEnergy(finalCost)
 
 	if CLIENT and LocalPlayer() == owner then
 		owner:ScreenFade(SCREENFADE.PURGE, color_white, 0.01, 0.01)
 
-		local indicator = owner.gJujutsu_TeleportIndicator
+		local indicator = self.TeleportIndicator
 	
 		if indicator and indicator:IsValid() then
 			indicator:Remove()
 		end
 	end
 
-	self:SetNextSecondaryFire(CurTime() + 2)
+	self:SetNextSecondaryFire(CurTime() + self.SecondaryCD)
 end
 
 function SWEP:DisableInfinityProps()
@@ -563,10 +586,20 @@ function SWEP:RedFire()
 
 	if not red:IsValid() then return end
 	if not red.Initialized then return end
-
-	self:SetNextAbility4(CurTime() + self.Ability4CD)
+	
 	self:SetBusy(false)
 	red:FireOff()
+
+	local redCost = math.Remap(red:GetHoldTime(), 0, red.MaxCharge, red.Cost.Min, red.Cost.Max)
+
+	if not red:GetReady() then
+		self:SetNextAbility4(CurTime() + self.Ability4CD / 10)
+		self:RemoveCursedEnergy(redCost / 10)
+		return
+	end
+
+	self:RemoveCursedEnergy(redCost)
+	self:SetNextAbility4(CurTime() + self.Ability4CD)
 end
 
 function SWEP:BlueSpawn(aroundMode)

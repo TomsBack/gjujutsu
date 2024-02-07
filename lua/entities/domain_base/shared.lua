@@ -73,6 +73,8 @@ ENT.DomainBaseBlacklist = {
 	["domain_base"] = true
 }
 
+ENT.EnergyDrain = 1 -- How much cursed energy it drains per tick
+
 function ENT:DefaultDataTables()
 	self:NetworkVar("String", 0, "Event")
 
@@ -232,6 +234,19 @@ function ENT:DamageMaterialThink()
 	end
 end
 
+function ENT:DrainEnergyThink()
+	if not self:GetDomainReady() then return end
+
+	local owner = self:GetDomainOwner()
+
+	if not owner:IsValid() then return end
+	local weapon = owner:GetActiveWeapon()
+
+	if weapon:IsValid() then
+		weapon:RemoveCursedEnergy(self.EnergyDrain)
+	end
+end
+
 function ENT:CheckEntsInDomain()
 	local oldEnts = self.EntsInDomain
 	local newEnts = {}
@@ -319,6 +334,7 @@ function ENT:DefaultOnRemove()
 	hook.Run("gJujutsu_DomainEnd", self)
 
 	local owner = self:GetDomainOwner()
+	local weapon = owner:GetActiveWeapon()
 
 	if CLIENT then
 		local myPos = self:GetPos()
@@ -361,6 +377,10 @@ function ENT:DefaultOnRemove()
 		end
 
 		self:EmitSound(self.DomainBreakSound)
+	end
+
+	if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+		weapon:SetNextUltimate(CurTime() + weapon.UltimateCD)
 	end
 end
 

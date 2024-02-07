@@ -33,7 +33,12 @@ function SWEP:DrawHUD()
 		cam.Start3D2D(pos, ang, 0.011) 
 			if self:GetSixEyes() then
 				self:DrawCDAbilityBox(-13, -120, "Hollow Technique: Purple", ability5:GetInt(), self:GetNextAbility5())
-				self:DrawCDAbilityBox(11, 120, "Domain Expansion: Infinite Void", abilityUltimate:GetInt(), self:GetNextUltimate())
+				
+				if self:GetDomain():IsValid() then
+					self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
+				else 
+					self:DrawCDAbilityBox(11, 120, "Domain Expansion: Infinite Void", abilityUltimate:GetInt(), self:GetNextUltimate())
+				end
 			end
 			if not owner:KeyDown(IN_SPEED) then
 				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal: Red", ability4:GetInt(), self:GetNextAbility4())

@@ -88,11 +88,11 @@ SWEP.DefaultMaxHealth = 1000
 
 SWEP.DefaultHealthGain = 2 -- Per tick
 SWEP.HealthGain = 2 -- Per tick
-SWEP.ExtinguishDrain = 10
+SWEP.ExtinguishDrain = 25
 
 SWEP.DefaultCursedEnergy = 1000
 SWEP.DefaultMaxCursedEnergy = 1000
-SWEP.DefaultCursedEnergyRegen = 0.1 -- Per tick
+SWEP.DefaultCursedEnergyRegen = 0.15 -- Per tick
 SWEP.CursedEnergyDrain = 1.75 -- Per tick
 
 SWEP.RunSpeed = 800
@@ -104,6 +104,8 @@ SWEP.OldWalk = -1
 SWEP.OldSlowWalk = -1
 SWEP.OldRun = -1
 SWEP.OldJumpPower = -1
+
+SWEP.DomainClearTreshold = 10 -- If the player has less than this in the domain. The domain will get cleared
 
 SWEP.LastMoveType = MOVETYPE_WALK -- Is used to set the last moveable type before getting frozen
 
@@ -240,6 +242,15 @@ function SWEP:EnableFlashlight(allow)
 	owner:AllowFlashlight(allow)
 end
 
+function SWEP:AddCursedEnergy(addAmount)
+	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy() + addAmount, 0, self:GetMaxCursedEnergy()))
+end
+
+function SWEP:RemoveCursedEnergy(substractAmount)
+	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy() - substractAmount, 0, self:GetMaxCursedEnergy()))
+end
+
+--Deprecated
 --I use this instead of timers, as it can support prediction
 function SWEP:SetTimedEvent(name, time)
 	self:SetNextEvent(CurTime() + time)

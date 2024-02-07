@@ -103,35 +103,17 @@ gebLib.ImportFile("includes/cinematics.lua")
 function SWEP:SetupDataTables()
 	self:DefaultDataTables()
 
-	self:NetworkVar("Bool", 0, "SixEyes")
-	self:NetworkVar("Bool", 1, "Infinity")
-	self:NetworkVar("Bool", 2, "Awakened")
-	self:NetworkVar("Bool", 3, "HoldingTeleport")
-
-	self:NetworkVar("Entity", 0, "Blue")
-	self:NetworkVar("Entity", 1, "Red")
-	self:NetworkVar("Entity", 2, "HollowPurple")
-	self:NetworkVar("Entity", 3, "PurpleBlue")
-	self:NetworkVar("Entity", 4, "PurpleRed")
+	self:NetworkVar("Int", 0, "Fingers")
 end
 
 function SWEP:Initialize()
 	self:DefaultInitialize()
 
-	self:SetSixEyes(false)
-	self:SetInfinity(false)
+
 end
 
 function SWEP:PostInitialize()
 	self:DefaultPostInitialize()
-
-	local owner = self:GetOwner()
-
-	if owner:IsValid() then
-		owner:SetBodygroup(1, 0)
-
-		owner.gJujutsu_TeleportIndicator = NULL
-	end
 end
 
 function SWEP:Deploy()
@@ -147,7 +129,6 @@ function SWEP:Holster()
 	if self:GetDomain():IsValid() then return end
 
 	self:DefaultHolster()
-	self:DisableInfinityProps()
 	return true
 end
 
@@ -199,7 +180,6 @@ function SWEP:Think()
 	self:ClampStatsThink()
 	self:EventThink()
 	self:ReversedActionClearThink()
-	self:TeleportIndicatorThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -216,18 +196,6 @@ function SWEP:SecondaryAttack()
 end
 
 -- Ability3
-function SWEP:LapseBlue()
-	if CurTime() < self:GetNextAbility3() then return end
-	if self:GetBusy() then return end
-	if self:GetCursedEnergy() < self.Ability3Cost then return end
-	local owner = self:GetOwner()
-
-	self:SetBusy(true)
-	self:EmitSound(self.BlueActivateSound)
-
-	self:BlueSpawn(owner:KeyDown(IN_SPEED))
-	return true
-end
 function SWEP:Slashes()
 	if CurTime() < self:GetNextAbility3() then return end
 	if self:GetBusy() then return end
@@ -398,84 +366,8 @@ function SWEP:DomainExpansion()
 	return true
 end
 
-
 local indicatorMat = Material("models/spawn_effect2")
 -- Secondary ability
-function SWEP:TeleportHold()
-	if CurTime() < self:GetNextSecondaryFire() then return end
-	if self:GetBusy() then return end
-	if self:GetDomain():IsValid() then return end
-
-	self:SetHoldingTeleport(true)
-	self:SetBusy(true)
-
-	local owner = self:GetOwner()
-
-	if CLIENT and IsFirstTimePredicted() then
-		local angles = owner:GetAngles()
-		angles.x = 0
-
-		local indicator = ClientsideModel(Model("models/gjujutsu/gojo/gojo.mdl"))
-		indicator:SetMaterial("models/spawn_effect2")
-		indicator:SetSequence(owner:GetSequence())
-		indicator:SetAngles(angles)
-		indicator.RenderOverride = function(self)
-			cam.IgnoreZ(true)
-				render.SetBlend(0.75)
-					self:DrawModel()
-				render.SetBlend(1)
-			cam.IgnoreZ(false)
-		end
-
-		owner.gJujutsu_TeleportIndicator = indicator
-	end
-
-	return true
-end
-
-function SWEP:Teleport()
-	if CurTime() < self:GetNextSecondaryFire() then return end
-	if not self:GetHoldingTeleport() then return end
-
-	self:SetBusy(false)
-	self:SetHoldingTeleport(false)
-
-	local owner = self:GetOwner()
-
-	if not owner:IsValid() then return end
-	if owner:InVehicle() then return end
-	if owner:Gjujutsu_IsInDomain() then return end
-	if self:GetCursedEnergy() < 100 then return end
-
-	local startPos = owner:EyePos()
-
-	local traceData = {
-		start = startPos,
-		endpos = startPos + owner:GetAimVector() * 3000,
-		filter = owner,
-		mask = MASK_NPCWORLDSTATIC
-	}
-
-	local tr = util.TraceLine(traceData)
-	
-	local teleportPos = owner:gebLib_FindEmptyPosition(tr.HitPos, 500, 2, owner)
-	owner:SetPos(teleportPos)
-	self:EmitSound(self.TeleportSound)
-
-	self:SetCursedEnergy(math.max(0, self:GetCursedEnergy() - 100))
-
-	if CLIENT and LocalPlayer() == owner then
-		owner:ScreenFade(SCREENFADE.PURGE, color_white, 0.01, 0.01)
-
-		local indicator = owner.gJujutsu_TeleportIndicator
-	
-		if indicator and indicator:IsValid() then
-			indicator:Remove()
-		end
-	end
-
-	self:SetNextSecondaryFire(CurTime() + 2)
-end
 
 function SWEP:DisableInfinityProps()
 	local owner = self:GetOwner()

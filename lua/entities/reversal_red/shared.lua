@@ -55,6 +55,8 @@ ENT.ProjectileFireSound = Sound("gjujutsu_kaisen/sfx/gojo/reversal_red_projectil
 
 ENT.ScreenFadeColor = Color(230, 33, 33)
 
+ENT.Cost = {Min = 250, Max = 500}
+
 ENT.DamageExceptions = {
     ["npc_monk"] = DMG_GENERIC,
     ["npc_strider"] = DMG_GENERIC,

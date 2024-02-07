@@ -1,5 +1,6 @@
 function SWEP:StatsRegenThink()
 	if self:GetBusy() then return end
+	if self:GetDomain():IsValid() then return end
 
 	local owner = self:GetOwner()
 
@@ -7,7 +8,7 @@ function SWEP:StatsRegenThink()
 	if owner:IsFrozen() or not owner:Alive() then return end
 	
 	if not self:GetReverseTechniqueEnabled() then
-		self:SetCursedEnergy(math.min(self:GetCursedEnergy() + self:GetCursedEnergyRegen(), self:GetMaxCursedEnergy()))
+		self:AddCursedEnergy(self:GetCursedEnergyRegen())
 	end
 end
 
@@ -21,11 +22,11 @@ function SWEP:ReverseTechniqueThink()
 
 	if SERVER and owner:IsOnFire() then
 		owner:Extinguish()
-		self:SetCursedEnergy(math.min(self:GetCursedEnergy() - 50, self:GetMaxCursedEnergy()))
+		self:RemoveCursedEnergy(self.ExtinguishDrain)
 	end
 
 	if owner:Health() < owner:GetMaxHealth() then
-		self:SetCursedEnergy(math.min(self:GetCursedEnergy() - self.CursedEnergyDrain, self:GetMaxCursedEnergy()))
+		self:RemoveCursedEnergy(self.CursedEnergyDrain)
 		owner:SetHealth(math.min(owner:Health() + self.HealthGain, owner:GetMaxHealth()))
 	end
 end
@@ -50,6 +51,19 @@ end
 
 function SWEP:ClampStatsThink()
 	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy(), 0, self:GetMaxCursedEnergy()))
+end
+
+function SWEP:DomainClearThink()
+	if not self:GetDomain():IsValid() then return end
+
+	local cursedEnergy = self:GetCursedEnergy()
+	local domain = self:GetDomain()
+
+	if cursedEnergy <= self.DomainClearTreshold then
+		if SERVER then
+			domain:Remove()
+		end
+	end
 end
 
 -- Animations in layers do not get killed when they are playing backwards and arrive at 0

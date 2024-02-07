@@ -189,8 +189,11 @@ function SWEP:FireHollowPurple()
 		return
 	end
 
+	local finalCost = math.Remap(math.max(hollowPurple:GetFinalHoldTime(), 0), 0, hollowPurple.MaxHoldTime, self.Ability5Cost.Min, self.Ability5Cost.Max)
+	
 	self:SetBusy(false)
 	self:SetNextAbility5(CurTime() + self.Ability5CD)
+	self:RemoveCursedEnergy(finalCost)
 	self:SetHoldingPurple(false)
 
 	owner:SetMoveType(self.LastMoveType)

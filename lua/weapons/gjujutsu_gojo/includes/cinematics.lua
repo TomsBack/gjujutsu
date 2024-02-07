@@ -224,6 +224,8 @@ function SWEP:DomainExpansionCinematic()
 	
 			if domain:IsValid() then
 				domain:SetSpawnTime(CurTime())
+
+				domain:StartDomain()
 			end
 		end
 

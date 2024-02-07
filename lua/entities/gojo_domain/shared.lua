@@ -36,8 +36,6 @@ end
 function ENT:Initialize()
 	self.Initialized = true
 	self:DefaultInitialize()
-
-	self:StartDomain()
 end
 
 function ENT:Think()
@@ -60,15 +58,12 @@ function ENT:DefaultPredictedThink(ply, mv)
 	self:ResetDefaultsThink()
 	self:DamageMaterialThink()
 	self:EventThink()
+	self:DrainEnergyThink()
 end 
 
 function ENT:StartDomain()
 	self:DefaultStartDomain()
 	self:SpawnParticles()
-
-	-- for ent, _ in pairs(self.EntsInDomain) do
-	-- 	self:FreezeEntity(ent)
-	-- end
 end
 
 function ENT:SpawnParticles()
