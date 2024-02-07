@@ -1,5 +1,5 @@
 SWEP.PrintName = "Gojo"
-SWEP.Author = "Darling & Tom"
+SWEP.Author = "& Tom"
 SWEP.Instructions = "Limitless Techniques"
 
 SWEP.Spawnable = true
@@ -88,7 +88,7 @@ SWEP.DefaultCursedEnergy = 8000
 SWEP.DefaultMaxCursedEnergy = 8000
 
 SWEP.SixEyesMaxCursedEnergy = 12000
-SWEP.SixEyesCursedEnergyRegen = 0.65
+SWEP.SixEyesCursedEnergyRegen = 0.6
 SWEP.SixEyesHealthGain = 6
 SWEP.SixEyesDamageMultiplier = 2
 
@@ -99,6 +99,8 @@ SWEP.BlueSummonSound = Sound("gjujutsu_kaisen/sfx/gojo/hollow_deploy.wav") -- Fo
 gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
 gebLib.ImportFile("includes/hollow_purple.lua")
+
+local unrestrictedTeleport = GetConVar("gjujutsu_gojo_unrestricted_teleport")
 
 function SWEP:SetupDataTables()
 	self:DefaultDataTables()
@@ -385,7 +387,7 @@ local indicatorMat = Material("models/spawn_effect2")
 -- Secondary ability
 function SWEP:TeleportHold()
 	if CurTime() < self:GetNextSecondaryFire() then return end
-	if self:GetBusy() then return end
+	if self:GetBusy() and not unrestrictedTeleport:GetBool() then return end
 	if self:GetDomain():IsValid() then return end
 
 	self:SetHoldingTeleport(true)

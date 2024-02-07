@@ -22,7 +22,6 @@ local cdColor = Color(255,255,255,30)
 local cursedEnergyColor = Color(72,167,255)
 
 local healthColor = Color(255, 0, 0, 255)
-local mindColor = Color(145, 21, 19, 255)
 local armorColor = Color(16, 73, 158)
 
 hook.Add("OnScreenSizeChanged", "gJujutsu_CacheScreenSize", function(oldW, oldH, newW, newH)
@@ -37,7 +36,6 @@ end)
 
 local oldHealth = -1
 local oldArmor = -1
-local oldMind = -1
 local oldCursedEnergy = -1
 
 function SWEP:DrawStatsHud()
@@ -52,7 +50,6 @@ function SWEP:DrawStatsHud()
 	if oldHealth == -1 then
 		oldHealth = owner:Health()
 		oldArmor = owner:Armor()
-		oldMind = self:GetMind()
 		oldCursedEnergy = self:GetCursedEnergy()
 	end
 	
@@ -84,12 +81,6 @@ function SWEP:DrawStatsHud()
 		local cursedEnergyString = math.Round(cursedEnergy) .. "/" .. maxCursedEnergy
 		oldCursedEnergy = cursedEnergyProgress
 
-		local mind = self:GetMind()
-		local maxMind = self:GetMaxMind()
-		local mindProgress = Lerp(FrameTime() * 15, oldMind, math.Clamp(mind, 0, maxMind))
-		local mindString = "Mind " .. math.Round(mind) .. "/" .. maxMind
-		oldMind = mindProgress
-
 		cam.Start3D2D(pos, ang, 0.011) 
 			surface.SetMaterial(healthBox)
 			surface.SetDrawColor(healthColor:Unpack())
@@ -97,13 +88,9 @@ function SWEP:DrawStatsHud()
 
 			surface.SetDrawColor(armorColor:Unpack())
 			surface.DrawTexturedRect(35.5, -37, math.Remap(armorProgress, 0, maxArmor, 0, 515), 40)
-
-			surface.SetDrawColor(mindColor:Unpack())
-			surface.DrawTexturedRect(22, -4, math.Remap(mindProgress, 0, maxMind, 0, 515), 40)
 			
 			draw.SimpleTextOutlined(healthString, "gJujutsuFont2", 81, -47.5, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 			draw.SimpleTextOutlined(armorString, "gJujutsuFont2", 60, -15.5, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
-			draw.SimpleTextOutlined(mindString, "gJujutsuFont2", 49, 18.5, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 
 			surface.SetDrawColor(255, 255, 255, 255)
 			surface.SetMaterial(statsBox)
@@ -259,7 +246,7 @@ hook.Add("CalcView", "gJujutsu_ThirdPerson", function(ply, pos, ang, fov)
 
 		if hollowPurple:IsValid() and hollowPurple.Initialized and not hollowPurple:GetFired() then
 			local holdTime = math.Clamp(CurTime() - hollowPurple:GetHoldStart(), 4, hollowPurple.MaxHoldTime)
-			print(holdTime)
+
 			local finalOffset = math.Remap(holdTime, 4, hollowPurple.MaxHoldTime, 100, 500)
 			
 			endPos = pos - ang:Forward() * finalOffset

@@ -14,10 +14,12 @@ hook.Add("EntityTakeDamage", "gJujutsu_InfinityNoDamage", function(ply, dmg)
 	local inflictor = dmg:GetInflictor()
 
 	if weapon:Gjujutsu_IsGojo() and weapon:GetInfinity() then
-		if attacker:IsValid() and weapon.DamageBypassBase[attacker.Base] then return end
-		if inflictor:IsValid() and weapon.DamageBypassBase[inflictor.Base] then return end
-		if attacker:IsValid() and weapon.DamageBypassEnts[attacker:GetClass()] then return end
-		if inflictor:IsValid() and weapon.DamageBypassEnts[inflictor:GetClass()] then return end
+		if attacker:IsValid() and weapon.DamageBypassBase[attacker.Base] then return false end
+		if inflictor:IsValid() and weapon.DamageBypassBase[inflictor.Base] then return false end
+		if attacker:IsValid() and weapon.DamageBypassEnts[attacker:GetClass()] then return false end
+		if inflictor:IsValid() and weapon.DamageBypassEnts[inflictor:GetClass()] then return false end
+
+		print(attacker, inflictor)
 
 		-- Need use this hack to remove knockback and screen punch
 		timer.Simple(0, function()

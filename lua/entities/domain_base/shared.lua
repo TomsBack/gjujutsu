@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Domain Expansion Base"
-ENT.Author = "Darling & Tom" 
+ENT.Author = "& Tom" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Base for all other domain expansions to inherit from"
 ENT.Type = "anim"

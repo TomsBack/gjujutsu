@@ -149,8 +149,6 @@ function ENT:Think()
 	if SERVER then
 		self:HitDetectionThink()
 		self:LifeTimeThink()
-
-		print(self:Health())
 	end
 
 	if game.SinglePlayer() then

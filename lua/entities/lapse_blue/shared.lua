@@ -4,7 +4,7 @@ end
 
 --
 ENT.PrintName = "Gojo Blue"
-ENT.Author = "Darling" 
+ENT.Author = "El Tomlino" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Blue!"
 ENT.Type = "anim"

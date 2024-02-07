@@ -19,8 +19,6 @@ if CLIENT then
 		local ent = net.ReadEntity()
 		local camera = ent.gJujutsu_Camera
 
-		print("Clearing camera")
-
 		if camera then
 			camera:Stop()
 		end

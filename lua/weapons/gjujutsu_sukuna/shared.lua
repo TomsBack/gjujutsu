@@ -1,5 +1,5 @@
 SWEP.PrintName = "Sukuna"
-SWEP.Author = "Darling & Tom"
+SWEP.Author = "& Tom"
 SWEP.Instructions = "Limitless Techniques"
 
 SWEP.Spawnable = true

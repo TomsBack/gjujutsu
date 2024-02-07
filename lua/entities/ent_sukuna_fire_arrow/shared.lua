@@ -2,7 +2,7 @@ AddCSLuaFile()
 
 --
 ENT.PrintName = "Fuga"
-ENT.Author = "Darling" 
+ENT.Author = "El Tomlino" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Fire Arrow!"
 ENT.Type = "anim"

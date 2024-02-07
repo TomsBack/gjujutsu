@@ -76,7 +76,7 @@ hook.Add( "PopulategJujutsu", "AddgJujutsuContent", function( pnlContent, tree, 
 	local Weapons = weapons.GetList()
 	local Categorised = {}
 	for k, weapon in pairs( Weapons ) do
-		if ( !string.StartWith( weapon.ClassName, "gjujutsu_" ) or (weapon.AdminSpawnable)) then continue end
+		if ( !string.StartWith( weapon.ClassName, "gjujutsu_" ) or (weapon.AdminSpawnable)) or not weapon.Spawnable then continue end
 		weapon.SubCategory = weapon.SubCategory or "gJujutsu"
 		Categorised[ weapon.SubCategory ] = Categorised[ weapon.SubCategory ] or {}
 		table.insert( Categorised[ weapon.SubCategory ], weapon )

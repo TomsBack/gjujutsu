@@ -2,7 +2,7 @@ AddCSLuaFile()
 
 --
 ENT.PrintName = "Mahoraga Wheel"
-ENT.Author = "Darling" 
+ENT.Author = "El Tomlino" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Adaptation..."
 ENT.Type = "anim"

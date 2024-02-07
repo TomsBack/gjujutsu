@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Domain Expansion: Infinite Void"
-ENT.Author = "Darling" 
+ENT.Author = "El Tomlino" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Infinity Voide!"
 ENT.Type = "anim"
@@ -158,7 +158,6 @@ function ENT:OnRemove()
 	end
 
 	self:StopSound(domainAmbienceSound)
-	print("Removing domain: " .. tostring(self))
 
 	for ent, _ in pairs(self.EntsInDomain) do
 		self:UnfreezeEntity(ent)

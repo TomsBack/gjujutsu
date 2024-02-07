@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Domain Expansion: Malevolent Shrine"
-ENT.Author = "Darling & Tom" 
+ENT.Author = "& Tom" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Malevolent Shrine!"
 ENT.Type = "anim"
@@ -111,8 +111,6 @@ function ENT:StartDomain()
 	if CLIENT and IsFirstTimePredicted() then
 		owner:EmitSound("gjujutsu_kaisen/sukuna/shrine_burst.wav")
 	end
-
-	print("Domain ready")
 end
 
 function ENT:SpawnParticles()

@@ -1,5 +1,5 @@
 SWEP.PrintName = "gJujutsu Base"
-SWEP.Author = "Darling & Tom"
+SWEP.Author = "& Tom"
 SWEP.Instructions = ""
 SWEP.Category = "gJujutsu" 
 
@@ -86,17 +86,14 @@ SWEP.DamageMultiplier = 1
 SWEP.DefaultHealth = 1000
 SWEP.DefaultMaxHealth = 1000
 
-SWEP.DefaultMind = 100
-SWEP.MindRegen = 0.05 -- Per tick
-SWEP.MindDrain = 0.15 -- Per tick
 SWEP.DefaultHealthGain = 2 -- Per tick
 SWEP.HealthGain = 2 -- Per tick
 SWEP.ExtinguishDrain = 10
 
 SWEP.DefaultCursedEnergy = 1000
 SWEP.DefaultMaxCursedEnergy = 1000
-SWEP.DefaultCursedEnergyRegen = 0.35 -- Per tick
-SWEP.CursedEnergyDrain = 0.75 -- Per tick
+SWEP.DefaultCursedEnergyRegen = 0.1 -- Per tick
+SWEP.CursedEnergyDrain = 1.75 -- Per tick
 
 SWEP.RunSpeed = 800
 SWEP.WalkSpeed = 350
@@ -139,8 +136,6 @@ function SWEP:DefaultDataTables()
 	self:NetworkVar("Float", 26, "CursedEnergy")
     self:NetworkVar("Float", 27, "MaxCursedEnergy")
     self:NetworkVar("Float", 28, "CursedEnergyRegen")
-    self:NetworkVar("Float", 29, "Mind")
-	self:NetworkVar("Float", 30, "MaxMind")
 
 	self:NetworkVar("Float", 31, "NextEvent")
 	self:NetworkVar("String", 3, "Event")
@@ -184,9 +179,6 @@ end
 
 function SWEP:SetupDefaultValues()
 	self:SetBlockCamera(false)
-
-	self:SetMind(self.DefaultMind)
-	self:SetMaxMind(self.DefaultMind)
 
 	self:SetCursedEnergy(self.DefaultCursedEnergy)
 	self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy)

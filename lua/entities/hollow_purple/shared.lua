@@ -593,8 +593,6 @@ function ENT:HollowPurpleClash(otherEnt)
 
 		otherEnt:Remove()
 	end
-		
-	print("Hollow purple clash")
 end
 
 function ExplosionParticle(pos, size)

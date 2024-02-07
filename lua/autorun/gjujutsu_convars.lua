@@ -1,8 +1,8 @@
-CreateClientConVar( "gjujutsu_thirdperson_offset", "0,0,5", true, false, "#gjujutsu.offset" ) 
+
+CreateClientConVar( "gjujutsu_thirdperson_offset", "0,0,5", true, false, "#gjujutsu.offset" )
 CreateConVar( "gjujutsu_show_hitboxes", 0, {FCVAR_NONE, FCVAR_CHEAT}, "#gjujutsu.hitboxes" ) 
 
 CreateClientConVar("gjujutsu_debris", 1, true, false, "If enabled, then debris is going to sapwn the hollow purple is near obstacles.", 0, 1)
-CreateConVar("hollow_purple_damage", 5000, bit.bor(FCVAR_ARCHIVE), "Specifies the damage hollow purple does on contact.")
 
 CreateClientConVar("gjujutsu_ability3_key", 28, true, true, "Sets the 3th ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
 CreateClientConVar("gjujutsu_ability4_key", 15, true, true, "Sets the 4th ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
@@ -14,3 +14,6 @@ CreateClientConVar("gjujutsu_ultimate_key", 30, true, true, "Sets the ultimate a
 CreateClientConVar("gjujutsu_taunt_key", 50, true, true, "Sets the taunt ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
 CreateClientConVar("gjujutsu_primary_key", 107, true, true, "Sets the primary ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
 CreateClientConVar("gjujutsu_secondary_key", 108, true, true, "Sets the secondary ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
+
+-- Gojo convars
+CreateConVar("gjujutsu_gojo_unrestricted_teleport", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to teleport while holding other cursed techniques", 0, 1)

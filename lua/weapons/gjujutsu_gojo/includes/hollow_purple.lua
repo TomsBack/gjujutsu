@@ -171,8 +171,7 @@ function SWEP:SpawnHollowPurple()
 			hollowPurple:EmitSound(Sound("gjujutsu_kaisen/sfx/gojo/hollow_purple_fire.wav"))
 		end
 	end
-
-	print("Spawn pico")
+	
 	owner:gebLib_PauseAction()
 
 	if not self:GetHoldingPurple() then

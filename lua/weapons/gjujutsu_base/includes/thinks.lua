@@ -8,13 +8,12 @@ function SWEP:StatsRegenThink()
 	
 	if not self:GetReverseTechniqueEnabled() then
 		self:SetCursedEnergy(math.min(self:GetCursedEnergy() + self:GetCursedEnergyRegen(), self:GetMaxCursedEnergy()))
-		self:SetMind(math.min(self:GetMind() + self.MindRegen, self:GetMaxMind()))
 	end
 end
 
 function SWEP:ReverseTechniqueThink()
 	if not self:GetReverseTechniqueEnabled() then return end
-	if self:GetMind() <= 0 or self:GetCursedEnergy() <= 0 then self:SetReverseTechniqueEnabled(false) return end
+	if self:GetCursedEnergy() <= 0 then self:SetReverseTechniqueEnabled(false) return end
 	local owner = self:GetOwner()
 
 	if not owner:IsValid() then return end
@@ -22,12 +21,11 @@ function SWEP:ReverseTechniqueThink()
 
 	if SERVER and owner:IsOnFire() then
 		owner:Extinguish()
-		self:SetMind(math.max(self:GetMind() - self.ExtinguishDrain, 0))
+		self:SetCursedEnergy(math.min(self:GetCursedEnergy() - 50, self:GetMaxCursedEnergy()))
 	end
 
 	if owner:Health() < owner:GetMaxHealth() then
 		self:SetCursedEnergy(math.min(self:GetCursedEnergy() - self.CursedEnergyDrain, self:GetMaxCursedEnergy()))
-		self:SetMind(math.max(self:GetMind() - self.MindDrain, 0))
 		owner:SetHealth(math.min(owner:Health() + self.HealthGain, owner:GetMaxHealth()))
 	end
 end
@@ -52,7 +50,6 @@ end
 
 function SWEP:ClampStatsThink()
 	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy(), 0, self:GetMaxCursedEnergy()))
-	self:SetMind(math.Clamp(self:GetMind(), 0, self:GetMaxMind()))
 end
 
 -- Animations in layers do not get killed when they are playing backwards and arrive at 0

@@ -146,7 +146,6 @@ function SWEP:StatsRegenThink()
 	
 	if not self:GetReverseTechniqueEnabled() and not self:GetInfinity() then
 		self:SetCursedEnergy(math.min(self:GetCursedEnergy() + self:GetCursedEnergyRegen(), self:GetMaxCursedEnergy()))
-		self:SetMind(math.min(self:GetMind() + self.MindRegen, self:GetMaxMind()))
 	end
 end
 
