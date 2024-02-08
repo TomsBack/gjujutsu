@@ -417,7 +417,7 @@ function ENT:ProjectileExplode()
 	self.Explosion = true
 
 	local owner = self:GetOwner()
-	local weapon = owner:GetActiveWeapon()
+	local weapon = owner:GetWeapon("gjujutsu_gojo")
 
 	if weapon:IsValid() and not self:GetFired() then
 		weapon:SetBusy(false)

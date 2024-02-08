@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Explosion Entity"
-ENT.Author = "& Tom" 
+ENT.Author = "Tom" 
 ENT.Contact = "Steam"
 ENT.Purpose = "An effect which fades out"
 ENT.Type = "anim"

@@ -143,6 +143,11 @@ end
 function ENT:OnRemove()
 	hook.Remove("PlayerTick", self.PredictedThinkName)
 	self:StopSound(loopSound)
+
+	for _, particle in ipairs(self.Particles) do
+		particle:SetShouldDraw(true)
+		particle:StopEmission()
+	end
 end
 
 function ENT:MovementThink(ply, mv)

@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Domain Expansion Floor"
-ENT.Author = "& Tom" 
+ENT.Author = "Tom" 
 ENT.Contact = "Steam"
 ENT.Purpose = "So you can walk properly in domains"
 ENT.Type = "anim"

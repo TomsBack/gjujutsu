@@ -14,9 +14,6 @@ ENT.RenderGroup	= RENDERGROUP_BOTH
 
 ENT.DomainType = DomainType.Barrier
 
-ENT.DamageMaterial1 = "models/limitless/domain_crack1.vmt"
-ENT.DamageMaterial2 = "models/limitless/domain_crack2.vmt"
-
 ENT.SlashCD = 0.07
 ENT.SlashDamageMin = 10
 ENT.SlashDamageMax = 30

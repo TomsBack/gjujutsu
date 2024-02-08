@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Domain Expansion Base"
-ENT.Author = "& Tom" 
+ENT.Author = "Tom" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Base for all other domain expansions to inherit from"
 ENT.Type = "anim"
@@ -423,7 +423,9 @@ function ENT:IsInDomain(ent, useCache)
 		return true
 	end
 
-	local distance = ent:GetPos():Distance(self:GetPos())
+	local rangeSquared = self.Range * self.Range
 
-	return distance <= self.Range
+	local distance = ent:GetPos():DistToSqr(self:GetPos())
+
+	return distance <= rangeSquared
 end

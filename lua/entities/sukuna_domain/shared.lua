@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Domain Expansion: Malevolent Shrine"
-ENT.Author = "& Tom" 
+ENT.Author = "Tom" 
 ENT.Contact = "Steam"
 ENT.Purpose = "Malevolent Shrine!"
 ENT.Type = "anim"

@@ -1,5 +1,5 @@
 SWEP.PrintName = "gJujutsu Base"
-SWEP.Author = "& Tom"
+SWEP.Author = "Tom"
 SWEP.Instructions = ""
 SWEP.Category = "gJujutsu" 
 
