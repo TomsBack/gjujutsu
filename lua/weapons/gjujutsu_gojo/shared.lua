@@ -42,7 +42,7 @@ SWEP.Abilities = {
 	[AbilityKey.Ability6] = "InfinityActivate",
 	[AbilityKey.Ability7] = "SixEyesActivate",
 	[AbilityKey.Ability8] = "ReverseTechnique",
-	[AbilityKey.Ultimate] = "DomainExpansion",
+	[AbilityKey.Ultimate] = "StartDomain",
 	[AbilityKey.Taunt] = nil,
 	[AbilityKey.Primary] = nil,
 	[AbilityKey.Secondary] = "TeleportHold",
@@ -361,15 +361,10 @@ function SWEP:ReverseTechnique()
 end
 
 -- Ultimate
-function SWEP:DomainExpansion()
+function SWEP:StartDomain()
+	if self:GetDomainClash() then return end
+
 	local domain = self:GetDomain()
-
-	if not self:GetSixEyes() and not domain:IsValid() then return end
-	if CurTime() < self:GetNextUltimate() and not domain:IsValid() then return end
-	if self:GetBusy() then return end
-	if self:GetCursedEnergy() < self.UltimateCost and not domain:IsValid() then return end
-
-	local owner = self:GetOwner()
 
 	if domain:IsValid() then
 		if SERVER and self:GetInCinematic() then
@@ -381,14 +376,76 @@ function SWEP:DomainExpansion()
 		if SERVER then
 			domain:Remove()
 		end
+
 		return
 	end
 
-	self:SetBusy(true)
+	if not self:GetSixEyes() and not domain:IsValid() then return end
+	if CurTime() < self:GetNextUltimate() and not domain:IsValid() then return end
+	if self:GetBusy() then return end
+	if self:GetCursedEnergy() < self.UltimateCost and not domain:IsValid() then return end
 
-	if owner:PredictedOrDifferentPlayer() then
-		self:DomainExpansionCinematic()
+	local owner = self:GetOwner()
+	local clashOwner = owner:Gjujutsu_GetDomainClashOwner()
+
+	if CLIENT then
+		local windWaveEnt = ents.CreateClientside("explosion_ent")
+		windWaveEnt.SphereSize = 200
+		windWaveEnt.EffectTime = 0.55
+		windWaveEnt.StartAlpha = 100
+		windWaveEnt:SetPos(owner:GetPos())
+		windWaveEnt:Spawn()
 	end
+
+	if SERVER then
+		util.ScreenShake(owner:GetPos(), 10, 10, 1, 500, true)
+		owner:EmitSound(Sound("gojo/voice/domain_start.wav"))
+	end
+
+	if CLIENT then return end
+
+	if clashOwner:IsValid() then
+		local clashData = gJujutsuDomainClashes[clashOwner]
+
+		table.insert(clashData.Players, {Player = owner, Presses = 0})
+	else
+		for _, ply in player.Pairs() do
+			local weapon = ply:GetActiveWeapon()
+
+			if not weapon:IsValid() then continue end
+			if not weapon:IsGjujutsuSwep() then continue end
+			if not weapon:GetDomainClash() then continue end
+
+			print(weapon:GetDomainClash())
+
+			local distance = owner:GetPos():Distance(ply:GetPos())
+
+			if distance <= 500 then
+				print("Close in to clash")
+				local clashData = gJujutsuDomainClashes[ply]
+				table.insert(clashData.Players, {Player = owner, Presses = 0})
+
+				PrintTable(gJujutsuDomainClashes)
+				return
+			end
+		end
+
+		print("Creating own clash")
+		gJujutsuDomainClashes[owner] = {ClashStart = CurTime() + gjujutsu_ClashWindUp, ClashEnd = 0, Players = {[0] = {Player = owner, Presses = 0}}, Range = 500}
+	end
+
+	self:SetDomainClash(true)
+end
+
+function SWEP:DomainExpansion()
+	local domain = self:GetDomain()
+
+	local owner = self:GetOwner()
+
+	self:SetBusy(true)
+	print("domain expnasion")
+
+	self:DomainExpansionCinematic()
 
 	if SERVER then
 		local domain = ents.Create("gojo_domain")

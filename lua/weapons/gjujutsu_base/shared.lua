@@ -118,6 +118,7 @@ gJujutsu_EntsBlacklist = {
 function SWEP:DefaultDataTables()
 	self:NetworkVar("Entity", 31, "Domain")
 
+	self:NetworkVar("Bool", 27, "DomainClash")
 	self:NetworkVar("Bool", 28, "InCinematic")
 	self:NetworkVar("Bool", 29, "Busy")
 	self:NetworkVar("Bool", 30, "ReverseTechniqueEnabled")
@@ -147,7 +148,7 @@ function SWEP:DefaultInitialize()
 	self.Initialized = true
 	self:SetupDefaultValues()
 
-	-- If its first time getting this wepon, then reset default values
+	-- If its first time getting this weapon, then reset default values
 	self.OldWalk = -1
 	self.OldSlowWalk = -1
 	self.OldRun = -1

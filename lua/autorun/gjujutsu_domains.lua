@@ -1,5 +1,14 @@
+if SERVER then
+	util.AddNetworkString("gJujutsu_cl_runDomainExpansion")
+end
+
+gjujutsu_ClashWindUp = 1
+gjujutsu_ClashTime = 5
 
 gJujutsuDomains = {}
+
+gJujutsuDomainClashCache = {} -- For avoiding expensive checks if player is in a clash
+gJujutsuDomainClashes = {}
 
 hook.Add("Tick", "gJujutsu_DomainHandling", function()
 	for owner, domain in pairs(gJujutsuDomains) do
@@ -7,7 +16,78 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 			gJujutsuDomains[owner] = nil
 			continue
 		end
+	end
 
+	if CLIENT then return end
+
+	for owner, data in pairs(gJujutsuDomainClashes) do
+		if CurTime() >= data.ClashStart and data.ClashStart ~= 0 then
+
+			print("Domain clash start", #data.Players)
+			if #data.Players == 0 then
+				gJujutsuDomainClashCache[owner] = nil
+
+				local weapon = owner:GetActiveWeapon()
+
+				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+					weapon:SetDomainClash(false)
+					weapon:DomainExpansion()
+				end
+
+				print("only one player")
+				-- Run domain expansion on all clients
+				net.Start("gJujutsu_cl_runDomainExpansion")
+				net.WriteEntity(weapon)
+				net.Broadcast()
+
+				print("clear owner short")
+				gJujutsuDomainClashes[owner] = nil
+				continue
+			end
+			
+			data.ClashStart = 0
+			data.ClashEnd = CurTime() + gjujutsu_ClashTime
+		end
+
+		if CurTime() >= data.ClashEnd and data.ClashEnd ~= 0 then
+			data.ClashEnd = 0
+			local winner = data.Players[0]
+
+			for _, plyData in ipairs(data.Players) do
+				if not plyData.Player:IsValid() then continue end
+
+				-- Removing clash state
+				local weapon = plyData.Player:GetActiveWeapon()
+
+				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+					weapon:SetDomainClash(false)
+				end
+
+				-- Determining winner
+				if plyData.Presses > winner.Presses then
+					winner = plyData
+				end
+			end
+
+			local winnerPlayer = winner.Player
+
+			if winnerPlayer:IsValid() then
+				local weapon = winnerPlayer:GetActiveWeapon()
+
+				if weapon:IsGjujutsuSwep() then
+					weapon:DomainExpansion()
+
+					-- Run domain expansion on all clients
+					net.Start("gJujutsu_cl_runDomainExpansion")
+					net.WriteEntity(weapon)
+					net.Broadcast()
+				end
+			end
+
+			print("owner delete")
+			gJujutsuDomainClashes[owner] = nil
+			gJujutsuDomainClashCache[owner] = nil
+		end
 	end
 end)
 
@@ -88,3 +168,20 @@ function SlashThink(self)
 		end
 	end
 end
+
+if SERVER then return end
+
+-- Handling nets
+
+net.Receive("gJujutsu_cl_runDomainExpansion", function()
+	local weapon = net.ReadEntity()
+	
+	if weapon:IsValid() then
+		weapon:DomainExpansion()
+	end
+end)
+
+concommand.Add( "jjk_domainClashes", function( ply, cmd, args )
+	if CLIENT then return end
+	PrintTable(gJujutsuDomainClashes)
+end )

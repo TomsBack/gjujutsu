@@ -28,6 +28,28 @@ function MENT:Gjujutsu_IsInDomain()
 	return false
 end
 
+function MPLY:Gjujutsu_GetDomainClashOwner()
+	if (gJujutsuDomainClashes[self]) then
+		return self
+	end
+
+	if gJujutsuDomainClashCache[self] then
+		return gJujutsuDomainClashCache[self]
+	end
+
+	for owner, data in pairs(gJujutsuDomainClashes) do
+		for _, plyData in ipairs(data.Players) do
+			if plyData.Player == self then
+
+				gJujutsuDomainClashCache[ply] = true
+				return owner
+			end
+		end
+	end
+
+	return NULL
+end
+
 function MPLY:PredictedOrDifferentPlayer()
 	if SERVER then return true end
 
