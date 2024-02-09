@@ -311,6 +311,7 @@ hook.Add("HUDPaint", "gJujutsu_DomainClashHUD", function()
 	if not ply:gebLib_ValidAndAlive() then return end
 	if not weapon:IsValid() then return end
 	if not weapon:IsGjujutsuSwep() then return end
+	if weapon:GetClashStart() then return end
 	if not weapon:GetDomainClash() then return end
 
 	local keyText = input.GetKeyName(ply.gJujutsu_ClashKey)
@@ -318,6 +319,7 @@ hook.Add("HUDPaint", "gJujutsu_DomainClashHUD", function()
 
 	local x = width * 0.5 - (textW * 0.5)
 	local y = height * 0.4
+
 
 	if input.IsKeyDown(ply.gJujutsu_ClashKey) then
 		draw.SimpleTextOutlined(keyText, "gJujutsuFontClash1", x, y, pressedColor, 0, 1, 1, color_black)

@@ -220,6 +220,7 @@ end
 
 function SWEP:PrimaryAttack()
 	self:SetCursedEnergy(self:GetCursedEnergy() - 50)
+	self:SetGlobalCD(2)
 end
 
 function SWEP:SecondaryAttack()
@@ -362,6 +363,7 @@ end
 
 -- Ultimate
 function SWEP:StartDomain()
+	if self:GetClashStart() then return end
 	if self:GetDomainClash() then return end
 
 	local domain = self:GetDomain()
@@ -395,6 +397,10 @@ function SWEP:StartDomain()
 		windWaveEnt.StartAlpha = 100
 		windWaveEnt:SetPos(owner:GetPos())
 		windWaveEnt:Spawn()
+	end
+
+	if SERVER then
+		owner:Freeze(true)
 	end
 
 	if SERVER then
@@ -433,6 +439,7 @@ function SWEP:StartDomain()
 	end
 
 	self:SetDomainClash(true)
+	self:SetClashStart(true)
 end
 
 function SWEP:DomainExpansion()
@@ -440,8 +447,13 @@ function SWEP:DomainExpansion()
 
 	local owner = self:GetOwner()
 
+	if SERVER then
+		owner:Freeze(true)
+	end
+
 	self:SetBusy(true)
-	print("domain expnasion")
+	self:SetDomainClash(false)
+	self:SetClashStart(false)
 
 	self:DomainExpansionCinematic()
 
@@ -463,7 +475,7 @@ end
 local indicatorMat = Material("models/spawn_effect2")
 -- Secondary ability
 function SWEP:TeleportHold()
-	if CurTime() < self:GetNextSecondaryFire() then return end
+	if CurTime() < self:GetSecondary() then return end
 	if self:GetBusy() and not unrestrictedTeleport:GetBool() then return end
 	if self:GetDomain():IsValid() then return end
 
@@ -495,7 +507,7 @@ function SWEP:TeleportHold()
 end
 
 function SWEP:Teleport()
-	if CurTime() < self:GetNextSecondaryFire() then return end
+	if CurTime() < self:GetSecondary() then return end
 	if not self:GetHoldingTeleport() then return end
 
 	self:SetBusy(false)
@@ -536,7 +548,7 @@ function SWEP:Teleport()
 		end
 	end
 
-	self:SetNextSecondaryFire(CurTime() + self.SecondaryCD)
+	self:SetSecondary(CurTime() + self.SecondaryCD)
 end
 
 function SWEP:DisableInfinityProps()

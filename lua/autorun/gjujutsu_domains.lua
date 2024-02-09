@@ -14,7 +14,7 @@ gJujutsuDomainClashes = {}
 local keyRefreshInterval = 0.1
 local keyRefreshTime = 0
 local keyRefreshCD = 2
-local keyRange = {Min = 11, Max = 30}
+local keyRange = {Min = 11, Max = 20}
 
 if SERVER then
 	hook.Add("Tick", "gjujutsu_ClashRefreshKey", function()
@@ -26,7 +26,7 @@ if SERVER then
 			-- Refresh domain clash key for all players who are clashing
 	
 			for _, ply in player.Pairs() do
-				if curTime < ply.gJujutsu_ClashKeyTime then continue end
+				if ply.gJujutsu_ClashKeyTime ~= nil and curTime < ply.gJujutsu_ClashKeyTime then continue end
 
 				local weapon = ply:GetActiveWeapon()
 	
@@ -68,6 +68,8 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 
 				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 					weapon:SetDomainClash(false)
+					weapon:SetClashStart(false)
+					weapon:SetBusy(false)
 					weapon:DomainExpansion()
 				end
 
@@ -91,8 +93,10 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 
 				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 					print("setting domain clash to true")
+					weapon:SetClashStart(false)
 					weapon:SetBusy(true)
 					weapon:SetDomainClash(true)
+					print(weapon:GetClashStart())
 				end
 
 				local newKey = math.random(keyRange.Min, keyRange.Max)
@@ -100,7 +104,8 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 				ply.gJujutsu_OldMoveType = ply:GetMoveType()
 				ply.gJujutsu_ClashKey = newKey
 				ply.gJujutsu_ClashKeyTime = 0
-
+				
+				ply:Freeze(false)
 				ply:SetMoveType(MOVETYPE_NONE)
 
 				net.Start("gJujutsu_cl_SyncClashKey")

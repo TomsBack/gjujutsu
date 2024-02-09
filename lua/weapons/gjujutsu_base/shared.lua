@@ -118,15 +118,15 @@ gJujutsu_EntsBlacklist = {
 function SWEP:DefaultDataTables()
 	self:NetworkVar("Entity", 31, "Domain")
 
+	self:NetworkVar("Bool", 27, "ClashStart")
 	self:NetworkVar("Bool", 27, "DomainClash")
 	self:NetworkVar("Bool", 28, "InCinematic")
 	self:NetworkVar("Bool", 29, "Busy")
 	self:NetworkVar("Bool", 30, "ReverseTechniqueEnabled")
 	self:NetworkVar("Bool", 31, "BlockCamera")
 
-	self:NetworkVar("Float", 17, "HoldingAbilityType")
-	self:NetworkVar("String", 2, "HoldingAbility")
-
+	self:NetworkVar("Float", 17, "Primary")
+	self:NetworkVar("Float", 18, "Secondary")
 	self:NetworkVar("Float", 19, "NextAbility3")
 	self:NetworkVar("Float", 20, "NextAbility4")
 	self:NetworkVar("Float", 21, "NextAbility5")
@@ -136,9 +136,9 @@ function SWEP:DefaultDataTables()
 	self:NetworkVar("Float", 25, "NextUltimate")
 	self:NetworkVar("Float", 26, "NextTaunt")
 
-	self:NetworkVar("Float", 26, "CursedEnergy")
-    self:NetworkVar("Float", 27, "MaxCursedEnergy")
-    self:NetworkVar("Float", 28, "CursedEnergyRegen")
+	self:NetworkVar("Float", 27, "CursedEnergy")
+    self:NetworkVar("Float", 28, "MaxCursedEnergy")
+    self:NetworkVar("Float", 29, "CursedEnergyRegen")
 
 	self:NetworkVar("Float", 31, "NextEvent")
 	self:NetworkVar("String", 3, "Event")
@@ -257,6 +257,21 @@ end
 
 function SWEP:RemoveCursedEnergy(substractAmount)
 	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy() - substractAmount, 0, self:GetMaxCursedEnergy()))
+end
+
+function SWEP:SetGlobalCD(cdAmount)
+	local curTime = CurTime()
+
+	self:SetPrimary(math.max(self:GetPrimary() + cdAmount, curTime + cdAmount))
+	self:SetSecondary(math.max(self:GetSecondary() + cdAmount, curTime + cdAmount))
+	self:SetNextAbility3(math.max(self:GetNextAbility3() + cdAmount, curTime + cdAmount))
+	self:SetNextAbility4(math.max(self:GetNextAbility4() + cdAmount, curTime + cdAmount))
+	self:SetNextAbility5(math.max(self:GetNextAbility5() + cdAmount, curTime + cdAmount))
+	self:SetNextAbility6(math.max(self:GetNextAbility6() + cdAmount, curTime + cdAmount))
+	self:SetNextAbility7(math.max(self:GetNextAbility7() + cdAmount, curTime + cdAmount))
+	self:SetNextAbility8(math.max(self:GetNextAbility8() + cdAmount, curTime + cdAmount))
+	self:SetNextUltimate(math.max(self:GetNextUltimate() + cdAmount, curTime + cdAmount))
+	self:SetNextTaunt(math.max(self:GetNextTaunt() + cdAmount, curTime + cdAmount))
 end
 
 --Deprecated

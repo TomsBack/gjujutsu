@@ -380,6 +380,7 @@ function ENT:DefaultOnRemove()
 	end
 
 	if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+		weapon:SetGlobalCD(10)
 		weapon:SetNextUltimate(CurTime() + weapon.UltimateCD)
 	end
 end

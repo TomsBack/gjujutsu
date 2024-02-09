@@ -74,12 +74,7 @@ local function onButtonDown(ply, btn)
 		gebLib_net.SendToAllExcept(ply)
 	end
 
-	local validState = weapon[abilityFunction](weapon) ~= nil -- Checks if the ability ran correctly
-
-	if validState then
-		weapon:SetHoldingAbilityType(abilityType)
-		weapon:SetHoldingAbility(tostring(abilityFunction))
-	end
+	weapon[abilityFunction](weapon)
 end
 
 local function onButtonUp(ply, btn)
@@ -100,9 +95,6 @@ local function onButtonUp(ply, btn)
 		
 		local abilityType = ply.gJujutsu_Keys[btn]
 		local abilityFunction = weapon.AbilitiesUp[abilityType]
-
-		weapon:SetHoldingAbilityType(-1)
-		weapon:SetHoldingAbility("")
 
 		if not weapon[abilityFunction] then
 			return
