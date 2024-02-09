@@ -416,8 +416,6 @@ function SWEP:StartDomain()
 			if not weapon:IsGjujutsuSwep() then continue end
 			if not weapon:GetDomainClash() then continue end
 
-			print(weapon:GetDomainClash())
-
 			local distance = owner:GetPos():Distance(ply:GetPos())
 
 			if distance <= 500 then

@@ -159,7 +159,7 @@ function SWEP:TeleportIndicatorThink()
 	if not self:GetHoldingTeleport() then return end
 
 	local owner = self:GetOwner()
-	local indicator = self.TeleportIndicato
+	local indicator = self.TeleportIndicator
 
 	if not indicator:IsValid() then return end
 

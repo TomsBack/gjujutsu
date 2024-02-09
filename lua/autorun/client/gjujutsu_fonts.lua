@@ -30,7 +30,37 @@ surface.CreateFont("gJujutsuFont2", {
 })
 surface.CreateFont("gJujutsuFont3", {
 	font = "Yahfie",
-	size = 19 ,
+	size = 19,
+	weight = 800 * weightMult,
+	blursize = 0,
+	scanlines = 0,
+	antialias = true,
+	underline= false,
+	italic = false,
+	rotary = false,
+	shadow = false,
+	additive = false,
+	outline = false 
+})
+
+surface.CreateFont("gJujutsuFontClash1", {
+	font = "Yahfie",
+	size = 30,
+	weight = 800 * weightMult,
+	blursize = 0,
+	scanlines = 0,
+	antialias = true,
+	underline= false,
+	italic = false,
+	rotary = false,
+	shadow = false,
+	additive = false,
+	outline = false 
+})
+
+surface.CreateFont("gJujutsuFontClash2", {
+	font = "Yahfie",
+	size = 40,
 	weight = 800 * weightMult,
 	blursize = 0,
 	scanlines = 0,

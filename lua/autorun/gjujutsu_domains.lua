@@ -1,14 +1,51 @@
 if SERVER then
 	util.AddNetworkString("gJujutsu_cl_runDomainExpansion")
+	util.AddNetworkString("gJujutsu_cl_SyncClashKey")
 end
 
-gjujutsu_ClashWindUp = 1
-gjujutsu_ClashTime = 5
+gjujutsu_ClashWindUp = 2
+gjujutsu_ClashTime = 10
 
 gJujutsuDomains = {}
 
 gJujutsuDomainClashCache = {} -- For avoiding expensive checks if player is in a clash
 gJujutsuDomainClashes = {}
+
+local keyRefreshInterval = 0.1
+local keyRefreshTime = 0
+local keyRefreshCD = 2
+local keyRange = {Min = 11, Max = 30}
+
+if SERVER then
+	hook.Add("Tick", "gjujutsu_ClashRefreshKey", function()
+		local curTime = CurTime()
+	
+		if curTime > keyRefreshTime then
+			keyRefreshTime = curTime + keyRefreshInterval
+	
+			-- Refresh domain clash key for all players who are clashing
+	
+			for _, ply in player.Pairs() do
+				if curTime < ply.gJujutsu_ClashKeyTime then continue end
+
+				local weapon = ply:GetActiveWeapon()
+	
+				if not weapon:IsValid() then continue end
+				if not weapon:IsGjujutsuSwep() then continue end
+				if not weapon:GetDomainClash() then continue end
+	
+				local newKey = math.random(keyRange.Min, keyRange.Max)
+
+				ply.gJujutsu_ClashKey = newKey
+				ply.gJujutsu_ClashKeyTime = curTime + keyRefreshCD
+
+				net.Start("gJujutsu_cl_SyncClashKey")
+				net.WriteUInt(newKey, 6)
+				net.Send(ply)
+			end
+		end
+	end)
+end
 
 hook.Add("Tick", "gJujutsu_DomainHandling", function()
 	for owner, domain in pairs(gJujutsuDomains) do
@@ -44,6 +81,32 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 				gJujutsuDomainClashes[owner] = nil
 				continue
 			end
+
+			keyRefreshTime = 0
+
+			PrintTable(data.Players)
+			for _, plyData in pairs(data.Players) do
+				local ply = plyData.Player
+				local weapon = ply:GetActiveWeapon()
+
+				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+					print("setting domain clash to true")
+					weapon:SetBusy(true)
+					weapon:SetDomainClash(true)
+				end
+
+				local newKey = math.random(keyRange.Min, keyRange.Max)
+
+				ply.gJujutsu_OldMoveType = ply:GetMoveType()
+				ply.gJujutsu_ClashKey = newKey
+				ply.gJujutsu_ClashKeyTime = 0
+
+				ply:SetMoveType(MOVETYPE_NONE)
+
+				net.Start("gJujutsu_cl_SyncClashKey")
+				net.WriteUInt(newKey, 6)
+				net.Send(ply)
+			end
 			
 			data.ClashStart = 0
 			data.ClashEnd = CurTime() + gjujutsu_ClashTime
@@ -51,25 +114,35 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 
 		if CurTime() >= data.ClashEnd and data.ClashEnd ~= 0 then
 			data.ClashEnd = 0
-			local winner = data.Players[0]
+			local winner = data.Players[1]
 
-			for _, plyData in ipairs(data.Players) do
+			for _, plyData in pairs(data.Players) do
 				if not plyData.Player:IsValid() then continue end
-
+				local ply = plyData.Player
+				
+				print("Reseting player after domain clash", ply)
+				
 				-- Removing clash state
-				local weapon = plyData.Player:GetActiveWeapon()
-
+				local weapon = ply:GetActiveWeapon()
+				
 				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 					weapon:SetDomainClash(false)
+					weapon:SetBusy(false)
 				end
-
+				
+				print(ply.gJujutsu_ClashPresses, winner.Player.gJujutsu_ClashPresses)
 				-- Determining winner
-				if plyData.Presses > winner.Presses then
+				if ply.gJujutsu_ClashPresses > winner.Player.gJujutsu_ClashPresses then
 					winner = plyData
 				end
+
+				ply.gJujutsu_ClashPresses = 0
+				ply:SetMoveType(ply.gJujutsu_OldMoveType)
 			end
 
 			local winnerPlayer = winner.Player
+
+			print("Winner: ", winner.Player)
 
 			if winnerPlayer:IsValid() then
 				local weapon = winnerPlayer:GetActiveWeapon()
@@ -180,6 +253,14 @@ net.Receive("gJujutsu_cl_runDomainExpansion", function()
 		weapon:DomainExpansion()
 	end
 end)
+
+net.Receive("gJujutsu_cl_SyncClashKey", function()
+	local newKey = net.ReadUInt(6)
+
+	LocalPlayer().gJujutsu_ClashKey = newKey
+end)
+
+-- Debug commands
 
 concommand.Add( "jjk_domainClashes", function( ply, cmd, args )
 	if CLIENT then return end

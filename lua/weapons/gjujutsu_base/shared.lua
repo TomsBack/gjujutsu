@@ -153,6 +153,14 @@ function SWEP:DefaultInitialize()
 	self.OldSlowWalk = -1
 	self.OldRun = -1
 	self.OldJumpPower = -1
+	
+	local owner = self:GetOwner()
+
+	if owner:IsValid() then
+		owner.gJujutsu_ClashPresses = 0
+		owner.gJujutsu_ClashKey = 0
+		owner.gJujutsu_ClashKeyTime = 0
+	end
 
 	self:SetHoldType(self.HoldType)
 end

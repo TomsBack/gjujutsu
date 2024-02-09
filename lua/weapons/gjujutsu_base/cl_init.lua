@@ -24,7 +24,9 @@ local cursedEnergyColor = Color(72,167,255)
 local healthColor = Color(255, 0, 0, 255)
 local armorColor = Color(16, 73, 158)
 
+-- TODO: Broken in older gmod versions
 hook.Add("OnScreenSizeChanged", "gJujutsu_CacheScreenSize", function(oldW, oldH, newW, newH)
+	print(newW, newH)
 	width = newW
 	healthBox = newH
 	mult = width / 1920
@@ -280,6 +282,8 @@ local hudToHide = {
 	["CHudSecondaryAmmo"] = true,
 }
 
+-- Handling hooks
+
 hook.Add("HUDShouldDraw", "gJujutsu_NoDefaultHUD", function(currentElement)
 	local ply = LocalPlayer()
 
@@ -292,5 +296,32 @@ hook.Add("HUDShouldDraw", "gJujutsu_NoDefaultHUD", function(currentElement)
 
 	if hudToHide[currentElement] then
 		return false
+	end
+end)
+
+local clashKeyMaterial = Material("hud/key_box_white.png","smooth")
+local pressedColor = Color(0, 150, 0)
+
+hook.Add("HUDPaint", "gJujutsu_DomainClashHUD", function()
+	local ply = LocalPlayer()
+	local weapon = ply:GetActiveWeapon()
+
+	if not ply.gJujutsu_ClashKey then return end
+	if ply.gJujutsu_ClashKey <= 0 then return end
+	if not ply:gebLib_ValidAndAlive() then return end
+	if not weapon:IsValid() then return end
+	if not weapon:IsGjujutsuSwep() then return end
+	if not weapon:GetDomainClash() then return end
+
+	local keyText = input.GetKeyName(ply.gJujutsu_ClashKey)
+	local textW, textH = surface.GetTextSize(keyText)
+
+	local x = width * 0.5 - (textW * 0.5)
+	local y = height * 0.4
+
+	if input.IsKeyDown(ply.gJujutsu_ClashKey) then
+		draw.SimpleTextOutlined(keyText, "gJujutsuFontClash1", x, y, pressedColor, 0, 1, 1, color_black)
+	else
+		draw.SimpleTextOutlined(keyText, "gJujutsuFontClash1", x, y, color_white, 0, 1, 1, color_black)
 	end
 end)
