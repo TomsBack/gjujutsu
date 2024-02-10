@@ -127,8 +127,8 @@ function ENT:Initialize()
 	local thinkName = "gJujutsu_ReversalRed" .. tostring(owner) .. tostring(self)
 	self.PredictedThinkName = thinkName
 
-	hook.Add("Move", thinkName, function(ply, mv)
-		if not self:IsValid() or not owner:IsValid() then hook.Remove("Move", thinkName) return end
+	hook.Add("FinishMove", thinkName, function(ply, mv)
+		if not self:IsValid() or not owner:IsValid() then hook.Remove("FinishMove", thinkName) return end
 
 		-- Only remove red if its not a projectile and was not fired, so it does not randomly explode in air
 		if SERVER and self:GetProjectileMode() and not self:GetFired() and not owner:Alive() then
@@ -180,7 +180,7 @@ function ENT:Draw()
 end
 
 function ENT:OnRemove()
-	hook.Remove("Move", self.PredictedThinkName)
+	hook.Remove("FinishMove", self.PredictedThinkName)
 	local owner = self:GetOwner()
 
 	-- Stop all reversal red sounds

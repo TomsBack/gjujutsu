@@ -81,8 +81,8 @@ function ENT:Initialize()
 	local thinkName = "gJujutsu_BlueLapse" .. tostring(owner)
 	self.PredictedThinkName = thinkName
 
-	hook.Add("PlayerTick", thinkName, function(ply, mv)
-		if not self:IsValid() or not owner:IsValid() then hook.Remove("PlayerTick", thinkName) return end
+	hook.Add("FinishMove", thinkName, function(ply, mv)
+		if not self:IsValid() or not owner:IsValid() then hook.Remove("FinishMove", thinkName) return end
 		if SERVER and (not owner:Alive() or not weapon:IsValid()) then self:Remove() return end
 		if not weapon:IsValid() then return end
 
@@ -141,7 +141,7 @@ function ENT:Draw()
 end
 
 function ENT:OnRemove()
-	hook.Remove("PlayerTick", self.PredictedThinkName)
+	hook.Remove("FinishMove", self.PredictedThinkName)
 	self:StopSound(loopSound)
 
 	for _, particle in ipairs(self.Particles) do

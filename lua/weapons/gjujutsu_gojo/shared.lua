@@ -79,7 +79,7 @@ SWEP.PrimaryCost = 0
 SWEP.SecondaryCost = {Min = 25, Max = 250}
 SWEP.Ability3Cost = 100
 SWEP.Ability4Cost = 500
-SWEP.Ability5Cost = {Min = 1000, Max = 2500}
+SWEP.Ability5Cost = {Min = 1000, Max = 3000}
 SWEP.Ability6Cost = 25
 SWEP.Ability7Cost = 0
 SWEP.Ability8Cost = 0
@@ -90,6 +90,7 @@ SWEP.TeleportDistance = 3000
 SWEP.TeleportIndicator = NULL
 
 SWEP.InfinityRadius = 175
+SWEP.FlightDrain = 0.5 -- Per tick
 
 SWEP.DefaultCursedEnergy = 8000
 SWEP.DefaultMaxCursedEnergy = 8000
@@ -98,6 +99,8 @@ SWEP.SixEyesMaxCursedEnergy = 12000
 SWEP.SixEyesCursedEnergyRegen = 0.25
 SWEP.SixEyesHealthGain = 6
 SWEP.SixEyesDamageMultiplier = 2
+
+SWEP.ClashPressScore = 1.75
 
 SWEP.BlueActivateSound = Sound("gjujutsu_kaisen/sfx/gojo/amplification_bluev2.mp3")
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
@@ -119,6 +122,7 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Bool", 2, "Awakened")
 	self:NetworkVar("Bool", 3, "HoldingTeleport")
 	self:NetworkVar("Bool", 4, "HoldingPurple")
+	self:NetworkVar("Bool", 5, "Flying")
 
 	self:NetworkVar("Entity", 0, "Blue")
 	self:NetworkVar("Entity", 1, "Red")
@@ -212,6 +216,7 @@ function SWEP:Think()
 	self:ReversedActionClearThink()
 	self:TeleportIndicatorThink()
 	self:DomainClearThink()
+	self:FlightThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -306,9 +311,14 @@ function SWEP:InfinityActivate()
 	if self:GetInfinity() then
 		self:EmitSound(self.InfinityActivateSound)
 	end
+
+	local owner = self:GetOwner()
+
+	if not owner:IsValid() then return end
 	
 	if not self:GetInfinity() then
 		self:DisableInfinityProps()
+		self:DisableFlight()
 	end
 
 	return true
@@ -395,14 +405,7 @@ function SWEP:StartDomain()
 
 	local owner = self:GetOwner()
 
-	if CLIENT then
-		local windWaveEnt = ents.CreateClientside("explosion_ent")
-		windWaveEnt.SphereSize = 200
-		windWaveEnt.EffectTime = 0.55
-		windWaveEnt.StartAlpha = 100
-		windWaveEnt:SetPos(owner:GetPos())
-		windWaveEnt:Spawn()
-	end
+	self:WindEffect(200, 0.55)
 
 	if SERVER then
 		owner:Freeze(true)
@@ -429,7 +432,7 @@ function SWEP:StartDomain()
 
 			local distance = owner:GetPos():Distance(ply:GetPos())
 
-			if distance <= 500 then
+			if distance <= weapon.DomainRange + self.DomainRange then
 				print("Close in to clash")
 
 				local nearClashData = ply:Gjujutsu_GetDomainClashData()
@@ -697,6 +700,15 @@ function SWEP:BlueRemove()
 	if SERVER and blue:IsValid() then
 		blue:Remove()
 	end
+end
+
+function SWEP:DisableFlight()
+	local owner = self:GetOwner()
+
+	if not owner:IsValid() then return end
+
+	self:SetFlying(false)
+	owner:SetMoveType(MOVETYPE_WALK)
 end
 
 -- Adding hooks

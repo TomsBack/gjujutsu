@@ -306,9 +306,18 @@ net.Receive("gJujutsu_cl_SyncClashKey", function()
 	local newKey = net.ReadUInt(6)
 	local ply = LocalPlayer()
 
+	if not ply:IsValid() then return end
+
 	ply.gJujutsu_ClashKey = newKey
-	
 	ply:EmitSound(keyChangeSounds[math.random(1, #keyChangeSounds)])
+	
+	util.ScreenShake(ply:GetPos(), 25, 25, 2, 500, true)
+	
+	local weapon = ply:GetActiveWeapon()
+
+	if weapon:IsGjujutsuSwep() then
+		weapon:WindEffect(200, 0.55)
+	end
 end)
 
 -- Debug commands

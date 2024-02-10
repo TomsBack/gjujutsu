@@ -105,6 +105,9 @@ SWEP.OldSlowWalk = -1
 SWEP.OldRun = -1
 SWEP.OldJumpPower = -1
 
+SWEP.DomainRange = 1500
+
+SWEP.ClashPressScore = 1 -- Default score that is going to be added once the player presses the right key in domain clash
 SWEP.DomainClearTreshold = 10 -- If the player has less than this in the domain. The domain will get cleared
 
 SWEP.LastMoveType = MOVETYPE_WALK -- Is used to set the last moveable type before getting frozen
@@ -274,6 +277,21 @@ function SWEP:SetGlobalCD(cdAmount)
 	self:SetNextAbility8(math.max(self:GetNextAbility8() + cdAmount, curTime + cdAmount))
 	self:SetNextUltimate(math.max(self:GetNextUltimate() + cdAmount, curTime + cdAmount))
 	self:SetNextTaunt(math.max(self:GetNextTaunt() + cdAmount, curTime + cdAmount))
+end
+
+function SWEP:WindEffect(endSize, endTime)
+	if SERVER then return end
+
+	local owner = self:GetOwner()
+
+	if not owner:IsValid() then return end
+
+	local windWaveEnt = ents.CreateClientside("explosion_ent")
+	windWaveEnt.SphereSize = endSize
+	windWaveEnt.EffectTime = endTime
+	windWaveEnt.StartAlpha = 100
+	windWaveEnt:SetPos(owner:GetPos())
+	windWaveEnt:Spawn()
 end
 
 function SWEP:ReverseCursedEffect()

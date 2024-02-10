@@ -32,8 +32,7 @@ function MPLY:CreateDomainClashTable()
 	local clashData = {
 		ClashStart = CurTime() + gjujutsu_ClashWindUp,
 		ClashEnd = 0,
-		Players = {[1] = self},
-		Range = 500
+		Players = {[1] = self}
 	}
 
 	gJujutsuDomainClashes[self] = clashData

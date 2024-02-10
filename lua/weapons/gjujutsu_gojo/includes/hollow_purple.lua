@@ -52,11 +52,11 @@ function SWEP:PurpleCombineBlueRed()
 
 	local combined = false
 	
-	hook.Add("PlayerTick", self.PurpleThinkName, function(ply, mv)
+	hook.Add("FinishMove", self.PurpleThinkName, function(ply, mv)
 		if ply ~= owner then return end
-		if not ply:IsValid() then hook.Remove("PlayerTick", self.PurpleThinkName) return end
-		if not weapon:IsValid() then hook.Remove("PlayerTick", self.PurpleThinkName) return end
-		if not ply:Alive() then hook.Remove("PlayerTick", self.PurpleThinkName) return end
+		if not ply:IsValid() then hook.Remove("FinishMove", self.PurpleThinkName) return end
+		if not weapon:IsValid() then hook.Remove("FinishMove", self.PurpleThinkName) return end
+		if not ply:Alive() then hook.Remove("FinishMove", self.PurpleThinkName) return end
 
 		local angles = mv:GetAngles()
 		local startPos = mv:GetOrigin() + angles:Up() * 60 - angles:Forward() * 25
@@ -181,23 +181,20 @@ function SWEP:SpawnHollowPurple()
 end
 
 function SWEP:FireHollowPurple()
-	hook.Remove("PlayerTick", self.PurpleThinkName)
+	hook.Remove("FinishMove", self.PurpleThinkName)
 	local owner = self:GetOwner()
 	local hollowPurple = self:GetHollowPurple()
 
 	if hollowPurple:IsValid() and hollowPurple:GetFired() then
 		return
 	end
-
-	local finalCost = math.Remap(math.max(hollowPurple:GetFinalHoldTime(), 0), 0, hollowPurple.MaxHoldTime, self.Ability5Cost.Min, self.Ability5Cost.Max)
 	
 	self:SetBusy(false)
 	self:SetNextAbility5(CurTime() + self.Ability5CD)
-	self:RemoveCursedEnergy(finalCost)
 	self:SetHoldingPurple(false)
-
+	
 	owner:SetMoveType(self.LastMoveType)
-
+	
 	if hollowPurple:IsValid() then
 		if CLIENT and IsFirstTimePredicted() or SERVER then
 			for _, ent in ipairs(ents.FindInSphere(owner:GetPos(), 700)) do
@@ -207,12 +204,16 @@ function SWEP:FireHollowPurple()
 			end
 			util.ScreenShake(owner:GetPos(), 20, 5, 5, 1000)
 		end
-
+		
 		hollowPurple:SetFireVelocity(owner:GetAimVector())
 		self:GetHollowPurple():Release()
-
+		
 		if owner:IsValid() then
 			owner:RemoveFlags(FL_ATCONTROLS)
 		end
 	end
+
+	print(hollowPurple:GetFinalHoldTime())
+	local finalCost = math.Remap(math.max(hollowPurple:GetFinalHoldTime(), 0), 0, hollowPurple.MaxHoldTime, self.Ability5Cost.Min, self.Ability5Cost.Max)
+	self:RemoveCursedEnergy(finalCost)
 end

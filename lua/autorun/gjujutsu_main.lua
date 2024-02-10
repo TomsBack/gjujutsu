@@ -66,7 +66,7 @@ end
 
 if SERVER then
 	util.AddNetworkString("jjk.LoadNombat")
-	hook.Add("PlayerTick", "gjujutsuNombatCompatibility", function(ply)
+	hook.Add("FinishMove", "gjujutsuNombatCompatibility", function(ply)
 		local wep = ply:GetActiveWeapon()
 		if NOMBAT and wep:IsValid() and string.StartWith(wep:GetClass(), "gjujutsu_") then
 			ply:ConCommand("nombat.client.has.hostiles")

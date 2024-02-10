@@ -53,8 +53,19 @@ local function onButtonDown(ply, btn)
 			ply.gJujutsu_ClashPresses = 0
 		end
 
-		ply.gJujutsu_ClashPresses = ply.gJujutsu_ClashPresses + 1 -- TODO: Make dynamic score point that depends on the swep you are using
+		ply.gJujutsu_ClashPresses = ply.gJujutsu_ClashPresses + weapon.ClashPressScore -- TODO: Make dynamic score point that depends on the swep you are using
 		print(ply, "Presses", ply.gJujutsu_ClashPresses)
+		return
+	end
+
+	if weapon:Gjujutsu_IsGojo() and not ply:OnGround() and weapon:GetInfinity() and btn == KEY_SPACE then
+		if not weapon:GetFlying() then
+			weapon:SetFlying(true)
+			ply:SetMoveType(MOVETYPE_NOCLIP)
+		else
+			weapon:DisableFlight()
+		end
+
 		return
 	end
 

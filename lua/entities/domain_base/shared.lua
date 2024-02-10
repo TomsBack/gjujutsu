@@ -143,7 +143,7 @@ function ENT:DefaultInitialize()
 	local predictedThink = "DomainExpansion" .. tostring(self:GetDomainOwner())
 	self.PredictedThinkName = predictedThink
 
-	hook.Add("PlayerTick", predictedThink, function(ply, mv)
+	hook.Add("FinishMove", predictedThink, function(ply, mv)
 		self:PredictedThink(ply, mv)
 	end)
 end
@@ -160,7 +160,7 @@ end
 
 function ENT:PredictedThink(ply, mv)
 	if not self:IsValid() then 
-		hook.Remove("PlayerTick", self.PredictedThinkName)
+		hook.Remove("FinishMove", self.PredictedThinkName)
 		return
 	end
 
@@ -333,7 +333,7 @@ function ENT:DefaultStartDomain()
 end
 
 function ENT:DefaultOnRemove()
-	hook.Remove("PlayerTick", self.PredictedThinkName)
+	hook.Remove("FinishMove", self.PredictedThinkName)
 	hook.Run("gJujutsu_DomainEnd", self)
 
 	local owner = self:GetDomainOwner()

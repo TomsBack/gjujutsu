@@ -198,3 +198,17 @@ function SWEP:TeleportIndicatorThink()
 	indicator:SetAngles(angles)
 	indicator:SetPos(teleportPos)
 end
+
+function SWEP:FlightThink()
+	if not self:GetFlying() then return end
+
+	if self:GetFlying() and not self:GetInfinity() then
+		self:DisableFlight()
+	end
+	
+	if self:GetCursedEnergy() <= 0 then
+		self:DisableFlight()
+	end
+
+	self:RemoveCursedEnergy(self.FlightDrain)
+end

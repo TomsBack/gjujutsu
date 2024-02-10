@@ -136,7 +136,7 @@ function ENT:Initialize()
 
 	--Creating a new player tick hook that supports prediction for smoother hollow purple movement
 	self.ThinkName = "GOJO_HollowPurple_" .. tostring(self:EntIndex())
-	hook.Add("PlayerTick", self.ThinkName, function(ply)
+	hook.Add("FinishMove", self.ThinkName, function(ply)
 		self:PredictedThink()
 	end)
 end
@@ -355,7 +355,7 @@ function ENT:MovementLight()
 end
 
 function ENT:Explode()
-	hook.Remove("PlayerTick", self.ThinkName)
+	hook.Remove("FinishMove", self.ThinkName)
 
 	local owner = self:GetOwner()
 	local purplePos = self:GetPos()
@@ -395,7 +395,7 @@ function ENT:Explode()
 end
 
 function ENT:OnRemove()
-	hook.Remove("PlayerTick", self.ThinkName)
+	hook.Remove("FinishMove", self.ThinkName)
 
 	if CLIENT and self.FullOutputParticle and self.FullOutputParticle:IsValid() then
 		self.FullOutputParticle:StopEmission()
