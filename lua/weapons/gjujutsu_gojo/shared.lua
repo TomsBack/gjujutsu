@@ -102,6 +102,7 @@ SWEP.SixEyesDamageMultiplier = 2
 SWEP.BlueActivateSound = Sound("gjujutsu_kaisen/sfx/gojo/amplification_bluev2.mp3")
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
 SWEP.BlueSummonSound = Sound("gjujutsu_kaisen/sfx/gojo/hollow_deploy.wav") -- For hollow purple anim
+SWEP.InfinityActivateSound = Sound("gojo/sfx/infinity_activate.wav")
 
 gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
@@ -301,6 +302,10 @@ function SWEP:InfinityActivate()
 	self:SetNextAbility6(CurTime() + self.Ability6CD)
 
 	self:SetInfinity(not self:GetInfinity())
+
+	if self:GetInfinity() then
+		self:EmitSound(self.InfinityActivateSound)
+	end
 	
 	if not self:GetInfinity() then
 		self:DisableInfinityProps()
@@ -357,6 +362,7 @@ function SWEP:ReverseTechnique()
 	self:SetNextAbility8(CurTime() + self.Ability8CD)
 
 	self:SetReverseTechniqueEnabled(not self:GetReverseTechniqueEnabled())
+	self:ReverseCursedEffect()
 	
 	return true
 end
@@ -388,7 +394,6 @@ function SWEP:StartDomain()
 	if self:GetCursedEnergy() < self.UltimateCost and not domain:IsValid() then return end
 
 	local owner = self:GetOwner()
-	local clashOwner = owner:Gjujutsu_GetDomainClashOwner()
 
 	if CLIENT then
 		local windWaveEnt = ents.CreateClientside("explosion_ent")
@@ -410,10 +415,10 @@ function SWEP:StartDomain()
 
 	if CLIENT then return end
 
-	if clashOwner:IsValid() then
-		local clashData = gJujutsuDomainClashes[clashOwner]
+	local clashData = owner:Gjujutsu_GetDomainClashData()
 
-		table.insert(clashData.Players, {Player = owner, Presses = 0})
+	if clashData then
+		table.insert(clashData.Players, owner)
 	else
 		for _, ply in player.Pairs() do
 			local weapon = ply:GetActiveWeapon()
@@ -426,16 +431,18 @@ function SWEP:StartDomain()
 
 			if distance <= 500 then
 				print("Close in to clash")
-				local clashData = gJujutsuDomainClashes[ply]
-				table.insert(clashData.Players, {Player = owner, Presses = 0})
 
-				PrintTable(gJujutsuDomainClashes)
+				local nearClashData = ply:Gjujutsu_GetDomainClashData()
+
+				print(tostring(owner) .. " joined the clash of " .. tostring(nearClashData.Players[1]))
+
+				table.insert(nearClashData.Players, owner)
 				return
 			end
 		end
 
 		print("Creating own clash")
-		gJujutsuDomainClashes[owner] = {ClashStart = CurTime() + gjujutsu_ClashWindUp, ClashEnd = 0, Players = {[0] = {Player = owner, Presses = 0}}, Range = 500}
+		owner:CreateDomainClashTable()
 	end
 
 	self:SetDomainClash(true)

@@ -9,3 +9,9 @@ hook.Add("gebLib_PlayerFullyConnected", "gJujutsu_PlayerInit", function(ply)
 
 	print(tostring(ply) .. " Fully connected")
 end)
+
+hook.Add("PostPlayerDeath", "gJujutsu_UnFreeze", function(ply)
+	if ply:IsValid() then
+		ply:Freeze(false)
+	end
+end)

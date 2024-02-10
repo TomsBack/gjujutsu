@@ -24,7 +24,7 @@ ENT.Model = Model("models/hunter/misc/sphere2x2.mdl")
 ENT.PredictedThinkName = ""
 
 ENT.Range = 750
-ENT.Radius = 1000 -- Attract radius
+ENT.Radius = 750 -- Attract radius
 ENT.AttractForce = 2500
 ENT.CursedEnergyDrain = 0.75 -- Per tick
 
@@ -42,11 +42,11 @@ ENT.AttractBlacklistBase = {
 
 local timeScale = GetConVar("host_timescale") -- Used with RealTime, so that effects are timed correctly
 
-ENT.DebrisEnabled = GetConVar("gjujutsu_debris")
-ENT.DebrisCD = 0.2 -- How fast are rocks going to spawn, when hollow purple is close to ground. Lower is faster
+ENT.DebrisEnabled = GetConVar("gjujutsu_fps_debris")
+ENT.DebrisCD = 0.4 -- How fast are rocks going to spawn, when hollow purple is close to ground. Lower is faster
 ENT.NextDebris = 0
 ENT.PropDebrisAmount = 1 -- How many rocks with physics spawn. Can get laggy at higher numbers
-ENT.StaticDebrisAmount = 3 -- How many non movable rocks spawn. Can get laggy at higher numbers
+ENT.StaticDebrisAmount = 2 -- How many non movable rocks spawn. Can get laggy at higher numbers
 
 -- I'm saving particles in to a table, so I can manually render them when needed to avoid culling and flickering
 ENT.Particles = {}

@@ -25,7 +25,7 @@ ENT.Lifetime = 10 --How long does hollow purple live, before exploding
 
 ENT.DamagedList = {}
 
-ENT.DebrisEnabled = GetConVar("gjujutsu_debris")
+ENT.DebrisEnabled = GetConVar("gjujutsu_fps_debris")
 ENT.DebrisCD = 0.1 --How fast are rocks going to spawn, when hollow purple is close to ground. Lower is faster
 ENT.NextDebris = 0
 ENT.PropDebrisAmount = 4 --How many rocks with physics spawn. Can get laggy at higher numbers

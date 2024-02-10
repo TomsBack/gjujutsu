@@ -105,6 +105,7 @@ function ENT:DefaultInitialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:DrawShadow(false)
 	self:SetDomainType(self.DomainType)
+	self:SetNoDraw(true)
 
 	if CLIENT then
 		self:SetPredictable(true)
@@ -303,6 +304,7 @@ end
 function ENT:DefaultStartDomain()
 	self:SetSpawnTime(CurTime())
 	self:SetDomainReady(true)
+	self:SetNoDraw(false)
 
 	if not self:GetDomainType() == DomainType.Barrier then return end
 	if not self:GetDomainOwner():IsValid() then return end
@@ -324,6 +326,7 @@ function ENT:DefaultStartDomain()
 	if CLIENT then
 		local effectData = EffectData()
 		effectData:SetEntity(self)
+		effectData:SetRadius(1)
 	
 		util.Effect("spawn_effect", effectData)
 	end

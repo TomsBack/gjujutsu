@@ -44,7 +44,10 @@ local function onButtonDown(ply, btn)
 	
 	-- Handle domain clashing
 	if weapon:GetDomainClash() and ply.gJujutsu_ClashKey and btn == ply.gJujutsu_ClashKey then
-		if CLIENT then return end
+		if CLIENT then
+			ply:EmitSound("misc/key_press.wav")
+			return
+		end
 
 		if ply.gJujutsu_ClashPresses == nil then
 			ply.gJujutsu_ClashPresses = 0

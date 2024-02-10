@@ -242,7 +242,9 @@ function SWEP:DomainExpansionCinematic()
 
 	if SERVER then return end
 	
-	self:EmitSound("gjujutsu_kaisen/sfx/domain_expansion/infinity_voide/gojo_domain_v2.wav", 0)
+	if caughtInDomain then
+		self:EmitSound("gjujutsu_kaisen/sfx/domain_expansion/infinity_voide/gojo_domain_v2.wav", 0)
+	end
 
 	-- Find target in domain radius, to show as the opponent in cinematic
 	for _, ent in player.Pairs() do
@@ -362,10 +364,13 @@ function SWEP:DomainExpansionCinematic()
 			cam.IgnoreZ( false )
 		cam.End3D()
 
-		copy:DrawModel()
-		if targetCopy:IsValid() then
-			targetCopy:DrawModel()
-		end
+		cam.IgnoreZ(true)
+			copy:DrawModel()
+
+			if targetCopy:IsValid() then
+				targetCopy:DrawModel()
+			end
+		cam.IgnoreZ(false)
 	end)
     
     local head = copy:LookupBone("ValveBiped.Bip01_Head1")

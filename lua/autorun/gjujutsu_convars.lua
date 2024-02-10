@@ -2,7 +2,7 @@
 CreateClientConVar( "gjujutsu_thirdperson_offset", "0,0,5", true, false, "#gjujutsu.offset" )
 CreateConVar( "gjujutsu_show_hitboxes", 0, {FCVAR_NONE, FCVAR_CHEAT}, "#gjujutsu.hitboxes" ) 
 
-CreateClientConVar("gjujutsu_debris", 1, true, false, "If enabled, then debris is going to sapwn the hollow purple is near obstacles.", 0, 1)
+CreateClientConVar("gjujutsu_fps_debris", 1, true, false, "If enabled, then debris is going to spawn", 0, 1)
 
 CreateClientConVar("gjujutsu_ability3_key", 28, true, true, "Sets the 3th ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
 CreateClientConVar("gjujutsu_ability4_key", 15, true, true, "Sets the 4th ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)

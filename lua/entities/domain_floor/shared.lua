@@ -80,6 +80,7 @@ hook.Add("ShouldCollide", "gJujutus_DomainFloorCollide", function(ent1, ent2)
 	local domain = domainFloor:GetOwner()
 
 	if not domain then return false end
+	if not domain:IsValid() then return end
 
 	return domain:IsInDomain(otherEnt)
 end)

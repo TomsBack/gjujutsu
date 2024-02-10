@@ -28,20 +28,54 @@ function MENT:Gjujutsu_IsInDomain()
 	return false
 end
 
-function MPLY:Gjujutsu_GetDomainClashOwner()
+function MPLY:CreateDomainClashTable()
+	local clashData = {
+		ClashStart = CurTime() + gjujutsu_ClashWindUp,
+		ClashEnd = 0,
+		Players = {[1] = self},
+		Range = 500
+	}
+
+	gJujutsuDomainClashes[self] = clashData
+
+	return clashData
+end
+
+function MPLY:Gjujutsu_GetDomainClashData()
 	if (gJujutsuDomainClashes[self]) then
-		return self
+		return gJujutsuDomainClashes[self]
+	end
+
+	if (gJujutsuDomainClashCache[self]) then
+		return gJujutsuDomainClashCache[self]
 	end
 
 	for owner, data in pairs(gJujutsuDomainClashes) do
-		for _, plyData in ipairs(data.Players) do
-			if plyData.Player == self then
-				return owner
+		for _, ply in ipairs(data.Players) do
+			if ply == self then
+				gJujutsuDomainClashCache[self] = gJujutsuDomainClashes[owner]
+				return gJujutsuDomainClashes[owner]
 			end
 		end
 	end
 
-	return NULL
+	return nil
+end
+
+function MPLY:Gjujutsu_IsInDomainClash()
+	if (gJujutsuDomainClashes[self]) then
+		return true
+	end
+
+	for owner, data in pairs(gJujutsuDomainClashes) do
+		for _, ply in ipairs(data.Players) do
+			if ply == self then
+				return true
+			end
+		end
+	end
+
+	return true
 end
 
 function MPLY:PredictedOrDifferentPlayer()
@@ -55,7 +89,7 @@ function MSWEP:IsGjujutsuSwep()
 end
 
 function MSWEP:Gjujutsu_IsGojo()
-	return self.Base == "gjujutsu_base"
+	return self:GetClass() == "gjujutsu_gojo"
 end
 
 function NiceDuration(inSoundDuration)

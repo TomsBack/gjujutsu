@@ -206,19 +206,6 @@ function SWEP:DrawHUD()
 	DisableClipping(false)
 end
 
-local oldContextMenuOpen = GAMEMODE.ContextMenuOpen
-
-function GAMEMODE:ContextMenuOpen()
-	local localPlayer = LocalPlayer()
-    local weapon = localPlayer:GetActiveWeapon()
-
-    if weapon:IsValid() and weapon:IsGjujutsuSwep() then
-        return false
-    end
-
-    return oldContextMenuOpen()
-end
-
 -- Hooks
 
 local ThirdPersonConvar = GetConVar("gjujutsu_thirdperson_offset")
@@ -282,8 +269,6 @@ local hudToHide = {
 	["CHudSecondaryAmmo"] = true,
 }
 
--- Handling hooks
-
 hook.Add("HUDShouldDraw", "gJujutsu_NoDefaultHUD", function(currentElement)
 	local ply = LocalPlayer()
 
@@ -311,7 +296,7 @@ hook.Add("HUDPaint", "gJujutsu_DomainClashHUD", function()
 	if not ply:gebLib_ValidAndAlive() then return end
 	if not weapon:IsValid() then return end
 	if not weapon:IsGjujutsuSwep() then return end
-	if weapon:GetClashStart() then return end
+	if ply:IsFrozen() then return end
 	if not weapon:GetDomainClash() then return end
 
 	local keyText = input.GetKeyName(ply.gJujutsu_ClashKey)
@@ -320,10 +305,30 @@ hook.Add("HUDPaint", "gJujutsu_DomainClashHUD", function()
 	local x = width * 0.5 - (textW * 0.5)
 	local y = height * 0.4
 
-
 	if input.IsKeyDown(ply.gJujutsu_ClashKey) then
 		draw.SimpleTextOutlined(keyText, "gJujutsuFontClash1", x, y, pressedColor, 0, 1, 1, color_black)
 	else
 		draw.SimpleTextOutlined(keyText, "gJujutsuFontClash1", x, y, color_white, 0, 1, 1, color_black)
+	end
+end)
+
+hook.Add("ContextMenuOpen", "gJujutsu_NoContextMenu", function()
+	local localPlayer = LocalPlayer()
+    local weapon = localPlayer:GetActiveWeapon()
+
+    if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+        return false
+    end
+end)
+
+hook.Add("SpawnMenuOpen", "Gjujutsu_ClashNoSpawnMenu", function()
+	local ply = LocalPlayer()
+	local weapon = ply:GetActiveWeapon()
+
+	if not weapon:IsValid() then return end
+	if not weapon:IsGjujutsuSwep() then return end
+
+	if weapon:GetDomainClash() or weapon:GetInCinematic() then
+		return false
 	end
 end)

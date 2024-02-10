@@ -109,6 +109,8 @@ SWEP.DomainClearTreshold = 10 -- If the player has less than this in the domain.
 
 SWEP.LastMoveType = MOVETYPE_WALK -- Is used to set the last moveable type before getting frozen
 
+SWEP.ReverseCurseSound = Sound("misc/reverse_curse_activate.wav")
+
 gebLib.ImportFile("includes/thinks.lua")
 
 gJujutsu_EntsBlacklist = {
@@ -272,6 +274,20 @@ function SWEP:SetGlobalCD(cdAmount)
 	self:SetNextAbility8(math.max(self:GetNextAbility8() + cdAmount, curTime + cdAmount))
 	self:SetNextUltimate(math.max(self:GetNextUltimate() + cdAmount, curTime + cdAmount))
 	self:SetNextTaunt(math.max(self:GetNextTaunt() + cdAmount, curTime + cdAmount))
+end
+
+function SWEP:ReverseCursedEffect()
+	local owner = self:GetOwner()
+
+	if not owner:IsValid() then return end
+	
+	if self:GetReverseTechniqueEnabled() and owner:Health() < owner:GetMaxHealth() then
+		self:EmitSound(self.ReverseCurseSound)
+
+		if CLIENT and IsFirstTimePredicted() then
+			CreateParticleSystemNoEntity("blood_impact_red_01", owner:EyePos() - owner:GetUp() * 15)
+		end
+	end
 end
 
 --Deprecated

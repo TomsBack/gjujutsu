@@ -98,7 +98,6 @@ function ENT:Draw()
 		domainSplattersParticle:SetShouldDraw(false)
 		self.DomainSplatters = domainSplattersParticle
 
-		-- TODO: Add domain ambience sound here
 		self:EmitSound(domainAmbienceSound, 0)
 	end
 
@@ -168,15 +167,21 @@ function ENT:FreezeEntity(ent)
 	if ent:IsPlayer() then
 		local weapon = ent:GetActiveWeapon()
 
+		if weapon:IsGjujutsuSwep() then
+			weapon:SetReverseTechniqueEnabled(false)
+		end
+
 		if weapon:Gjujutsu_IsGojo() and weapon:GetInfinity() then
 			weapon:SetInfinity(false)
 		end
 	end
 
-	ent.gJujutsu_OldMoveType = ent:GetMoveType()
-
-	ent:SetMoveType(MOVETYPE_NONE)
-	ent:AddEFlags(EFL_NO_THINK_FUNCTION)
+	if not ent:IsPlayer() then
+		ent.gJujutsu_OldMoveType = ent:GetMoveType()
+		
+		ent:SetMoveType(MOVETYPE_NONE)
+		ent:AddEFlags(EFL_NO_THINK_FUNCTION)
+	end
 
 	if SERVER and ent:IsPlayer() then
 		ent:Freeze(true)
@@ -190,8 +195,10 @@ function ENT:UnfreezeEntity(ent)
 	local owner = self:GetDomainOwner()
 	if ent == owner then return end
 
-	ent:SetMoveType(ent.gJujutsu_OldMoveType)
-	ent:RemoveEFlags(EFL_NO_THINK_FUNCTION)
+	if not ent:IsPlayer() then
+		ent:SetMoveType(ent.gJujutsu_OldMoveType)
+		ent:RemoveEFlags(EFL_NO_THINK_FUNCTION)
+	end
 
 	if SERVER and ent:IsPlayer() then
 		ent:Freeze(false)
@@ -208,7 +215,8 @@ hook.Add("gJujutsu_EntEnteredDomain", "gojo_enterDomain", function(domain, ent)
 		local owner = domain:GetDomainOwner()
 		local weapon = owner:GetActiveWeapon()
 
-		if weapon:Gjujutsu_IsGojo() and not weapon:GetInCinematic() then
+		if weapon:Gjujutsu_IsGojo() and not weapon:GetInCinematic() and IsFirstTimePredicted() then
+			print("ambiencew")
 			domain:EmitSound(domainAmbienceSound, 0)
 		end
 	end
@@ -220,7 +228,7 @@ hook.Add("gJujutsu_EntLeftDomain", "gojo_leftDomain", function(domain, ent)
 
 	domain:UnfreezeEntity(ent)
 
-	if CLIENT and ent == LocalPlayer() then
+	if CLIENT and ent == LocalPlayer() and IsFirstTimePredicted() then
 		domain:StopSound(domainAmbienceSound)
 	end
 end)

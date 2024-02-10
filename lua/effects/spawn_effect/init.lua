@@ -9,7 +9,14 @@ function EFFECT:Init( data )
 
 	-- This is how long the spawn effect
 	-- takes from start to finish.
-	self.Time = 0.5
+
+	local time = data:GetRadius()
+
+	if not time then
+		time = 0.5
+	end
+
+	self.Time = time
 	self.LifeTime = CurTime() + self.Time
 
 	local ent = data:GetEntity()
@@ -26,8 +33,6 @@ function EFFECT:Init( data )
 	self.OldRenderOverride = self.ParentEntity.RenderOverride
 	self.ParentEntity.SpawnEffect = self
 	self.ParentEntity.RenderOverride = self.RenderParent
-
-
 end
 
 function EFFECT:Think()

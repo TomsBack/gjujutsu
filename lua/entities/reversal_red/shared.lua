@@ -17,6 +17,7 @@ ENT.AutomaticFrameAdvance = true
 ENT.Initialized = false
 ENT.PostInitialized = false
 
+ENT.DebrisEnabled = GetConVar("gjujutsu_fps_debris")
 ENT.Model = Model("models/hunter/misc/sphere2x2.mdl")
 ENT.PredictedThinkName = ""
 
@@ -180,10 +181,19 @@ end
 
 function ENT:OnRemove()
 	hook.Remove("Move", self.PredictedThinkName)
+	local owner = self:GetOwner()
 
 	-- Stop all reversal red sounds
 	self:StopSound(self.ReadySound)
 	self:StopSound(self.ActivateSound)
+
+	if not self:GetFired() and owner:IsValid() then
+		local weapon = owner:GetActiveWeapon()
+		
+		if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+			weapon:SetBusy(false)
+		end
+	end
 
 	if CLIENT and self:GetFired() then
 		if self.Particle:IsValid() then
@@ -249,8 +259,10 @@ function ENT:FireEffects()
 		local ply = LocalPlayer()
 
 		-- First spawn debris at the owner
-		CreateParticleSystemNoEntity("debris_2", ownerPos)
-		CreateParticleSystemNoEntity("smoke_debris_ring", ownerPos)
+		if self.DebrisEnabled:GetBool() then
+			CreateParticleSystemNoEntity("debris_2", ownerPos)
+			CreateParticleSystemNoEntity("smoke_debris_ring", ownerPos)
+		end
 
 		local distance = ownerPos:Distance(ply:GetPos())
 
@@ -302,7 +314,7 @@ function ENT:Explode()
 		gebLib_net.SendToAllExcept(owner)
 	end
 
-    if CLIENT then
+    if CLIENT and self.DebrisEnabled:GetBool() then
 		local spawnTime = 0.01
 		for i = 1, 100 do
 			timer.Simple(spawnTime, function()
@@ -437,7 +449,7 @@ function ENT:ProjectileExplode()
 
 	local redPos = self:GetPos()
 
-	if CLIENT then
+	if CLIENT and self.DebrisEnabled:GetBool() then
 		CreateParticleSystemNoEntity("debris_1", redPos)
 		CreateParticleSystemNoEntity("debris_2", redPos)
 
