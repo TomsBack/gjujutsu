@@ -25,7 +25,7 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 
-SWEP.Model = Model("models/jjk_falko/sukuna2.mdl")
+SWEP.Model = Model("models/gjujutsu/sukuna/sukuna.mdl")
 
 SWEP.PurpleAnimation = false
 SWEP.PurpleAnimationStart = 0
@@ -106,8 +106,6 @@ end
 
 function SWEP:Initialize()
 	self:DefaultInitialize()
-
-
 end
 
 function SWEP:PostInitialize()
@@ -142,8 +140,8 @@ function SWEP:SetWeaponHoldType(holdType)
 	if not owner:IsValid() then return end
     if holdType == "sukuna" then
         self.ActivityTranslate = {}
-		self.ActivityTranslate[ ACT_MP_STAND_IDLE ]	= self.Owner:GetSequenceActivity(self.Owner:LookupSequence("sukuna_idle"))
-		self.ActivityTranslate[ ACT_MP_WALK ] = ACT_HL2MP_IDLE + 1
+		self.ActivityTranslate[ ACT_MP_STAND_IDLE ]	= self.Owner:GetSequenceActivity(self.Owner:LookupSequence("Idle"))
+		self.ActivityTranslate[ ACT_MP_WALK ] = self.Owner:GetSequenceActivity(self.Owner:LookupSequence("Walk"))
 		self.ActivityTranslate[ ACT_MP_RUN ] = ACT_HL2MP_RUN_FAST
 		self.ActivityTranslate[ ACT_MP_CROUCH_IDLE ] = self.Owner:GetSequenceActivity(self.Owner:LookupSequence( "pose_ducking_01" ))
 		self.ActivityTranslate[ ACT_MP_CROUCHWALK ] = index + 4

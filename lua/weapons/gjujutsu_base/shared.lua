@@ -196,9 +196,9 @@ end
 function SWEP:SetupDefaultValues()
 	self:SetBlockCamera(false)
 
-	self:SetCursedEnergy(self.DefaultCursedEnergy)
-	self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy)
-	self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen)
+	-- self:SetCursedEnergy(self.DefaultCursedEnergy)
+	-- -- self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy)
+	-- self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen)
 
 	local owner = self:GetOwner()
 

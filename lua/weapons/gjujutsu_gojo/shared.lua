@@ -136,6 +136,10 @@ function SWEP:Initialize()
 
 	self:SetSixEyes(false)
 	self:SetInfinity(false)
+
+	self:SetCursedEnergy(self.DefaultCursedEnergy)
+	self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy)
+	self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen)
 end
 
 function SWEP:PostInitialize()
