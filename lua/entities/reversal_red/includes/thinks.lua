@@ -79,7 +79,8 @@ function ENT:HitDetectionThink()
 		endpos = redPos + self:GetFireVelocity() * 2,
 		mins = self.HitBoxMins,
 		maxs = self.HitBoxMaxs,
-		filter = {self, owner}
+		filter = {self, owner},
+		mask = MASK_ALL
 	}
 
 	if SERVER then owner:LagCompensation(true) end
