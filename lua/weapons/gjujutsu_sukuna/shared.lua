@@ -96,9 +96,7 @@ SWEP.BlueActivateSound = Sound("gjujutsu_kaisen/sfx/gojo/amplification_bluev2.mp
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
 SWEP.BlueSummonSound = Sound("gjujutsu_kaisen/sfx/gojo/hollow_deploy.wav") -- For hollow purple anim
 
-gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
-
 
 function SWEP:SetupDataTables()
 	self:DefaultDataTables()

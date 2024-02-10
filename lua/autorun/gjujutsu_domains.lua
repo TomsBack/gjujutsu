@@ -11,7 +11,7 @@ gJujutsuDomains = {}
 gJujutsuDomainClashCache = {} -- For avoiding expensive checks if player is in a clash
 gJujutsuDomainClashes = {}
 
-local keyRefreshInterval = 0.1
+local keyRefreshInterval = 0.1 -- Runs the checking logic every this interval to avoid lag
 local keyRefreshTime = 0
 local keyRefreshCD = 2
 local keyRange = {Min = 11, Max = 20}
@@ -93,9 +93,9 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 
 				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 					print("setting domain clash to true")
-					weapon:SetClashStart(false)
 					weapon:SetBusy(true)
 					weapon:SetDomainClash(true)
+					weapon:SetClashStart(false)
 					print(weapon:GetClashStart())
 				end
 
@@ -125,8 +125,6 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 				if not plyData.Player:IsValid() then continue end
 				local ply = plyData.Player
 				
-				print("Reseting player after domain clash", ply)
-				
 				-- Removing clash state
 				local weapon = ply:GetActiveWeapon()
 				
@@ -136,6 +134,7 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 				end
 				
 				print(ply.gJujutsu_ClashPresses, winner.Player.gJujutsu_ClashPresses)
+
 				-- Determining winner
 				if ply.gJujutsu_ClashPresses > winner.Player.gJujutsu_ClashPresses then
 					winner = plyData
@@ -143,6 +142,18 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 
 				ply.gJujutsu_ClashPresses = 0
 				ply:SetMoveType(ply.gJujutsu_OldMoveType)
+			end
+
+			-- Add stun to all the losing players
+			for _, plyData in pairs(data.Players) do
+				local ply = plyData.Player
+				if ply == winner.Player then continue end
+
+				local weapon = ply:GetActiveWeapon()
+				
+				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+					weapon:SetGlobalCD(5)
+				end
 			end
 
 			local winnerPlayer = winner.Player
@@ -162,7 +173,6 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 				end
 			end
 
-			print("owner delete")
 			gJujutsuDomainClashes[owner] = nil
 			gJujutsuDomainClashCache[owner] = nil
 		end
