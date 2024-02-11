@@ -1,3 +1,7 @@
+if SERVER then
+	util.AddNetworkString("gJujutsu_cl_deploy")
+end
+
 SWEP.PrintName = "gJujutsu Base"
 SWEP.Author = "Tom"
 SWEP.Instructions = ""
@@ -187,6 +191,12 @@ function SWEP:DefaultDeploy()
 	self:SetupDefaultValues()
 
 	self:EnableFlashlight(false)
+
+	if SERVER then
+		net.Start("gJujutsu_cl_deploy")
+		net.WriteEntity(self)
+		net.Broadcast()
+	end
 end
 
 function SWEP:DefaultHolster()
@@ -197,10 +207,6 @@ end
 
 function SWEP:SetupDefaultValues()
 	self:SetBlockCamera(false)
-
-	-- self:SetCursedEnergy(self.DefaultCursedEnergy)
-	-- -- self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy)
-	-- self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen)
 
 	local owner = self:GetOwner()
 
@@ -241,10 +247,11 @@ function SWEP:SetupModel()
 	local owner = self:GetOwner()
 
 	if owner:IsValid() then
-
 		self.OldModel = owner:GetModel()
 		owner:SetModel(self.Model)
+		print(owner:GetModel())
 	end
+
 end
 
 function SWEP:EnableFlashlight(allow)
@@ -318,3 +325,14 @@ function SWEP:SetTimedEvent(name, time)
 end
 
 -- Adding hooks
+
+-- Handling nets
+if SERVER then return end
+
+net.Receive("gJujutsu_cl_deploy", function()
+	local weapon = net.ReadEntity()
+
+	if weapon:IsValid() then
+		weapon:Deploy()
+	end
+end)
