@@ -104,3 +104,5 @@ PrecacheParticleSystem("technique_red_explosion")
 PrecacheParticleSystem("clash_explosion")
 
 PrecacheParticleSystem("domain_splatters")
+
+PrecacheParticleSystem("dismantle_slash")

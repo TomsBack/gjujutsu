@@ -76,7 +76,8 @@ function ENT:DefaultPredictedThink(ply, mv)
 	self:ResetDefaultsThink()
 	self:DamageMaterialThink()
 	self:EventThink()
-end 
+	self:DrainEnergyThink()
+end
 
 function ENT:RevealShrine()
 	if SERVER then

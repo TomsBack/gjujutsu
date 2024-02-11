@@ -282,9 +282,9 @@ function meta:AddClipPlane( ply, plane )
 			ent:SetClipPlanes( { plane } )
 			ent:Spawn()
 			
-			local motion = self:GetPhysicsObject():IsMotionEnabled()
 			local phys = ent:GetPhysicsObject()
-			if IsValid( phys ) then
+			if IsValid( phys ) and self:IsValid() and self:GetPhysicsObject():IsValid() then
+				local motion = self:GetPhysicsObject():IsMotionEnabled()
 				phys:EnableMotion( motion )
 				phys:Wake()
 			end

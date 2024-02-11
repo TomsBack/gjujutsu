@@ -19,6 +19,7 @@ function SWEP:DrawHUD()
 	end
 
 	self:DrawStatsHud()
+	draw.DrawText(self:GetFingers() .. "/20", "gJujutsuFont2", ScrW() * 0.048, ScrH() * 0.75)
 
 	DisableClipping(true)
 	cam.Start3D(nil, nil, 65, gJujutsu_width*.6, gJujutsu_height * .3, gJujutsu_width/2, gJujutsu_height * .7)
@@ -30,19 +31,21 @@ function SWEP:DrawHUD()
 
 		local pos = EyePos() + (forward * 7) + (up * upperindex) + (right * -2.1 )
 
-		cam.Start3D2D(pos, ang, 0.011) 
+		cam.Start3D2D(pos, ang, 0.011)
+
+			self:DrawCDAbilityBox(-13, -120, "Fuga (Open)", ability5:GetInt(), self:GetNextAbility5())
 			if self:GetDomain():IsValid() then
 				self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
 			else 
 				self:DrawCDAbilityBox(11, 120, "Domain Expansion: Malevolent shrine", abilityUltimate:GetInt(), self:GetNextUltimate())
 			end
 			if not owner:KeyDown(IN_SPEED) then
-				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal: Red", ability4:GetInt(), self:GetNextAbility4())
-				self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse: Blue", ability3:GetInt(), self:GetNextAbility3())
+				self:DrawCDAbilityBox(-9, -80, "Cleave", ability4:GetInt(), self:GetNextAbility4())
+				self:DrawCDAbilityBox(-5, -40, "Dismantle", ability3:GetInt(), self:GetNextAbility3())
 			end
 			if owner:KeyDown(IN_SPEED) then
 				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal (Projectile): Red", ability4:GetInt(), self:GetNextAbility4())
-				self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse (Around): Blue", ability3:GetInt(), self:GetNextAbility3())
+				self:DrawCDAbilityBox(-5, -40, "Dismantle Barrage", ability3:GetInt(), self:GetNextAbility3())
 			end
 			self:DrawActivateAbilityBox(7, 80, "Reverse Cursed Technique (Inactive)", ability8:GetInt(), self:GetNextAbility8(), "Reverse Cursed Technique (Active)", self:GetReverseTechniqueEnabled())
 		cam.End3D2D()

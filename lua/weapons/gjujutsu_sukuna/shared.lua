@@ -28,9 +28,9 @@ SWEP.Secondary.Ammo = "none"
 SWEP.Model = Model("models/gjujutsu/sukuna/sukuna.mdl")
 
 SWEP.Abilities = {
-	[AbilityKey.Ability3] = "LapseBlue",
-	[AbilityKey.Ability4] = "ReversalRed",
-	[AbilityKey.Ability5] = "HollowPurple",
+	[AbilityKey.Ability3] = "Dismantle",
+	[AbilityKey.Ability4] = "Cleave",
+	[AbilityKey.Ability5] = "Fuga",
 	[AbilityKey.Ability6] = "InfinityActivate",
 	[AbilityKey.Ability7] = "SixEyesActivate",
 	[AbilityKey.Ability8] = "ReverseTechnique",
@@ -53,12 +53,12 @@ SWEP.AbilitiesUp = {
 	[AbilityKey.Secondary] = "Teleport",
 }
 
-SWEP.DefaultHealth = 4000
-SWEP.DefaultMaxHealth = 4000
+SWEP.DefaultHealth = 3000
+SWEP.DefaultMaxHealth = 3000
 
 SWEP.PrimaryCD = 0
 SWEP.SecondaryCD = 3
-SWEP.Ability3CD = 5
+SWEP.Ability3CD = 2
 SWEP.Ability4CD = 10
 SWEP.Ability5CD = 25
 SWEP.Ability6CD = 0.5
@@ -78,15 +78,24 @@ SWEP.Ability8Cost = 0
 SWEP.UltimateCost = 1500
 SWEP.TauntCost = 0
 
-SWEP.DefaultCursedEnergy = 5000
-SWEP.DefaultMaxCursedEnergy = 5000
-SWEP.DefaultCursedEnergyRegen = 0.2
+SWEP.DefaultCursedEnergy = 3500
+SWEP.DefaultMaxCursedEnergy = 3500
+SWEP.DefaultCursedEnergyRegen = 0.15
+SWEP.DefaultHealthGain = 3
+
+SWEP.HealthGain = 3
+SWEP.CursedEnergyDrain = 1.5 -- Per tick
 
 SWEP.DomainRange = 7000
 
+SWEP.HealthPerFinger = 1150
+SWEP.EnergyPerFinger = 1500
+SWEP.HealthGainPerFinger = 0.45 -- For reverse curse technique
+SWEP.EnergyGainPerFinger = 0.01
+
 SWEP.ClashPressScore = 2
 
--- gebLib.ImportFile("includes/thinks.lua")
+gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
 
 function SWEP:SetupDataTables()
@@ -181,6 +190,7 @@ function SWEP:Think()
 	self:EventThink()
 	self:ReversedActionClearThink()
 	self:DomainClearThink()
+	self:FingerStatsThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -201,15 +211,100 @@ function SWEP:OnRemove()
 end
 
 -- Ability3
-function SWEP:LapseBlue()
+function SWEP:Dismantle()
 	if CurTime() < self:GetNextAbility3() then return end
 	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability3Cost then return end
+
+	local owner = self:GetOwner()
+
+	local cd = self.Ability3CD
 	
+	if owner:KeyDown(IN_SPEED) then
+		local nextSlash = 0
+
+		for i = 1, 7 do
+			timer.Simple(nextSlash, function()
+				self:DismantleSlash(25 * self:GetFingers())
+			end)
+			nextSlash = nextSlash + 0.09
+		end
+
+		cd = cd * 3
+	else 
+		self:DismantleSlash(75 * self:GetFingers())
+	end
+
+
+	self:SetNextAbility3(CurTime() + cd)
+end
+
+function SWEP:DismantleSlash(damage)
+	local owner = self:GetOwner()
+	local ownerPos = owner:GetPos()
+	local aimVector = owner:GetAimVector()
+	
+	if SERVER then
+		owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
+		owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
+	end
+	owner:ViewPunch( Angle( -10, 0, 0 ) )
+
+	local force = aimVector * 50000
+
+	local damageInfo = DamageInfo()
+	damageInfo:SetDamageType(5)
+	if owner:IsValid() then damageInfo:SetAttacker(owner) end
+	if self:IsValid() then damageInfo:SetInflictor(self) end
+	damageInfo:SetDamage(damage)
+	damageInfo:SetDamageForce(force)
+
+	owner:LagCompensation(true)
+	for _, ent in ipairs(ents.FindInCone(ownerPos, aimVector, 1500, 0.8)) do
+
+		if SERVER then
+			SuppressHostEvents(nil)
+			ent:TakeDamageInfo(damageInfo)
+			SuppressHostEvents(owner)
+		end
+
+		if CLIENT and ent:IsSolid() then
+			CreateParticleSystemNoEntity("dismantle_slash", ent:GetPos())
+
+			if ent:gebLib_IsPerson() then
+				CreateParticleSystemNoEntity("blood_impact_red_01", ent:GetPos())
+			end
+		end
+
+		if SERVER then
+			ent:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
+		end
+
+		if ent:gebLib_IsPerson() then
+			if SERVER then
+				ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))	
+			end
+		end
+
+		if ent:gebLib_IsProp() then
+			ent:SetVelocity(force)
+			
+			local phys = ent:GetPhysicsObject()
+			
+			if phys:IsValid() then
+				phys:SetVelocity(force)
+			end
+
+			if SERVER then
+				SukunaPropCut(owner, ent, -45)
+			end
+		end
+	end
+	owner:LagCompensation(false)
 end
 
 -- Ability4
-function SWEP:ReversalRed()
+function SWEP:Cleave()
 	if CurTime() < self:GetNextAbility4() then return end
 	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability4Cost then return end
@@ -217,9 +312,9 @@ function SWEP:ReversalRed()
 end
 
 -- Ability5
-function SWEP:HollowPurple()
-	if CurTime() < self:GetNextAbility5() and not detonatePurple:GetBool() then return end
-	if self:GetBusy() and not detonatePurple:GetBool() then return end
+function SWEP:Fuga()
+	if CurTime() < self:GetNextAbility5() then return end
+	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability5Cost.Min then return end
 
 	return true
@@ -336,6 +431,7 @@ function SWEP:DomainExpansion()
 
 	local owner = self:GetOwner()
 	local aimAngles = owner:GetAimVector():Angle()
+	aimAngles.x = 0
 
 	if SERVER then
 		owner:Freeze(true)

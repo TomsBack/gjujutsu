@@ -166,6 +166,7 @@ function SWEP:DomainExpansionCinematic()
 
     camera:AddEvent(0, 850, function(ply, pos, ang, fov)
         local initialAng = ang
+		ang = copy:EyeAngles()
         if camera.CurFrame >= 1 and camera.CurFrame <= 300 then
             pos = LerpVector(camera:GetTime(1, 400), firstStartPos, firstStartPos)
         end

@@ -25,6 +25,10 @@ ENT.SlashDamageMin = 20
 ENT.SlashDamageMax = 55
 ENT.NextSlash = 0
 
+ENT.EnergyDrain = 2 -- How much cursed energy it drains per tick
+
+ENT.Particles = {}
+
 function ENT:SetupDataTables()
 	self:DefaultDataTables()
 end
@@ -36,6 +40,12 @@ function ENT:Initialize()
 	self:SetSequence(1)
 	self:SetPlaybackRate(0)
 	self:SetNoDraw(true)
+
+	if CLIENT then	
+		self:SetRenderBoundsWS(Vector(-9999999, -9999999, -9999999), Vector(9999999, 9999999, 9999999))
+		self:SetRenderBounds(Vector(-9999999, -9999999, -9999999), Vector(9999999, 9999999, 9999999))
+		self:SetRenderClipPlaneEnabled(false)
+	end
 
 	self:SetTimedEvent("RevealShrine", 6.58)
 end
@@ -66,6 +76,14 @@ end
 
 function ENT:Draw()
 	if not self:IsValid() then return end
+
+	for _, particle in ipairs(self.Particles) do
+		if not particle:IsValid() then continue end
+
+		particle:SetShouldDraw(false)
+		particle:Render()
+	end
+
 	render.OverrideDepthEnable(true, true)
 	render.SetBlend(math.Remap(self:Health(), 0, self.DefaultHealth, 0, 1))
 	self:DrawModel()
@@ -80,6 +98,7 @@ function ENT:DefaultPredictedThink(ply, mv)
 	self:ResetDefaultsThink()
 	self:DamageMaterialThink()
 	self:EventThink()
+	self:DrainEnergyThink()
 end
 
 function ENT:RevealShrine()
@@ -128,6 +147,7 @@ function ENT:SpawnParticles()
 	if not IsFirstTimePredicted() then return end
 	if not self:IsValid() then return end
 
-	CreateParticleSystem(self, "Shrine_Large", PATTACH_ABSORIGIN_FOLLOW, 1)
-	CreateParticleSystem(self, "Shrine_Large", PATTACH_ABSORIGIN_FOLLOW, 1)
+	print("spawning particles")
+	table.insert(self.Particles, CreateParticleSystem(self, "Shrine_Large", PATTACH_ABSORIGIN_FOLLOW, 1))
+	table.insert(self.Particles, CreateParticleSystem(self, "Shrine_Large", PATTACH_ABSORIGIN_FOLLOW, 1))
 end

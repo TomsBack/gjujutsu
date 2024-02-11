@@ -119,7 +119,7 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 					if ply == winner then
 						weapon:SetGlobalCD(0.5)
 					else
-						weapon:SetGlobalCD(5)
+						weapon:SetGlobalCD(10)
 						weapon:SetNextUltimate(CurTime() + weapon.UltimateCD)
 					end
 				end
