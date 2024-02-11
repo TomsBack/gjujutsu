@@ -37,7 +37,7 @@ function ENT:Initialize()
 	self:SetPlaybackRate(0)
 	self:SetNoDraw(true)
 
-	self:SetTimedEvent("RevealShrine", 6.8)
+	self:SetTimedEvent("RevealShrine", 6.58)
 end
 
 function ENT:PostInitialize()
@@ -89,7 +89,7 @@ function ENT:RevealShrine()
 
 	util.Effect("spawn_effect", effectData)
 
-	self:SetTimedEvent("StartShrine", 4.25)
+	self:SetTimedEvent("StartShrine", 4.3)
 end
 
 function ENT:StartShrine()
@@ -111,6 +111,15 @@ function ENT:StartDomain()
 	if CLIENT and IsFirstTimePredicted() then
 		print("AA")
 		owner:EmitSound("gjujutsu_kaisen/sukuna/shrine_burst.wav")
+	end
+end
+
+function ENT:OnRemove()
+	self:DefaultOnRemove()
+	local owner = self:GetDomainOwner()
+
+	if owner:IsValid() then
+		owner:StopSound(Sound("sukuna/sfx/domain_theme.mp3"))
 	end
 end
 

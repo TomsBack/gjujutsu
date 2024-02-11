@@ -48,13 +48,15 @@ function SWEP:DomainExpansionCinematic()
 		caughtInDomain = false
 	end
 
-	local fps = 30
+	local fps = 24
 	local animRate = 1 / fps
 	local interval = CurTime() + animRate
 	local currentFrame = 0
 
 	local playedClap = false
+	local playedGif = false
 	local screenEffectPaused = true
+	local playedTheme = false
 
 	hook.Add("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect", function()
 		if not localPlayer:gebLib_Alive() then hook.Remove("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect") return end
@@ -93,11 +95,20 @@ function SWEP:DomainExpansionCinematic()
 			end
 		end
 
-		if camera.CurFrame > 130 and screenEffectPaused then
+		if camera.CurFrame > 130 and not playedGif and screenEffectPaused then
+			playedGif = true
 			screenEffectPaused = false
 		end
 
-		if camera.CurFrame > 382 and not screenEffectPaused then
+		if camera.CurFrame > 300 and not playedTheme then
+			playedTheme = true
+
+			if CLIENT then
+				owner:EmitSound(Sound("sukuna/sfx/domain_theme.mp3"))
+			end
+		end
+
+		if camera.CurFrame > 410 and not screenEffectPaused then
 			screenEffectPaused = true
 		end
 

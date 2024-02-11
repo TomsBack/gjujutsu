@@ -86,8 +86,6 @@ SWEP.DomainRange = 7000
 
 SWEP.ClashPressScore = 2
 
-
-
 -- gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
 
@@ -346,9 +344,7 @@ function SWEP:DomainExpansion()
 	self:SetBusy(true)
 	self:SetDomainClash(false)
 	self:SetClashStart(false)
-
-	self:DomainExpansionCinematic()
-
+	
 	if SERVER then
 		local domain = ents.Create("sukuna_domain")
 		self:SetDomain(domain)
@@ -358,6 +354,8 @@ function SWEP:DomainExpansion()
 		domain:Spawn()
 		domain:Activate()
 	end
+
+	self:DomainExpansionCinematic()
 
 	self:RemoveCursedEnergy(self.UltimateCost)
 end
