@@ -161,6 +161,7 @@ function SWEP:Holster()
 	if not owner:IsValid() then return end
 	if owner:IsFrozen() or not owner:Alive() then return end
 	if self:GetBusy() then return end
+	if self:GetDomainClash() then return end
 	if self:GetInCinematic() then return end
 	if self:GetDomain():IsValid() then return end
 

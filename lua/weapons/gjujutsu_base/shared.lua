@@ -80,6 +80,8 @@ SWEP.Ability8Cost = 0
 SWEP.UltimateCost = 0
 SWEP.TauntCost = 0
 
+SWEP.Grade = Grade.NoGrade
+
 SWEP.DefaultDamageMultiplier = 1
 SWEP.DamageMultiplier = 1
 

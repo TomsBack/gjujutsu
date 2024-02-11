@@ -132,7 +132,8 @@ function SWEP:DomainExpansionCinematic()
 	local ply = self:GetOwner()
 	local owner = ply
 	local ownerPos = owner:GetPos()
-	local weapon = owner:GetActiveWeapon()
+
+	local weapon = self
 	
 	self:SetBusy(true)
 	self:SetBlockCamera(true)

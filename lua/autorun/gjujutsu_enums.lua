@@ -16,3 +16,12 @@ AbilityKey = {
 	Primary = 9,
 	Secondary = 10
 }
+
+Grade = {
+	NoGrade = 0,
+	Fourth = 1,
+	Third = 2,
+	Second = 3,
+	First = 4,
+	Special = 5
+}

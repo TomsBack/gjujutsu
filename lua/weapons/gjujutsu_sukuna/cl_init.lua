@@ -31,14 +31,19 @@ function SWEP:DrawHUD()
 		local pos = EyePos() + (forward * 7) + (up * upperindex) + (right * -2.1 )
 
 		cam.Start3D2D(pos, ang, 0.011) 
-			if self:GetSixEyes() then
-				self:DrawCDAbilityBox(-13, -120, "Hollow Technique: Purple", ability5:GetInt(), self:GetNextAbility5())
-				self:DrawCDAbilityBox(11, 120, "Domain Expansion: Infinite Void", abilityUltimate:GetInt(), self:GetNextUltimate())
+			if self:GetDomain():IsValid() then
+				self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
+			else 
+				self:DrawCDAbilityBox(11, 120, "Domain Expansion: Malevolent shrine", abilityUltimate:GetInt(), self:GetNextUltimate())
 			end
-			self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal: Red", ability4:GetInt(), self:GetNextAbility4())
-			self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse: Blue", ability3:GetInt(), self:GetNextAbility3())
-			self:DrawActivateAbilityBox(-1, 0, "Infinite Technique (Inactive)", ability6:GetInt(), self:GetNextAbility6(), "Infinite Technique (Active)", self:GetInfinity())
-			self:DrawActivateAbilityBox(3, 40, "Six Eyes Mode (Inactive)", ability7:GetInt(), self:GetNextAbility7(), "Six Eyes Mode (Active)", self:GetSixEyes())
+			if not owner:KeyDown(IN_SPEED) then
+				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal: Red", ability4:GetInt(), self:GetNextAbility4())
+				self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse: Blue", ability3:GetInt(), self:GetNextAbility3())
+			end
+			if owner:KeyDown(IN_SPEED) then
+				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal (Projectile): Red", ability4:GetInt(), self:GetNextAbility4())
+				self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse (Around): Blue", ability3:GetInt(), self:GetNextAbility3())
+			end
 			self:DrawActivateAbilityBox(7, 80, "Reverse Cursed Technique (Inactive)", ability8:GetInt(), self:GetNextAbility8(), "Reverse Cursed Technique (Active)", self:GetReverseTechniqueEnabled())
 		cam.End3D2D()
 

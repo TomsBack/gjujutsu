@@ -37,7 +37,7 @@ function ENT:Initialize()
 	self:SetPlaybackRate(0)
 	self:SetNoDraw(true)
 
-	self:SetTimedEvent("RevealShrine", 5.25)
+	self:SetTimedEvent("RevealShrine", 6.8)
 end
 
 function ENT:PostInitialize()
@@ -109,6 +109,7 @@ function ENT:StartDomain()
 	self:SpawnParticles()
 
 	if CLIENT and IsFirstTimePredicted() then
+		print("AA")
 		owner:EmitSound("gjujutsu_kaisen/sukuna/shrine_burst.wav")
 	end
 end

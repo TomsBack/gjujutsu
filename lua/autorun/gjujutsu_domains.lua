@@ -120,6 +120,7 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 						weapon:SetGlobalCD(0.5)
 					else
 						weapon:SetGlobalCD(5)
+						weapon:SetNextUltimate(CurTime() + weapon.UltimateCD)
 					end
 				end
 			end
