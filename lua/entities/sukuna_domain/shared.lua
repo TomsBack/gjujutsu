@@ -29,6 +29,9 @@ ENT.EnergyDrain = 2 -- How much cursed energy it drains per tick
 
 ENT.Particles = {}
 
+local renderMins = Vector(-9999999, -9999999, -9999999)
+local renderMaxs = Vector(9999999, 9999999, 9999999)
+
 function ENT:SetupDataTables()
 	self:DefaultDataTables()
 end
@@ -42,8 +45,8 @@ function ENT:Initialize()
 	self:SetNoDraw(true)
 
 	if CLIENT then	
-		self:SetRenderBoundsWS(Vector(-9999999, -9999999, -9999999), Vector(9999999, 9999999, 9999999))
-		self:SetRenderBounds(Vector(-9999999, -9999999, -9999999), Vector(9999999, 9999999, 9999999))
+		self:SetRenderBoundsWS(renderMins, renderMaxs)
+		self:SetRenderBounds(renderMins, renderMaxs)
 		self:SetRenderClipPlaneEnabled(false)
 	end
 
@@ -128,7 +131,6 @@ function ENT:StartDomain()
 	self:SpawnParticles()
 
 	if CLIENT and IsFirstTimePredicted() then
-		print("AA")
 		owner:EmitSound("gjujutsu_kaisen/sukuna/shrine_burst.wav")
 	end
 end
@@ -140,6 +142,14 @@ function ENT:OnRemove()
 	if owner:IsValid() then
 		owner:StopSound(Sound("sukuna/sfx/domain_theme.mp3"))
 	end
+
+	if CLIENT then
+		for _, particle in ipairs(self.Particles) do
+			if not particle:IsValid() then continue end
+			particle:SetShouldDraw(true)
+			particle:StopEmission()
+		end
+	end
 end
 
 function ENT:SpawnParticles()
@@ -147,7 +157,12 @@ function ENT:SpawnParticles()
 	if not IsFirstTimePredicted() then return end
 	if not self:IsValid() then return end
 
+	local owner = self:GetDomainOwner()
+
+	if not owner:IsValid() then return end
+	local ownerPos = owner:EyePos()
+
 	print("spawning particles")
-	table.insert(self.Particles, CreateParticleSystem(self, "Shrine_Large", PATTACH_ABSORIGIN_FOLLOW, 1))
-	table.insert(self.Particles, CreateParticleSystem(self, "Shrine_Large", PATTACH_ABSORIGIN_FOLLOW, 1))
+	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
+	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 end
