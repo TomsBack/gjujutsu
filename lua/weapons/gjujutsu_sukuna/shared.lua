@@ -423,7 +423,6 @@ function SWEP:InfinityActivate()
 	if self:GetCursedEnergy() < self.Ability6Cost then return end
 	self:SetNextAbility6(CurTime() + self.Ability6CD)
 
-
 	return true
 end
 
