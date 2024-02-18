@@ -61,7 +61,7 @@ SWEP.DefaultMaxHealth = 3000
 SWEP.PrimaryCD = 0
 SWEP.SecondaryCD = 3
 SWEP.Ability3CD = 2
-SWEP.Ability4CD = 10
+SWEP.Ability4CD = 15
 SWEP.Ability5CD = 25
 SWEP.Ability6CD = 0.5
 SWEP.Ability7CD = 0.5
@@ -98,8 +98,8 @@ SWEP.EnergyGainPerFinger = 0.01
 SWEP.MaxFingers = 20
 
 SWEP.DismantleAngle = 0.8
-SWEP.DismantleRange = 1500
-SWEP.CleaveRange = 200
+SWEP.DismantleRange = 2000
+SWEP.CleaveRange = 150
 
 SWEP.ClashPressScore = 2
 
@@ -110,6 +110,8 @@ function SWEP:SetupDataTables()
 	self:DefaultDataTables()
 
 	self:NetworkVar("Int", 0, "Fingers")
+
+	self:NetworkVar("Bool", 0, "HoldingCleave")
 
 	self:NetworkVarNotify( "Fingers", self.OnVarChanged)
 end
@@ -347,6 +349,7 @@ function SWEP:Cleave()
 	
 	for k, ent in ipairs(ents.FindInSphere(ownerPos, self.CleaveRange)) do
 		if self.HitBlacklist[ent:GetClass()] then continue end
+		if not ent:gebLib_IsProp() and not ent:gebLib_IsPerson() then continue end
 		if ent == self or ent == owner then continue end
 		if ent:GetOwner() == owner then continue end
 		if ent == self:GetDomain() then continue end
@@ -354,10 +357,13 @@ function SWEP:Cleave()
 		if SERVER then
 			local timerName = "Gjujutsu_Cleave" .. tostring(ent:EntIndex()) .. tostring(ent)
 
-			timer.Create(timerName, 0.05, 20, function()
-				if not ent:IsValid() then timer.Remove(timerName) return end
+			timer.Create(timerName, 0.06, 20, function()
+				if not ent:IsValid() then 
+					timer.Remove(timerName) 
+					return 
+				end
 	
-				local force = VectorRand(-1, 1)
+				local force = VectorRand(-1, 1) * 100
 				
 				local damageInfo = DamageInfo()
 				damageInfo:SetDamageType(5)
@@ -374,7 +380,14 @@ function SWEP:Cleave()
 					damageInfo:SetDamageType(5)
 				end
 
-				ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
+				local phys = ent:GetPhysicsObject()
+
+				ent:SetVelocity(force)
+				if phys:IsValid() then
+					phys:SetVelocity(force)
+				end
+
+				ent:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"), 75, math.random(70, 150), 0.7, CHAN_STATIC)
 		
 				SuppressHostEvents(nil)
 				ent:TakeDamageInfo(damageInfo)
