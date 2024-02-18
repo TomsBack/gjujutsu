@@ -26,6 +26,7 @@ function MPLY:gJujutsu_SetupKeys()
         [self:GetInfoNum("gjujutsu_taunt_key", 0)] = ability.Taunt,
         [self:GetInfoNum("gjujutsu_primary_key", 0)] = ability.Primary,
         [self:GetInfoNum("gjujutsu_secondary_key", 0)] = ability.Secondary,
+        [self:GetInfoNum("gjujutsu_block_key", 0)] = ability.Block,
     }
 
 	self.gJujutsu_Keys = keys	

@@ -1,7 +1,11 @@
+local statsUpdateRate = 0.3
+local nextStatsUpdate = CurTime() + statsUpdateRate
 
 function SWEP:FingerStatsThink()
-	local fingers = self:GetFingers()
+	if CurTime() < nextStatsUpdate then return end
+	nextStatsUpdate = CurTime() + statsUpdateRate
 
+	local fingers = self:GetFingers()
 	local owner = self:GetOwner()
 
 	self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy + (self.EnergyPerFinger * fingers))
@@ -9,7 +13,6 @@ function SWEP:FingerStatsThink()
 
 	self.HealthGain = self.DefaultHealthGain + (self.HealthGainPerFinger * fingers)
 
-	print(self.HealthGain)
 	if SERVER and owner:IsValid() then
 		owner:SetMaxHealth(self.DefaultMaxHealth + (self.HealthPerFinger * fingers))
 	end

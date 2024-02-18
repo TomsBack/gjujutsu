@@ -28,6 +28,17 @@ function MENT:Gjujutsu_IsInDomain()
 	return false
 end
 
+function MPLY:Gjujutsu_ResetKnockback()
+	local oldVelocity = self.gJujutsu_OldVelocity
+
+	if not oldVelocity then return end
+
+	local knockbackVelocity = oldVelocity - self:GetVelocity()
+	
+	self:SetVelocity(knockbackVelocity)
+	self:ViewPunchReset()
+end
+
 function MPLY:CreateDomainClashTable()
 	local clashData = {
 		ClashStart = CurTime() + gjujutsu_ClashWindUp,

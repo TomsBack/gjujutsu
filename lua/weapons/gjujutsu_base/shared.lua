@@ -1,5 +1,7 @@
 if SERVER then
 	util.AddNetworkString("gJujutsu_cl_deploy")
+	util.AddNetworkString("gJujutsu_cl_onBlock")
+	util.AddNetworkString("gJujutsu_cl_onPerfectBlock")
 end
 
 SWEP.PrintName = "gJujutsu Base"
@@ -31,6 +33,36 @@ SWEP.OldModel = nil
 SWEP.Initialized = false
 SWEP.PostInitialized = false
 
+SWEP.HitBlacklist = {
+	["env_spritetrail"] = true,
+	["purple_fragment"] = true,
+	["class CLuaEffect"] = true,
+	["gmod_hands"] = true,
+	["gmod_tool"] = true,
+	["gmod_camera"] = true,
+	["class C_PhysPropClientside"] = true,
+	["domain_floor"] = true,
+	["func_button"] = true,
+	["prop_door_rotating"] = true,
+	["class C_BaseEntity"] = true,
+}
+
+SWEP.DamageExceptions = {
+    ["npc_monk"] = DMG_GENERIC,
+    ["npc_strider"] = DMG_GENERIC,
+    ["npc_alyx"] = DMG_GENERIC,
+    ["npc_barney"] = DMG_GENERIC,
+    ["npc_mossman"] = DMG_GENERIC,
+    ["npc_gman"] = DMG_GENERIC,
+	["npc_rollermine"] = DMG_BLAST,
+	["npc_antlionguard"] = DMG_GENERIC,
+	["npc_vortigaunt"] = DMG_GENERIC,
+	["VortigauntSlave"] = DMG_GENERIC,
+	["npc_combinegunship"] = DMG_GENERIC,
+	["npc_combinedropship"] = DMG_CRUSH,
+	["npc_helicopter"] = DMG_AIRBOAT
+}
+
 SWEP.DamageBypassEnts = {
 	["hollow_purple"] = true,
 }
@@ -50,6 +82,7 @@ SWEP.Abilities = {
 	[AbilityKey.Taunt] = nil,
 	[AbilityKey.Primary] = nil,
 	[AbilityKey.Secondary] = nil,
+	[AbilityKey.Block] = nil,
 }
 
 SWEP.AbilitiesUp = {
@@ -63,8 +96,12 @@ SWEP.AbilitiesUp = {
 	[AbilityKey.Taunt] = nil,
 	[AbilityKey.Primary] = nil,
 	[AbilityKey.Secondary] = nil,
+	[AbilityKey.Block] = nil,
 }
 
+SWEP.BlockCD = 2
+SWEP.PrimaryCD = 0
+SWEP.SecondaryCD = 0
 SWEP.Ability3CD = 0
 SWEP.Ability4CD = 0
 SWEP.Ability5CD = 0
@@ -75,6 +112,9 @@ SWEP.UltimateCD = 0
 SWEP.TauntCD = 0
 
 -- Cost is meant in cursed energy
+SWEP.BlockCost = 0
+SWEP.PrimaryCost = 0
+SWEP.SecondaryCost = 0
 SWEP.Ability3Cost = 0
 SWEP.Ability4Cost = 0
 SWEP.Ability5Cost = 0
@@ -112,13 +152,21 @@ SWEP.OldRun = -1
 SWEP.OldJumpPower = -1
 
 SWEP.DomainRange = 1500
-
 SWEP.ClashPressScore = 1 -- Default score that is going to be added once the player presses the right key in domain clash
 SWEP.DomainClearTreshold = 10 -- If the player has less than this in the domain. The domain will get cleared
 
 SWEP.LastMoveType = MOVETYPE_WALK -- Is used to set the last moveable type before getting frozen
 
+SWEP.PerfectBlockTime = 0.2 -- The player needs to press the block button in this time window in order to perfect block
+SWEP.PerfectBlockMult = 0.05 -- 0.1 means the player takes only 10% of the original damage, 0.5 is 50%, so player takes 50%
+
+SWEP.BlockMult = 0.5
+
+SWEP.ReverseCursedParticle = NULL
+
 SWEP.ReverseCurseSound = Sound("misc/reverse_curse_activate.wav")
+SWEP.BlockStartSound = Sound("misc/cloth_whoosh_1.wav")
+SWEP.BlockEndSound = Sound("misc/cloth_whoosh_1_reverse.wav")
 
 gebLib.ImportFile("includes/thinks.lua")
 
@@ -129,6 +177,7 @@ gJujutsu_EntsBlacklist = {
 function SWEP:DefaultDataTables()
 	self:NetworkVar("Entity", 31, "Domain")
 
+	self:NetworkVar("Bool", 26, "Block")
 	self:NetworkVar("Bool", 27, "ClashStart")
 	self:NetworkVar("Bool", 27, "DomainClash")
 	self:NetworkVar("Bool", 28, "InCinematic")
@@ -136,6 +185,8 @@ function SWEP:DefaultDataTables()
 	self:NetworkVar("Bool", 30, "ReverseTechniqueEnabled")
 	self:NetworkVar("Bool", 31, "BlockCamera")
 
+	self:NetworkVar("Float", 15, "NextBlock")
+	self:NetworkVar("Float", 16, "BlockStart")
 	self:NetworkVar("Float", 17, "Primary")
 	self:NetworkVar("Float", 18, "Secondary")
 	self:NetworkVar("Float", 19, "NextAbility3")
@@ -157,7 +208,7 @@ end
 
 function SWEP:DefaultInitialize()
 	self.Initialized = true
-	self:SetupDefaultValues()
+	self:SetupDefaultValues(true)
 
 	-- If its first time getting this weapon, then reset default values
 	self.OldWalk = -1
@@ -179,7 +230,7 @@ end
 function SWEP:DefaultPostInitialize()
 	self.PostInitialized = true
 	self:SetupModel()
-	self:SetupDefaultValues()
+	self:SetupDefaultValues(true)
 
 	self:SetHoldType(self.HoldType)
 
@@ -205,17 +256,20 @@ function SWEP:DefaultHolster()
 	self:EnableFlashlight(true)
 end
 
-function SWEP:SetupDefaultValues()
+function SWEP:SetupDefaultValues(setHealth)
 	self:SetBlockCamera(false)
 
 	local owner = self:GetOwner()
 
 	if not owner:IsValid() then return end
-
+	
 	if SERVER then
 		owner:SetMaxHealth(self.DefaultMaxHealth)
 	end
-	owner:SetHealth(self.DefaultHealth)
+
+	if setHealth then
+		owner:SetHealth(self.DefaultHealth)
+	end
 
 	if self.OldWalk <= -1 then
 		self.OldWalk = owner:GetWalkSpeed()
@@ -286,6 +340,12 @@ function SWEP:SetGlobalCD(cdAmount)
 	self:SetNextAbility8(math.max(self:GetNextAbility8() + cdAmount, curTime + cdAmount))
 	self:SetNextUltimate(math.max(self:GetNextUltimate() + cdAmount, curTime + cdAmount))
 	self:SetNextTaunt(math.max(self:GetNextTaunt() + cdAmount, curTime + cdAmount))
+
+	self:DisableReverseCursed()
+
+	if self:Gjujutsu_IsGojo() then
+		self:SetInfinity(false)
+	end
 end
 
 function SWEP:WindEffect(endSize, endTime)
@@ -317,6 +377,62 @@ function SWEP:ReverseCursedEffect()
 	end
 end
 
+function SWEP:StartBlock()
+	if self:GetBlock() then return end
+	if CurTime() < self:GetNextBlock() then return end
+
+	self:SetBlockStart(CurTime())
+	self:SetBlock(true)
+	self:SetBusy(true)
+
+	self:EmitSound(self.BlockStartSound)
+	print("Blocking")
+
+	hook.Run("gJujutsu_OnBlockStart", self)
+end
+
+function SWEP:EndBlock()
+	if not self:GetBlock() then return end
+
+	self:SetBlock(false)
+	self:SetBusy(false)
+
+	self:EmitSound(self.BlockEndSound)
+	print("Blocking ended")
+
+	hook.Run("gJujutsu_OnBlockEnd", self)
+
+	self:SetNextBlock(CurTime() + self.BlockCD)
+end
+
+function SWEP:IsPerfectBlocking()
+	local blockStart = self:GetBlockStart()
+
+	return CurTime() - blockStart <= self.PerfectBlockTime
+end
+
+function SWEP:EnableReverseCursed()
+	local owner = self:GetOwner()
+
+	self:SetReverseTechniqueEnabled(true)
+
+	if not owner:IsValid() then return end
+
+	self:ReverseCursedEffect()
+
+	if CLIENT then
+		self.ReverseCursedParticle = CreateParticleSystem(owner, "reverse_cursed", PATTACH_ABSORIGIN_FOLLOW, 0)
+	end
+end
+
+function SWEP:DisableReverseCursed()
+	self:SetReverseTechniqueEnabled(false)
+
+	if CLIENT and self.ReverseCursedParticle:IsValid() then
+		self.ReverseCursedParticle:StopEmission()
+	end
+end
+
 --Deprecated
 --I use this instead of timers, as it can support prediction
 function SWEP:SetTimedEvent(name, time)
@@ -325,6 +441,30 @@ function SWEP:SetTimedEvent(name, time)
 end
 
 -- Adding hooks
+
+hook.Add("gJujutsu_OnPerfectBlock", "gJujutsu_PerfectBlockEffects", function(weapon, dmg)
+	local owner = weapon:GetOwner()
+	local pos = owner:GetPos()
+
+	if CLIENT then
+		if dmg >= 200 then
+			CreateParticleSystemNoEntity("smoke_debris_ring", pos)
+		end
+
+		if dmg >= 500 then
+			owner:EmitSound(Sound("misc/rock_hit.wav"))
+			CreateParticleSystemNoEntity("debris_2", pos)
+		end
+	end
+
+
+end)
+
+hook.Add("gJujutsu_OnBlock", "test", function(weapon, dmg)
+	print("block")
+	print(weapon, dmg)
+end)
+
 
 -- Handling nets
 if SERVER then return end
@@ -335,4 +475,18 @@ net.Receive("gJujutsu_cl_deploy", function()
 	if weapon:IsValid() then
 		weapon:Deploy()
 	end
+end)
+
+net.Receive("gJujutsu_cl_onBlock", function()
+	local weapon = net.ReadEntity()
+	local damage = net.ReadInt(32)
+
+	hook.Run("gJujutsu_OnBlock", weapon, damage)
+end)
+
+net.Receive("gJujutsu_cl_onPerfectBlock", function()
+	local weapon = net.ReadEntity()
+	local damage = net.ReadInt(32)
+
+	hook.Run("gJujutsu_OnPerfectBlock", weapon, damage)
 end)

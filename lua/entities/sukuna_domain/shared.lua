@@ -32,6 +32,9 @@ ENT.Particles = {}
 local renderMins = Vector(-9999999, -9999999, -9999999)
 local renderMaxs = Vector(9999999, 9999999, 9999999)
 
+ENT.DomainBurstSound = Sound("sukuna/sfx/shrine_burst.wav")
+ENT.DomainThemeSound = Sound("sukuna/sfx/domain_theme.mp3")
+
 function ENT:SetupDataTables()
 	self:DefaultDataTables()
 end
@@ -91,6 +94,7 @@ function ENT:Draw()
 	render.SetBlend(math.Remap(self:Health(), 0, self.DefaultHealth, 0, 1))
 	self:DrawModel()
 	render.OverrideDepthEnable(false)
+	render.SetBlend(1)
 end
 
 function ENT:DefaultPredictedThink(ply, mv)
@@ -131,7 +135,7 @@ function ENT:StartDomain()
 	self:SpawnParticles()
 
 	if CLIENT and IsFirstTimePredicted() then
-		owner:EmitSound("gjujutsu_kaisen/sukuna/shrine_burst.wav")
+		owner:EmitSound(self.DomainBurstSound)
 	end
 end
 
@@ -140,7 +144,7 @@ function ENT:OnRemove()
 	local owner = self:GetDomainOwner()
 
 	if owner:IsValid() then
-		owner:StopSound(Sound("sukuna/sfx/domain_theme.mp3"))
+		owner:StopSound(self.DomainThemeSound)
 	end
 
 	if CLIENT then
@@ -165,4 +169,75 @@ function ENT:SpawnParticles()
 	print("spawning particles")
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
+end
+
+-- Sukuna's domain slash. I've put this here as its shared for both sukuna's domains, so it won't get copied
+function SlashThink(self)
+	if not self:GetDomainReady() then return end
+	
+	local owner = self:GetDomainOwner()
+	
+	if not owner:IsValid() then return end
+	if not IsFirstTimePredicted() then return end
+	local curTime = CurTime()
+
+	if curTime < self.NextSlash then return end
+	self.NextSlash = CurTime() + self.SlashCD
+
+	local domainPos = self:GetPos()
+
+	local dmgInfo = DamageInfo()
+	if owner:IsValid() then dmgInfo:SetAttacker(owner) end
+	if self:IsValid() then dmgInfo:SetInflictor(self) end
+	dmgInfo:SetDamage(math.random(self.SlashDamageMin, self.SlashDamageMax))
+	
+	-- Play effects for clients which are in the range
+	if CLIENT then
+		local ply = LocalPlayer()
+
+		if self:IsInDomain(ply) then
+			ply:EmitSound(Sound("gjujutsu_kaisen/sfx/domain_expansion/malevolent_shrine/swing_0"..math.random(1,5)..".wav", 75, math.random(70, 130), 0))
+			util.ScreenShake(ply:GetPos(), 1, 1, 0.1, 100, true)
+		end
+	end
+
+	-- Decimate everything in range
+	for ent, _ in pairs(self.EntsInDomain) do
+		if not ent:IsValid() then continue end
+		if self.DomainBlacklist[ent:GetClass()] then continue end
+		if self.Children[ent] then continue end
+		if not ent:IsSolid() or ent == self or ent == owner then continue end
+
+		local randomVelocity = VectorRand() * 300
+
+		if ent:IsNPC() then randomVelocity = randomVelocity / 10 end
+		if ent:IsNextBot() then randomVelocity = vector_origin end
+		if ent:IsPlayer() then randomVelocity = randomVelocity / 4 end
+			
+		dmgInfo:SetDamageForce(randomVelocity)
+
+		if ent:IsPlayer() then
+			ent:SetVelocity(randomVelocity + vector_up * 10)
+		elseif not ent:IsNextBot() and not ent:IsNPC() then
+			ent:SetVelocity(ent:GetVelocity() +  randomVelocity)
+		end
+
+		local phys = ent:GetPhysicsObject()
+
+		if not ent:gebLib_IsPerson() and phys:IsValid() then
+			SukunaPropCut(owner, ent, math.random(30,90))
+
+			phys:SetVelocity(phys:GetVelocity() + randomVelocity)
+		end
+		
+		if SERVER then
+			owner:LagCompensation(true)
+			SuppressHostEvents(nil)
+			ent:TakeDamageInfo(dmgInfo)
+			SuppressHostEvents(owner)
+			owner:LagCompensation(false)
+			
+			ent:EmitSound(Sound("gjujutsu_kaisen/sfx/domain_expansion/malevolent_shrine/hit_0"..math.random(1,2)..".wav"), 75, math.random(90, 110))
+		end
+	end
 end

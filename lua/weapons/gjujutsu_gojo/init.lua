@@ -25,11 +25,8 @@ hook.Add("EntityTakeDamage", "gJujutsu_InfinityNoDamage", function(ply, dmg)
 		timer.Simple(0, function()
 			if not weapon:IsValid() then return end
 			if not ply:IsValid() then return end
-			local oldVelocity = ply.gJujutsu_OldVelocity
-			local knockbackVelocity = oldVelocity - ply:GetVelocity()
 			
-			ply:SetVelocity(knockbackVelocity)
-			ply:ViewPunchReset()
+			ply:Gjujutsu_ResetKnockback()
 		end)
 
 		return true

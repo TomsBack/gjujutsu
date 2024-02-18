@@ -14,6 +14,9 @@ ENT.RenderGroup	= RENDERGROUP_OPAQUE
 
 ENT.Model = Model("models/gjujutsu/sukuna_finger/sukuna_finger.mdl")
 
+ENT.FingerEatSound = Sound("sukuna/sfx/finger_eat.mp3")
+ENT.LaughSound = Sound("sukuna/voice/sukuna_laugh.mp3")
+
 function ENT:Initialize()
 	self.Initialized = true
 
@@ -33,11 +36,11 @@ function ENT:Use(activator)
 	self:Remove()
 
 	if weapon:IsValid() then
-		weapon:SetFingers(math.min(weapon:GetFingers() + 1, 20))
+		activator:EmitSound(self.FingerEatSound)
+		weapon:AddFinger()
 		return
 	end
 
-	activator:EmitSound("gjujutsu_kaisen/sukuna/sukuna_laugh.wav")
-
+	activator:EmitSound(self.LaughSound)
 	activator:Kill()
 end

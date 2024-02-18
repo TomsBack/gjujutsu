@@ -5,7 +5,7 @@ DomainType = {
 }
 
 AbilityKey = {
-	Ability3 = 1, -- Starting from ability3 as 1 is primary attack, 2 is secondary
+	Ability3 = 1,
 	Ability4 = 2,
 	Ability5 = 3,
 	Ability6 = 4,
@@ -14,7 +14,8 @@ AbilityKey = {
 	Ultimate = 7,
 	Taunt = 8,
 	Primary = 9,
-	Secondary = 10
+	Secondary = 10,
+	Block = 11
 }
 
 Grade = {

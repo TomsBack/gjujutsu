@@ -46,6 +46,7 @@ SWEP.Abilities = {
 	[AbilityKey.Taunt] = nil,
 	[AbilityKey.Primary] = nil,
 	[AbilityKey.Secondary] = "TeleportHold",
+	[AbilityKey.Block] = "StartBlock",
 }
 
 SWEP.AbilitiesUp = {
@@ -59,6 +60,7 @@ SWEP.AbilitiesUp = {
 	[AbilityKey.Taunt] = nil,
 	[AbilityKey.Primary] = nil,
 	[AbilityKey.Secondary] = "Teleport",
+	[AbilityKey.Block] = "EndBlock",
 }
 
 SWEP.DefaultHealth = 10000
@@ -83,7 +85,7 @@ SWEP.Ability5Cost = {Min = 1000, Max = 3000}
 SWEP.Ability6Cost = 25
 SWEP.Ability7Cost = 0
 SWEP.Ability8Cost = 0
-SWEP.UltimateCost = 1500
+SWEP.UltimateCost = 1000
 SWEP.TauntCost = 0
 
 SWEP.TeleportDistance = 3000
@@ -95,12 +97,12 @@ SWEP.FlightDrain = 0.5 -- Per tick
 SWEP.DefaultCursedEnergy = 8000
 SWEP.DefaultMaxCursedEnergy = 8000
 
-SWEP.SixEyesMaxCursedEnergy = 12000
+SWEP.SixEyesMaxCursedEnergy = 16000
 SWEP.SixEyesCursedEnergyRegen = 0.25
-SWEP.SixEyesHealthGain = 6
-SWEP.SixEyesDamageMultiplier = 2
+SWEP.SixEyesHealthGain = 10
+SWEP.SixEyesDamageMultiplier = 2.25
 
-SWEP.ClashPressScore = 1.75
+SWEP.ClashPressScore = 1.85
 
 SWEP.BlueActivateSound = Sound("gjujutsu_kaisen/sfx/gojo/amplification_bluev2.mp3")
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
@@ -207,12 +209,7 @@ function SWEP:Think()
         self:PostInitialize()
     end
 
-	local owner = self:GetOwner()
-
-	if owner:IsValid() then
-		owner.gJujutsu_OldVelocity = owner:GetVelocity()
-	end
-
+	self:MiscThink()
 	self:InfinityThink()
 	self:ReverseTechniqueThink()
 	self:StatsRegenThink()
@@ -376,8 +373,13 @@ function SWEP:ReverseTechnique()
 	if self:GetCursedEnergy() < self.Ability8Cost then return end
 	self:SetNextAbility8(CurTime() + self.Ability8CD)
 
-	self:SetReverseTechniqueEnabled(not self:GetReverseTechniqueEnabled())
-	self:ReverseCursedEffect()
+	local reverseCurseEnabled = self:GetReverseTechniqueEnabled()
+
+	if reverseCurseEnabled then
+		self:DisableReverseCursed()
+	else
+		self:EnableReverseCursed()
+	end
 	
 	return true
 end

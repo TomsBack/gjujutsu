@@ -23,6 +23,8 @@ ENT.VoidCore = NULL
 ENT.DomainSplatters = NULL
 ENT.AfterCinematic = false
 
+ENT.EnergyDrain = 0.5
+
 local cinematicSound = Sound("gjujutsu_kaisen/sfx/domain_expansion/infinity_voide/gojo_domain_v2.wav")
 local domainAmbienceSound = Sound("gjujutsu_kaisen/sfx/gojo/domain_ambience.wav")
 
@@ -132,6 +134,7 @@ function ENT:Draw()
 	else
 		render.SetBlend(math.Remap(self:Health(), 0, self.DefaultHealth, 0, 1))
 		self:DrawModel()
+		render.SetBlend(1)
 	end
 end
 
@@ -168,7 +171,7 @@ function ENT:FreezeEntity(ent)
 		local weapon = ent:GetActiveWeapon()
 
 		if weapon:IsGjujutsuSwep() then
-			weapon:SetReverseTechniqueEnabled(false)
+			weapon:DisableReverseCursed()
 		end
 
 		if weapon:Gjujutsu_IsGojo() and weapon:GetInfinity() then
@@ -216,7 +219,6 @@ hook.Add("gJujutsu_EntEnteredDomain", "gojo_enterDomain", function(domain, ent)
 		local weapon = owner:GetActiveWeapon()
 
 		if weapon:Gjujutsu_IsGojo() and not weapon:GetInCinematic() and IsFirstTimePredicted() then
-			print("ambiencew")
 			domain:EmitSound(domainAmbienceSound, 0)
 		end
 	end

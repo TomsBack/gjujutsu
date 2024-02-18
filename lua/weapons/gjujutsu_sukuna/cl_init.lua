@@ -19,7 +19,7 @@ function SWEP:DrawHUD()
 	end
 
 	self:DrawStatsHud()
-	draw.DrawText(self:GetFingers() .. "/20", "gJujutsuFont2", ScrW() * 0.048, ScrH() * 0.75)
+	draw.DrawText(self:GetFingers() .. "/" .. self.MaxFingers, "gJujutsuFont2", ScrW() * 0.048, ScrH() * 0.75)
 
 	DisableClipping(true)
 	cam.Start3D(nil, nil, 65, gJujutsu_width*.6, gJujutsu_height * .3, gJujutsu_width/2, gJujutsu_height * .7)

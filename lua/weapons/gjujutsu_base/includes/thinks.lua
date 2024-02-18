@@ -1,3 +1,11 @@
+function SWEP:MiscThink()
+	local owner = self:GetOwner()
+
+	if owner:IsValid() then
+		owner.gJujutsu_OldVelocity = owner:GetVelocity()
+	end
+end
+
 function SWEP:StatsRegenThink()
 	if self:GetBusy() then return end
 	if self:GetDomain():IsValid() then return end
@@ -14,7 +22,7 @@ end
 
 function SWEP:ReverseTechniqueThink()
 	if not self:GetReverseTechniqueEnabled() then return end
-	if self:GetCursedEnergy() <= 0 then self:SetReverseTechniqueEnabled(false) return end
+	if self:GetCursedEnergy() <= 0 then self:DisableReverseCursed() return end
 	local owner = self:GetOwner()
 
 	if not owner:IsValid() then return end

@@ -38,6 +38,7 @@ SWEP.Abilities = {
 	[AbilityKey.Taunt] = nil,
 	[AbilityKey.Primary] = nil,
 	[AbilityKey.Secondary] = "TeleportHold",
+	[AbilityKey.Block] = "StartBlock",
 }
 
 SWEP.AbilitiesUp = {
@@ -51,6 +52,7 @@ SWEP.AbilitiesUp = {
 	[AbilityKey.Taunt] = nil,
 	[AbilityKey.Primary] = nil,
 	[AbilityKey.Secondary] = "Teleport",
+	[AbilityKey.Block] = "EndBlock",
 }
 
 SWEP.DefaultHealth = 3000
@@ -81,17 +83,23 @@ SWEP.TauntCost = 0
 SWEP.DefaultCursedEnergy = 3500
 SWEP.DefaultMaxCursedEnergy = 3500
 SWEP.DefaultCursedEnergyRegen = 0.15
-SWEP.DefaultHealthGain = 3
+SWEP.DefaultHealthGain = 4
 
-SWEP.HealthGain = 3
+SWEP.HealthGain = 4
 SWEP.CursedEnergyDrain = 1.5 -- Per tick
 
 SWEP.DomainRange = 7000
 
 SWEP.HealthPerFinger = 1150
 SWEP.EnergyPerFinger = 1500
-SWEP.HealthGainPerFinger = 0.45 -- For reverse curse technique
+SWEP.HealthGainPerFinger = 0.6 -- For reverse curse technique
 SWEP.EnergyGainPerFinger = 0.01
+
+SWEP.MaxFingers = 20
+
+SWEP.DismantleAngle = 0.8
+SWEP.DismantleRange = 1500
+SWEP.CleaveRange = 200
 
 SWEP.ClashPressScore = 2
 
@@ -102,20 +110,32 @@ function SWEP:SetupDataTables()
 	self:DefaultDataTables()
 
 	self:NetworkVar("Int", 0, "Fingers")
+
+	self:NetworkVarNotify( "Fingers", self.OnVarChanged)
+end
+
+function SWEP:OnVarChanged(name, old, new)
+	if name ~= "Fingers" then return end
+
+	self:UpdateFingerStats(new)
+
+	hook.Run("gJujutsu_OnFingerUpdate", self, old, new)
 end
 
 function SWEP:Initialize()
 	self:DefaultInitialize()
 
-	self:SetFingers(1)
-
 	self:SetCursedEnergy(self.DefaultCursedEnergy)
 	self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy)
 	self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen)
+
+	self:SetFingers(1)
 end
 
 function SWEP:PostInitialize()
 	self:DefaultPostInitialize()
+
+	self:SetFingers(1)
 
 	local owner = self:GetOwner()
 
@@ -126,6 +146,12 @@ end
 
 function SWEP:Deploy()
 	self:DefaultDeploy()
+
+	local owner = self:GetOwner()
+
+	if SERVER then
+		owner:SetMaxHealth(self.DefaultMaxHealth + (self.HealthPerFinger * self:GetFingers()))
+	end
 end
 
 function SWEP:Holster()
@@ -178,19 +204,14 @@ function SWEP:Think()
         self:PostInitialize()
     end
 
-	local owner = self:GetOwner()
-
-	if owner:IsValid() then
-		owner.gJujutsu_OldVelocity = owner:GetVelocity()
-	end
-
+	self:MiscThink()
 	self:ReverseTechniqueThink()
 	self:StatsRegenThink()
 	self:ClampStatsThink()
 	self:EventThink()
 	self:ReversedActionClearThink()
 	self:DomainClearThink()
-	self:FingerStatsThink()
+	-- self:FingerStatsThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -260,7 +281,19 @@ function SWEP:DismantleSlash(damage)
 	damageInfo:SetDamageForce(force)
 
 	owner:LagCompensation(true)
-	for _, ent in ipairs(ents.FindInCone(ownerPos, aimVector, 1500, 0.8)) do
+	for _, ent in ipairs(ents.FindInCone(ownerPos, aimVector, self.DismantleRange, self.DismantleAngle)) do
+		if self.HitBlacklist[ent:GetClass()] then continue end
+		if ent == self or ent == owner then continue end
+		if ent:GetOwner() == owner then continue end
+		if ent == self:GetDomain() then continue end
+
+		local customDamageType = self.DamageExceptions[ent:GetClass()]
+
+		if customDamageType ~= nil then
+			damageInfo:SetDamageType(customDamageType)
+		else
+			damageInfo:SetDamageType(5)
+		end
 
 		if SERVER then
 			SuppressHostEvents(nil)
@@ -282,7 +315,7 @@ function SWEP:DismantleSlash(damage)
 
 		if ent:gebLib_IsPerson() then
 			if SERVER then
-				ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))	
+				ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
 			end
 		end
 
@@ -309,6 +342,56 @@ function SWEP:Cleave()
 	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability4Cost then return end
 
+	local owner = self:GetOwner()
+	local ownerPos = owner:GetPos()
+	
+	for k, ent in ipairs(ents.FindInSphere(ownerPos, self.CleaveRange)) do
+		if self.HitBlacklist[ent:GetClass()] then continue end
+		if ent == self or ent == owner then continue end
+		if ent:GetOwner() == owner then continue end
+		if ent == self:GetDomain() then continue end
+
+		if SERVER then
+			local timerName = "Gjujutsu_Cleave" .. tostring(ent:EntIndex()) .. tostring(ent)
+
+			timer.Create(timerName, 0.05, 20, function()
+				if not ent:IsValid() then timer.Remove(timerName) return end
+	
+				local force = VectorRand(-1, 1)
+				
+				local damageInfo = DamageInfo()
+				damageInfo:SetDamageType(5)
+				if owner:IsValid() then damageInfo:SetAttacker(owner) end
+				if self:IsValid() then damageInfo:SetInflictor(self) end
+				damageInfo:SetDamageForce(force)
+				damageInfo:SetDamage(100)
+	
+				local customDamageType = self.DamageExceptions[ent:GetClass()]
+		
+				if customDamageType ~= nil then
+					damageInfo:SetDamageType(customDamageType)
+				else
+					damageInfo:SetDamageType(5)
+				end
+
+				ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
+		
+				SuppressHostEvents(nil)
+				ent:TakeDamageInfo(damageInfo)
+				SuppressHostEvents(owner)
+			end)
+		end
+
+		if CLIENT then
+			local particle = CreateParticleSystem(ent, "cleave", PATTACH_ABSORIGIN_FOLLOW, 0)
+
+			timer.Simple(1, function()
+				if not particle:IsValid() then return end
+
+				particle:StopEmission()
+			end)
+		end
+	end
 end
 
 -- Ability5
@@ -346,8 +429,13 @@ function SWEP:ReverseTechnique()
 	if self:GetCursedEnergy() < self.Ability8Cost then return end
 	self:SetNextAbility8(CurTime() + self.Ability8CD)
 
-	self:SetReverseTechniqueEnabled(not self:GetReverseTechniqueEnabled())
-	self:ReverseCursedEffect()
+	local reverseCurseEnabled = self:GetReverseTechniqueEnabled()
+
+	if reverseCurseEnabled then
+		self:DisableReverseCursed()
+	else
+		self:EnableReverseCursed()
+	end
 	
 	return true
 end
@@ -464,6 +552,27 @@ function SWEP:Teleport()
 	if CurTime() < self:GetSecondary() then return end
 
 	self:SetSecondary(CurTime() + self.SecondaryCD)
+end
+
+function SWEP:AddFinger()
+	self:SetFingers(math.min(self:GetFingers() + 1, self.MaxFingers))
+end
+
+function SWEP:UpdateFingerStats(fingers)
+	local owner = self:GetOwner()
+
+	print("Updated Stats", fingers)
+
+	self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy + (self.EnergyPerFinger * fingers))
+	self:SetCursedEnergy(self:GetMaxCursedEnergy())
+	self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen + (self.EnergyGainPerFinger * fingers))
+
+	self.HealthGain = self.DefaultHealthGain + (self.HealthGainPerFinger * fingers)
+
+	if SERVER and owner:IsValid() then
+		owner:SetMaxHealth(self.DefaultMaxHealth + (self.HealthPerFinger * fingers))
+		owner:SetHealth(owner:GetMaxHealth())
+	end
 end
 
 -- Adding hooks

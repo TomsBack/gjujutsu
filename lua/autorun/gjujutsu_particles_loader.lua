@@ -12,6 +12,7 @@ game.AddParticles("particles/red.pcf")
 game.AddParticles("particles/smoke_general.pcf")
 game.AddParticles("particles/infinite_void.pcf")
 game.AddParticles("particles/hollow_purple.pcf")
+game.AddParticles("particles/reverse_cursed.pcf")
 
 ------------------------------------------------------------------------------
 
@@ -95,7 +96,6 @@ PrecacheParticleSystem("hollow_purple")
 PrecacheParticleSystem("hollow_purple_explosion")
 
 PrecacheParticleSystem("purple_fragment")
-
 PrecacheParticleSystem("blue_red_combine")
 
 PrecacheParticleSystem("technique_red")
@@ -106,3 +106,6 @@ PrecacheParticleSystem("clash_explosion")
 PrecacheParticleSystem("domain_splatters")
 
 PrecacheParticleSystem("dismantle_slash")
+PrecacheParticleSystem("cleave")
+
+PrecacheParticleSystem("reverse_cursed")
