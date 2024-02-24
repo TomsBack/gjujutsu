@@ -34,7 +34,7 @@ ENT.DamageMultiplier = 1 -- Used to save damage multiplier before firing
 
 ENT.Velocity = {Min = 40, Max = 70}
 ENT.HitBox = {Min = 35, Max = 75}
-ENT.ExplosionRadius = {Min = 750, Max = 1200}
+ENT.ExplosionRadius = {Min = 7500000, Max = 12000000}
 
 ENT.DamageExceptions = {
     ["npc_monk"] = DMG_GENERIC,
@@ -162,6 +162,10 @@ function ENT:OnRemove()
 		end
 
 		self:StopFireRing()
+
+		for _, particle in ipairs(self.Particles) do
+			if particle:IsValid() then particle:StopEmission() end
+		end
 	end
 
 	print("Removed Fire Arrow")
@@ -212,8 +216,8 @@ end
 function ENT:Explode()
 	print("Exploded fire arrow")
 
+	self:ExplosionDamage()
 	if SERVER then
-		self:ExplosionDamage()
 		util.ScreenShake(self:GetPos(), 100, 50, 2, 3000, true)
 	end
 	
@@ -244,12 +248,14 @@ function ENT:ExplosionDamage()
 	damageInfo:SetDamageType(DMG_DISSOLVE)
 	damageInfo:SetDamageForce(vector_up * 150 + VectorRand() * 150)
 	damageInfo:SetDamage(finalDamage)
+	
 
 	for _, ent in ipairs(ents.FindInSphere(pos, finalRadius)) do
-		if weapon.HitBlacklist[ent:GetClass()] then continue end
-		if ent == weapon or ent == owner then continue end
+		if gebLib_ClassBlacklist[ent:GetClass()] then continue end
+		if ent == weapon or ent == owner or ent == self then continue end
 		if ent:GetOwner() == owner then continue end
 		if ent == weapon:GetDomain() then continue end
+		if ent:IsWeapon() and ent:gebLib_IsCarried() then continue end
 		
 		local customDamageType = weapon.DamageExceptions[ent:GetClass()]
 
@@ -261,7 +267,7 @@ function ENT:ExplosionDamage()
 
 		ent:Ignite(self.IgniteTime)
 
-		if ent:gebLib_IsProp() then
+		if ent:gebLib_IsProp() or ent:IsWeapon() and not ent:gebLib_IsCarried() then
 			ent:gebLib_Dissolve()
 			continue
 		end

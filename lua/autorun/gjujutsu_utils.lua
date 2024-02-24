@@ -8,7 +8,7 @@ local abilityClasses = {
 	["hollow_purple"] = true,
 	["lapse_blue"] = true,
 	["reversal_red"] = true,
-	[""] = true,
+	["fire_arrow"] = true,
 	[""] = true,
 }
 
