@@ -89,7 +89,7 @@ function ENT:SetupDataTables()
 
 	self:NetworkVar("Bool", 0, "Fired")
 	self:NetworkVar("Bool", 1, "ProjectileMode")
-	self:NetworkVar("Bool", 3, "Ready")
+	self:NetworkVar("Bool", 2, "Ready")
 end
 
 function ENT:Initialize()

@@ -39,12 +39,12 @@ function SWEP:DrawHUD()
 			else 
 				self:DrawCDAbilityBox(11, 120, "Domain Expansion: Malevolent shrine", abilityUltimate:GetInt(), self:GetNextUltimate())
 			end
+			self:DrawCDAbilityBox(-9, -80, "Cleave", ability4:GetInt(), self:GetNextAbility4())
 			if not owner:KeyDown(IN_SPEED) then
-				self:DrawCDAbilityBox(-9, -80, "Cleave", ability4:GetInt(), self:GetNextAbility4())
 				self:DrawCDAbilityBox(-5, -40, "Dismantle", ability3:GetInt(), self:GetNextAbility3())
 			end
 			if owner:KeyDown(IN_SPEED) then
-				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal (Projectile): Red", ability4:GetInt(), self:GetNextAbility4())
+				-- self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal (Projectile): Red", ability4:GetInt(), self:GetNextAbility4())
 				self:DrawCDAbilityBox(-5, -40, "Dismantle Barrage", ability3:GetInt(), self:GetNextAbility3())
 			end
 			self:DrawActivateAbilityBox(7, 80, "Reverse Cursed Technique (Inactive)", ability8:GetInt(), self:GetNextAbility8(), "Reverse Cursed Technique (Active)", self:GetReverseTechniqueEnabled())

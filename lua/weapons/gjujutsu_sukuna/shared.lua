@@ -30,7 +30,7 @@ SWEP.Model = Model("models/gjujutsu/sukuna/sukuna.mdl")
 SWEP.Abilities = {
 	[AbilityKey.Ability3] = "Dismantle",
 	[AbilityKey.Ability4] = "Cleave",
-	[AbilityKey.Ability5] = "Fuga",
+	[AbilityKey.Ability5] = "FireArrowStart",
 	[AbilityKey.Ability6] = "InfinityActivate",
 	[AbilityKey.Ability7] = "SixEyesActivate",
 	[AbilityKey.Ability8] = "ReverseTechnique",
@@ -44,7 +44,7 @@ SWEP.Abilities = {
 SWEP.AbilitiesUp = {
 	[AbilityKey.Ability3] = "BlueRemove",
 	[AbilityKey.Ability4] = "RedFire",
-	[AbilityKey.Ability5] = "HollowPurpleFire",
+	[AbilityKey.Ability5] = "FireArrowEnd",
 	[AbilityKey.Ability6] = nil,
 	[AbilityKey.Ability7] = nil,
 	[AbilityKey.Ability8] = nil,
@@ -62,7 +62,7 @@ SWEP.PrimaryCD = 0
 SWEP.SecondaryCD = 3
 SWEP.Ability3CD = 2
 SWEP.Ability4CD = 15
-SWEP.Ability5CD = 25
+SWEP.Ability5CD = 1
 SWEP.Ability6CD = 0.5
 SWEP.Ability7CD = 0.5
 SWEP.Ability8CD = 0.5
@@ -103,6 +103,8 @@ SWEP.CleaveRange = 150
 
 SWEP.ClashPressScore = 2
 
+SWEP.FireArrowVoice = Sound("sukuna/voice/fire_arrow.wav")
+
 gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
 
@@ -112,6 +114,9 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Int", 0, "Fingers")
 
 	self:NetworkVar("Bool", 0, "HoldingCleave")
+	self:NetworkVar("Bool", 1, "HoldingFireArrow")
+
+	self:NetworkVar("Entity", 0, "FireArrow")
 
 	self:NetworkVarNotify( "Fingers", self.OnVarChanged)
 end
@@ -266,12 +271,6 @@ function SWEP:DismantleSlash(damage)
 	local owner = self:GetOwner()
 	local ownerPos = owner:GetPos()
 	local aimVector = owner:GetAimVector()
-	
-	if SERVER then
-		owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
-		owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
-	end
-	owner:ViewPunch( Angle( -10, 0, 0 ) )
 
 	local force = aimVector * 50000
 
@@ -282,62 +281,73 @@ function SWEP:DismantleSlash(damage)
 	damageInfo:SetDamage(damage)
 	damageInfo:SetDamageForce(force)
 
-	owner:LagCompensation(true)
-	for _, ent in ipairs(ents.FindInCone(ownerPos, aimVector, self.DismantleRange, self.DismantleAngle)) do
-		if self.HitBlacklist[ent:GetClass()] then continue end
-		if ent == self or ent == owner then continue end
-		if ent:GetOwner() == owner then continue end
-		if ent == self:GetDomain() then continue end
+	owner:gebLib_PlayAction("dismantle", 1.35)
 
-		local customDamageType = self.DamageExceptions[ent:GetClass()]
-
-		if customDamageType ~= nil then
-			damageInfo:SetDamageType(customDamageType)
-		else
-			damageInfo:SetDamageType(5)
-		end
-
+	timer.Simple(0.3, function()
 		if SERVER then
-			SuppressHostEvents(nil)
-			ent:TakeDamageInfo(damageInfo)
-			SuppressHostEvents(owner)
+			owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
+			owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
 		end
 
-		if CLIENT and ent:IsSolid() then
-			CreateParticleSystemNoEntity("dismantle_slash", ent:GetPos())
+		owner:ViewPunch( Angle( -10, 0, 0 ) )
 
+		owner:LagCompensation(true)
+		for _, ent in ipairs(ents.FindInCone(ownerPos, aimVector, self.DismantleRange, self.DismantleAngle)) do
+			if self.HitBlacklist[ent:GetClass()] then continue end
+			if ent == self or ent == owner then continue end
+			if ent:GetOwner() == owner then continue end
+			if ent == self:GetDomain() then continue end
+			
+			local customDamageType = self.DamageExceptions[ent:GetClass()]
+			
+			if customDamageType ~= nil then
+				damageInfo:SetDamageType(customDamageType)
+			else
+				damageInfo:SetDamageType(5)
+			end
+			
+			if SERVER then
+				SuppressHostEvents(nil)
+				ent:TakeDamageInfo(damageInfo)
+				SuppressHostEvents(owner)
+			end
+			
+			if CLIENT and ent:IsSolid() then
+				CreateParticleSystemNoEntity("dismantle_slash", ent:GetPos())
+				
+				if ent:gebLib_IsPerson() then
+					CreateParticleSystemNoEntity("blood_impact_red_01", ent:GetPos())
+				end
+			end
+			
+			if SERVER then
+				ent:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
+			end
+			
 			if ent:gebLib_IsPerson() then
-				CreateParticleSystemNoEntity("blood_impact_red_01", ent:GetPos())
+				if SERVER then
+					ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
+				end
 			end
-		end
-
-		if SERVER then
-			ent:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
-		end
-
-		if ent:gebLib_IsPerson() then
-			if SERVER then
-				ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
-			end
-		end
-
-		if ent:gebLib_IsProp() then
-			ent:SetVelocity(force)
 			
-			local phys = ent:GetPhysicsObject()
-			
-			if phys:IsValid() then
-				phys:SetVelocity(force)
-			end
-
-			if SERVER then
-				SukunaPropCut(owner, ent, -45)
+			if ent:gebLib_IsProp() then
+				ent:SetVelocity(force)
+				
+				local phys = ent:GetPhysicsObject()
+				
+				if phys:IsValid() then
+					phys:SetVelocity(force)
+				end
+				
+				if SERVER then
+					SukunaPropCut(owner, ent, -45)
+				end
 			end
 		end
-	end
-	owner:LagCompensation(false)
+		owner:LagCompensation(false)
+	end)
 end
-
+	
 -- Ability4
 function SWEP:Cleave()
 	if CurTime() < self:GetNextAbility4() then return end
@@ -408,12 +418,77 @@ function SWEP:Cleave()
 end
 
 -- Ability5
-function SWEP:Fuga()
+function SWEP:FireArrowStart()
 	if CurTime() < self:GetNextAbility5() then return end
 	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability5Cost.Min then return end
+	self:SetBusy(true)
+	self:SetHoldingFireArrow(true)
+
+	print("Started holding fire arrow")
+
+	self:EmitSound(self.FireArrowVoice)
+	
+	local owner = self:GetOwner()
+	if SERVER then
+		owner:EmitSound(Sound("sukuna/sfx/fire_arrow_start.wav"))
+	end
+	owner:gebLib_PlayAction("FireArrow", 1)
+
+	timer.Simple(0.8, function()
+		if not owner:IsValid() then return end
+		if not self:IsValid() then return end
+		if not self:GetHoldingFireArrow() then return end
+
+		if SERVER then
+			local arrow = ents.Create("fire_arrow")
+			self:SetFireArrow(arrow)
+			arrow:SetOwner(owner)
+			arrow:Spawn()
+		end
+	end)
+
+	timer.Simple(1.35, function()
+		if not owner:IsValid() then return end
+		if not self:IsValid() then return end
+		if not self:GetHoldingFireArrow() then return end
+
+		owner:gebLib_PauseAction()
+	end)
+	
+	self.LastMoveType = owner:GetMoveType()
+	owner:SetMoveType(MOVETYPE_NONE)
+	owner:SetVelocity(-owner:GetVelocity())
 
 	return true
+end
+
+function SWEP:FireArrowEnd()
+	if not self:GetHoldingFireArrow() then return end
+	local arrow = self:GetFireArrow()
+
+	self:SetBusy(false)
+	self:SetHoldingFireArrow(false)
+	self:SetNextAbility5(CurTime() + self.Ability5CD)
+
+	if not arrow:IsValid() then
+		self:SetNextAbility5(CurTime() + 1)
+	end
+
+	local owner = self:GetOwner()
+
+	if owner:IsValid() then
+		owner:gebLib_ResumeAction(1)
+		owner:SetVelocity(-owner:GetVelocity())
+		owner:SetMoveType(self.LastMoveType)
+	end
+
+	print("Stopped holding fire arrow")
+
+	if arrow:IsValid() then
+		arrow:Release()
+		self:SetFireArrow(NULL)
+	end
 end
 
 -- Ability6
@@ -557,14 +632,7 @@ function SWEP:DomainExpansion()
 end
 
 -- Secondary ability
-function SWEP:TeleportHold()
-end
 
-function SWEP:Teleport()
-	if CurTime() < self:GetSecondary() then return end
-
-	self:SetSecondary(CurTime() + self.SecondaryCD)
-end
 
 function SWEP:AddFinger()
 	self:SetFingers(math.min(self:GetFingers() + 1, self.MaxFingers))

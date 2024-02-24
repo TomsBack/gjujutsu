@@ -1,8 +1,8 @@
 vertexlitgeneric
 {
-	$basetexture "models\chromeda\darling\arrow\basecol"
+	$basetexture "models\gjujutsu\fire_arrow\basecol"
 
-	$detail "models\chromeda\darling\arrow\basecol"
+	$detail "models\gjujutsu\fire_arrow\basecol"
 	$detailscale 1
 	$detailblendmode 5
 	$allowalphatocoverage 1

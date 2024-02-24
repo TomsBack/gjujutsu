@@ -18,3 +18,7 @@ CreateClientConVar("gjujutsu_block_key", 16, true, true, "Sets the block key", B
 -- Gojo convars
 CreateConVar("gjujutsu_gojo_unrestricted_teleport", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to teleport while holding other cursed techniques", 0, 1)
 CreateConVar("gjujutsu_gojo_detonate_purple", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to detonate hollow purple when you press the button again", 0, 1)
+
+-- Sukuna convars
+CreateConVar("gjujutsu_sukuna_max_fingers", 20, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines how much fingers sukuna can have", 1, 1000)
+CreateConVar("gjujutsu_sukuna_mahoraga_wheel", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows Sukuna to use Mahoraga's wheel", 0, 1)
