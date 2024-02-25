@@ -63,13 +63,13 @@ SWEP.AbilitiesUp = {
 	[AbilityKey.Block] = "EndBlock",
 }
 
-SWEP.DefaultHealth = 10000
-SWEP.DefaultMaxHealth = 10000
+SWEP.DefaultHealth = 12000
+SWEP.DefaultMaxHealth = 12000
 
 SWEP.PrimaryCD = 0
 SWEP.SecondaryCD = 3
 SWEP.Ability3CD = 5
-SWEP.Ability4CD = 10
+SWEP.Ability4CD = 8
 SWEP.Ability5CD = 25
 SWEP.Ability6CD = 0.5
 SWEP.Ability7CD = 0.5
@@ -78,31 +78,35 @@ SWEP.UltimateCD = 50
 SWEP.TauntCD = 0
 
 SWEP.PrimaryCost = 0
-SWEP.SecondaryCost = {Min = 25, Max = 250}
-SWEP.Ability3Cost = 100
-SWEP.Ability4Cost = 500
-SWEP.Ability5Cost = {Min = 1000, Max = 3000}
+SWEP.SecondaryCost = {Min = 10, Max = 100}
+SWEP.Ability3Cost = 50
+SWEP.Ability4Cost = 250
+SWEP.Ability5Cost = {Min = 500, Max = 1250}
 SWEP.Ability6Cost = 25
 SWEP.Ability7Cost = 0
 SWEP.Ability8Cost = 0
-SWEP.UltimateCost = 1000
+SWEP.UltimateCost = 750
 SWEP.TauntCost = 0
 
-SWEP.TeleportDistance = 3000
+SWEP.BrainRecover = true
+SWEP.BrainRecoverDrain = 250
+
+SWEP.TeleportDistance = 3500
 SWEP.TeleportIndicator = NULL
 
 SWEP.InfinityRadius = 175
-SWEP.FlightDrain = 0.5 -- Per tick
+SWEP.FlightDrain = 0.2 -- Per tick
 
 SWEP.DefaultCursedEnergy = 8000
 SWEP.DefaultMaxCursedEnergy = 8000
+SWEP.CursedEnergyDrain = 1.25
 
 SWEP.SixEyesMaxCursedEnergy = 16000
-SWEP.SixEyesCursedEnergyRegen = 0.25
-SWEP.SixEyesHealthGain = 10
-SWEP.SixEyesDamageMultiplier = 2.25
+SWEP.SixEyesCursedEnergyRegen = 0.35
+SWEP.SixEyesHealthGain = 12
+SWEP.SixEyesDamageMultiplier = 2.6
 
-SWEP.ClashPressScore = 1.85
+SWEP.ClashPressScore = 1.9
 
 SWEP.BlueActivateSound = Sound("gjujutsu_kaisen/sfx/gojo/amplification_bluev2.mp3")
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
@@ -209,6 +213,7 @@ function SWEP:Think()
         self:PostInitialize()
     end
 
+	self:ConVarsThink()
 	self:MiscThink()
 	self:InfinityThink()
 	self:ReverseTechniqueThink()
@@ -219,6 +224,7 @@ function SWEP:Think()
 	self:TeleportIndicatorThink()
 	self:DomainClearThink()
 	self:FlightThink()
+	self:BrainRecoverThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -306,6 +312,13 @@ function SWEP:InfinityActivate()
 	if CurTime() < self:GetNextAbility6() then return end
 	if self:GetBusy() then return end
 	if not self:GetInfinity() and self:GetCursedEnergy() < self.Ability6Cost then return end
+	local owner = self:GetOwner()
+
+	if owner:Gjujutsu_IsInDomain() then
+		self:SetInfinity(false)
+		return
+	end
+
 	self:SetNextAbility6(CurTime() + self.Ability6CD)
 
 	self:SetInfinity(not self:GetInfinity())
@@ -313,8 +326,6 @@ function SWEP:InfinityActivate()
 	if self:GetInfinity() then
 		self:EmitSound(self.InfinityActivateSound)
 	end
-
-	local owner = self:GetOwner()
 
 	if not owner:IsValid() then return end
 	
@@ -494,13 +505,15 @@ local indicatorMat = Material("models/spawn_effect2")
 function SWEP:TeleportHold()
 	if CurTime() < self:GetSecondary() then return end
 	if self:GetBusy() and not unrestrictedTeleport:GetBool() then return end
+	if self:GetHoldingTeleport() then return end
 	if self:GetDomain():IsValid() then return end
-
-	self:SetHoldingTeleport(true)
-	self:SetBusy(true)
-
 	local owner = self:GetOwner()
 
+	if owner:Gjujutsu_IsInDomain() then return end
+	
+	self:SetHoldingTeleport(true)
+	self:SetBusy(true)
+	
 	if CLIENT and IsFirstTimePredicted() then
 		local angles = owner:GetAngles()
 		angles.x = 0
@@ -534,7 +547,6 @@ function SWEP:Teleport()
 
 	if not owner:IsValid() then return end
 	if owner:InVehicle() then return end
-	if owner:Gjujutsu_IsInDomain() then return end
 	if self:GetCursedEnergy() < self.SecondaryCost.Min then return end
 
 	local startPos = owner:EyePos()
@@ -614,6 +626,7 @@ end
 function SWEP:HollowPurpleFire()
 	-- if not self:GetHollowPurple():IsValid() then return end
 	if CurTime() < self:GetNextAbility5() then return end
+	if not self:GetHoldingPurple() then return end
 	if not IsFirstTimePredicted() then return end
 
 	local owner = self:GetOwner()
@@ -716,6 +729,14 @@ function SWEP:DisableFlight()
 
 	self:SetFlying(false)
 	owner:SetMoveType(MOVETYPE_WALK)
+end
+
+function SWEP:StartBlock()
+	self:DefaultStartBlock()
+end
+
+function SWEP:EndBlock()
+	self:DefaultEndBlock()
 end
 
 -- Adding hooks

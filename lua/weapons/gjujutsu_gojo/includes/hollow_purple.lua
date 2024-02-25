@@ -185,13 +185,15 @@ function SWEP:FireHollowPurple()
 	local owner = self:GetOwner()
 	local hollowPurple = self:GetHollowPurple()
 
-	if hollowPurple:IsValid() and hollowPurple:GetFired() then
-		return
-	end
-	
 	self:SetBusy(false)
 	self:SetNextAbility5(CurTime() + self.Ability5CD)
 	self:SetHoldingPurple(false)
+
+	print("Fired hollow purple")
+
+	if hollowPurple:IsValid() and hollowPurple:GetFired() then
+		return
+	end
 	
 	owner:SetMoveType(self.LastMoveType)
 	
@@ -213,7 +215,8 @@ function SWEP:FireHollowPurple()
 		end
 	end
 
-	print(hollowPurple:GetFinalHoldTime())
-	local finalCost = math.Remap(math.max(hollowPurple:GetFinalHoldTime(), 0), 0, hollowPurple.MaxHoldTime, self.Ability5Cost.Min, self.Ability5Cost.Max)
-	self:RemoveCursedEnergy(finalCost)
+	if hollowPurple:IsValid() then
+		local finalCost = math.Remap(math.max(hollowPurple:GetFinalHoldTime(), 0), 0, hollowPurple.MaxHoldTime, self.Ability5Cost.Min, self.Ability5Cost.Max)
+		self:RemoveCursedEnergy(finalCost)
+	end
 end

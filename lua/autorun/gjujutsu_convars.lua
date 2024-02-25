@@ -15,6 +15,9 @@ CreateClientConVar("gjujutsu_primary_key", 107, true, true, "Sets the primary ab
 CreateClientConVar("gjujutsu_secondary_key", 108, true, true, "Sets the secondary ability key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
 CreateClientConVar("gjujutsu_block_key", 16, true, true, "Sets the block key", BUTTON_CODE_NONE, BUTTON_CODE_LAST)
 
+-- Misc convars
+CreateConVar("gjujutsu_misc_brain_recover_limit", 5, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Maximum amounts of time you can recover your brain. 0 For disabling", 0, 1000)
+
 -- Gojo convars
 CreateConVar("gjujutsu_gojo_unrestricted_teleport", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to teleport while holding other cursed techniques", 0, 1)
 CreateConVar("gjujutsu_gojo_detonate_purple", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to detonate hollow purple when you press the button again", 0, 1)

@@ -34,7 +34,7 @@ ENT.DamageMultiplier = 1 -- Used to save damage multiplier before firing
 
 ENT.Velocity = {Min = 40, Max = 70}
 ENT.HitBox = {Min = 35, Max = 75}
-ENT.ExplosionRadius = {Min = 7500000, Max = 12000000}
+ENT.ExplosionRadius = {Min = 750, Max = 1200}
 
 ENT.DamageExceptions = {
     ["npc_monk"] = DMG_GENERIC,
@@ -88,7 +88,7 @@ function ENT:Initialize()
 	local owner = self:GetOwner()
 
 	if CLIENT and owner:IsValid() then
-		local fireRing = CreateParticleSystemNoEntity("fire_ring", owner:GetPos() + vector_up * 15)
+		local fireRing = CreateParticleSystem(self, "fire_ring", PATTACH_POINT, 0, owner:GetPos() + vector_up * 15)
 		local fireAura = CreateParticleSystem(self, "fire_aura", PATTACH_ABSORIGIN_FOLLOW, 0)
 		
 		self.FireRing = fireRing
@@ -191,6 +191,9 @@ function ENT:Release()
 
 	if CLIENT and owner:gebLib_PredictedOrDifferentPlayer() then
 		local fireBurst = CreateParticleSystemNoEntity("fire_ring_burst_charge", owner:GetPos() + vector_up * 5)
+		local fireWind = CreateParticleSystem(self, "fire_wind", PATTACH_ABSORIGIN_FOLLOW, 0)
+
+		table.insert(self.Particles, fireWind)
 		table.insert(self.Particles, fireBurst)
 	end
 
@@ -248,7 +251,6 @@ function ENT:ExplosionDamage()
 	damageInfo:SetDamageType(DMG_DISSOLVE)
 	damageInfo:SetDamageForce(vector_up * 150 + VectorRand() * 150)
 	damageInfo:SetDamage(finalDamage)
-	
 
 	for _, ent in ipairs(ents.FindInSphere(pos, finalRadius)) do
 		if gebLib_ClassBlacklist[ent:GetClass()] then continue end
@@ -267,7 +269,7 @@ function ENT:ExplosionDamage()
 
 		ent:Ignite(self.IgniteTime)
 
-		if ent:gebLib_IsProp() or ent:IsWeapon() and not ent:gebLib_IsCarried() then
+		if ent:gebLib_IsProp() or (ent:IsWeapon() and not ent:gebLib_IsCarried()) or ent:gebLib_IsItem() then
 			ent:gebLib_Dissolve()
 			continue
 		end

@@ -59,7 +59,7 @@ local function onButtonDown(ply, btn)
 		return
 	end
 
-	if weapon:Gjujutsu_IsGojo() and not ply:OnGround() and weapon:GetInfinity() and btn == KEY_SPACE then
+	if weapon:Gjujutsu_IsGojo() and not weapon:GetBusy() and not ply:OnGround() and weapon:GetInfinity() and btn == KEY_SPACE then
 		if not weapon:GetFlying() then
 			weapon:SetFlying(true)
 			ply:SetMoveType(MOVETYPE_NOCLIP)

@@ -18,16 +18,16 @@ ENT.DomainType = DomainType.Barrierless
 ENT.DamageMaterial1 = "models/limitless/domain_crack1.vmt"
 ENT.DamageMaterial2 = "models/limitless/domain_crack2.vmt"
 
-ENT.Range = 7000
+ENT.Range = 2500
 
 ENT.SlashCD = 0.02
-ENT.SlashDamageMin = 20
-ENT.SlashDamageMax = 55
+ENT.SlashDamage = 15
 ENT.NextSlash = 0
 
 ENT.EnergyDrain = 2 -- How much cursed energy it drains per tick
 
 ENT.Particles = {}
+ENT.SpawnedParticles = false
 
 local renderMins = Vector(-9999999, -9999999, -9999999)
 local renderMaxs = Vector(9999999, 9999999, 9999999)
@@ -41,6 +41,23 @@ end
 
 function ENT:Initialize()
 	self.Initialized = true
+
+	local owner = self:GetDomainOwner()
+
+	if owner:IsValid() then
+		local weapon = owner:GetActiveWeapon()
+
+		if weapon:IsValid() and weapon:Gjujutsu_IsSukuna() then
+			local fingers = weapon:GetFingers()
+
+			self.Range = self.Range * (1 + fingers / 5)
+			self.SlashDamage = self.SlashDamage * (1 + fingers / 5)
+
+			print("Range", self.Range)
+			print("Slash damage", self.SlashDamage)
+		end 
+	end
+
 	self:DefaultInitialize()
 
 	self:SetSequence(1)
@@ -158,10 +175,13 @@ end
 
 function ENT:SpawnParticles()
 	if SERVER then return end
-	if not IsFirstTimePredicted() then return end
 	if not self:IsValid() then return end
 
 	local owner = self:GetDomainOwner()
+
+	if not owner:gebLib_PredictedOrDifferentPlayer() then return end
+	if self.SpawnedParticles then return end
+	self.SpawnedParticles = true
 
 	if not owner:IsValid() then return end
 	local ownerPos = owner:EyePos()
@@ -189,7 +209,8 @@ function SlashThink(self)
 	local dmgInfo = DamageInfo()
 	if owner:IsValid() then dmgInfo:SetAttacker(owner) end
 	if self:IsValid() then dmgInfo:SetInflictor(self) end
-	dmgInfo:SetDamage(math.random(self.SlashDamageMin, self.SlashDamageMax))
+	dmgInfo:SetDamageType(5)
+	dmgInfo:SetDamage(self.SlashDamage)
 	
 	-- Play effects for clients which are in the range
 	if CLIENT then
@@ -213,7 +234,15 @@ function SlashThink(self)
 		if ent:IsNPC() then randomVelocity = randomVelocity / 10 end
 		if ent:IsNextBot() then randomVelocity = vector_origin end
 		if ent:IsPlayer() then randomVelocity = randomVelocity / 4 end
-			
+
+		local customDamageType = gebLib_DamageExceptions[ent:GetClass()]
+
+		if customDamageType ~= nil then
+			dmgInfo:SetDamageType(customDamageType)
+		else
+			dmgInfo:SetDamageType(5)
+		end
+
 		dmgInfo:SetDamageForce(randomVelocity)
 
 		if ent:IsPlayer() then
@@ -241,3 +270,20 @@ function SlashThink(self)
 		end
 	end
 end
+
+-- Handling hooks
+
+hook.Add("gJujutsu_EntEnteredDomain", "sukuna_enterDomain", function(domain, ent)
+	if not domain:IsValid() then return end
+	if domain:GetClass() ~= "sukuna_domain" then return end
+
+	if ent:IsPlayer() then
+		local weapon = ent:GetWeapon("gjujutsu_gojo")
+
+		print("Turning infinity off because of domain for", ent)
+
+		if weapon:IsValid() then
+			weapon:SetInfinity(false)
+		end
+	end
+end)

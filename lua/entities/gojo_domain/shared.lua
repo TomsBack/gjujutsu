@@ -218,6 +218,10 @@ hook.Add("gJujutsu_EntEnteredDomain", "gojo_enterDomain", function(domain, ent)
 		local owner = domain:GetDomainOwner()
 		local weapon = owner:GetActiveWeapon()
 
+		if weapon:IsGjujutsuSwep() then
+			weapon:SetBlock(false)
+		end
+
 		if weapon:Gjujutsu_IsGojo() and not weapon:GetInCinematic() and IsFirstTimePredicted() then
 			domain:EmitSound(domainAmbienceSound, 0)
 		end

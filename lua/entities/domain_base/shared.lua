@@ -243,7 +243,7 @@ function ENT:DrainEnergyThink()
 	if not owner:IsValid() then return end
 	local weapon = owner:GetActiveWeapon()
 
-	if weapon:IsValid() then
+	if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 		weapon:RemoveCursedEnergy(self.EnergyDrain)
 	end
 end
@@ -383,7 +383,10 @@ function ENT:DefaultOnRemove()
 	end
 
 	if weapon:IsValid() and weapon:IsGjujutsuSwep() then
-		weapon:SetGlobalCD(10)
+		if SERVER then
+			weapon:SetGlobalCD(10)
+		end
+		
 		weapon:SetNextUltimate(CurTime() + weapon.UltimateCD)
 	end
 end

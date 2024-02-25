@@ -46,7 +46,7 @@ ENT.ExplosionRadius = 600
 ENT.MinCharge = 5
 ENT.MaxCharge = 10
 
-ENT.DamageMin = 2000
+ENT.DamageMin = 3000
 ENT.DamageMax = 12500
 ENT.DamageMultiplier = 1 -- Used to save damage multiplier before firing hollow purple
 

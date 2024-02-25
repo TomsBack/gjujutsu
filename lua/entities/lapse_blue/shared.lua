@@ -26,7 +26,7 @@ ENT.PredictedThinkName = ""
 ENT.Range = 750
 ENT.Radius = 750 -- Attract radius
 ENT.AttractForce = 2500
-ENT.CursedEnergyDrain = 0.75 -- Per tick
+ENT.CursedEnergyDrain = 0.55 -- Per tick
 
 ENT.DamageMin = 1
 ENT.DamageMax = 20

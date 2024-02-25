@@ -1,3 +1,6 @@
+local nextConvarUpdate = 0
+local convarCD = 0.5
+
 function SWEP:MiscThink()
 	local owner = self:GetOwner()
 
@@ -76,6 +79,7 @@ end
 
 -- Animations in layers do not get killed when they are playing backwards and arrive at 0
 function SWEP:ReversedActionClearThink()
+	
 	local owner = self:GetOwner()
 	local actionLayer = 1
 
@@ -88,4 +92,55 @@ function SWEP:ReversedActionClearThink()
 	if playback < 0 and cycle <= 0 then
 		owner:gebLib_StopAction()
 	end
+end
+
+function SWEP:BrainRecoverThink()
+	if self:GetBrainRecoverCount() <= 0 then return end
+	if CurTime() < self.NextBrainRecoverTimer then return end
+	self.NextBrainRecoverTimer = CurTime() + self.BrainRecoverTimer
+
+	self:SetBrainRecoverCount(self:GetBrainRecoverCount() - 1)
+
+	print("Recovered brain recover", self:GetBrainRecoverCount())
+end
+
+local maxs = Vector(10, 10, 10)
+function SWEP:HealOthersThink()
+	if CLIENT then return end
+	if not self:GetReverseTechniqueEnabled() then return end
+	if not self.CanHealOthers then return end
+	local owner = self:GetOwner()
+
+	if not owner:KeyDown(IN_DUCK) then return end
+	if not owner:gebLib_ValidAndAlive() then return end
+
+	local startPos = owner:EyePos()
+	
+	local traceData = {
+		start = startPos,
+		endpos = startPos + owner:GetAimVector() * self.HealRange,
+		filter = {self, owner},
+		mins = -maxs,
+		maxs = maxs
+	}
+	
+	local trace = util.TraceHull(traceData)
+	local ent = trace.Entity
+	
+	if ent:IsValid() then
+		print("Healing others")
+		ent:SetHealth(math.min(ent:Health() + self.HealthGain, ent:GetMaxHealth()))
+		self:RemoveCursedEnergy(self.CursedEnergyDrain * 2)
+
+		if ent:IsOnFire() then
+			ent:Extinguish()
+		end
+	end
+end
+
+function SWEP:ConVarsThink()
+	if CurTime() < nextConvarUpdate then return end
+	nextConvarUpdate = CurTime() + convarCD
+	
+	self.BrainRecoverLimit = self.BrainRecoverConvar:GetInt()
 end

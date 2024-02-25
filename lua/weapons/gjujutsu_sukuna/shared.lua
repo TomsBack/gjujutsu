@@ -60,9 +60,9 @@ SWEP.DefaultMaxHealth = 3000
 
 SWEP.PrimaryCD = 0
 SWEP.SecondaryCD = 3
-SWEP.Ability3CD = 2
+SWEP.Ability3CD = 3
 SWEP.Ability4CD = 15
-SWEP.Ability5CD = 1
+SWEP.Ability5CD = 20
 SWEP.Ability6CD = 0.5
 SWEP.Ability7CD = 0.5
 SWEP.Ability8CD = 0.5
@@ -89,6 +89,9 @@ SWEP.HealthGain = 4
 SWEP.CursedEnergyDrain = 1.5 -- Per tick
 
 SWEP.DomainRange = 7000
+
+SWEP.BrainRecover = true
+SWEP.CanHealOthers = true
 
 SWEP.HealthPerFinger = 1150
 SWEP.EnergyPerFinger = 1500
@@ -117,6 +120,7 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Bool", 1, "HoldingFireArrow")
 
 	self:NetworkVar("Entity", 0, "FireArrow")
+	self:NetworkVar("Entity", 1, "MahoragaWheel")
 
 	self:NetworkVarNotify( "Fingers", self.OnVarChanged)
 end
@@ -146,8 +150,15 @@ function SWEP:PostInitialize()
 
 	local owner = self:GetOwner()
 
-	if owner:IsValid() then
+	if SERVER and owner:IsValid() then
 		owner:SetBodygroup(1, 0)
+
+		local wheel = ents.Create("mahoraga_wheel")
+		self:SetMahoragaWheel(wheel)
+		wheel:SetOwner(owner)
+		wheel:FollowBone(owner, owner:LookupBone("head"))
+		wheel:SetPos(owner:EyePos() + owner:GetUp() * 10)
+		wheel:Spawn()
 	end
 end
 
@@ -211,6 +222,7 @@ function SWEP:Think()
         self:PostInitialize()
     end
 
+	self:ConVarsThink()
 	self:MiscThink()
 	self:ReverseTechniqueThink()
 	self:StatsRegenThink()
@@ -218,6 +230,8 @@ function SWEP:Think()
 	self:EventThink()
 	self:ReversedActionClearThink()
 	self:DomainClearThink()
+	self:BrainRecoverThink()
+	self:HealOthersThink()
 	-- self:FingerStatsThink()
 
 	if SERVER then
@@ -253,14 +267,14 @@ function SWEP:Dismantle()
 
 		for i = 1, 7 do
 			timer.Simple(nextSlash, function()
-				self:DismantleSlash(25 * self:GetFingers())
+				self:DismantleSlash(50 * (1 + self:GetFingers() / 3))
 			end)
 			nextSlash = nextSlash + 0.09
 		end
 
 		cd = cd * 3
 	else 
-		self:DismantleSlash(75 * self:GetFingers())
+		self:DismantleSlash(150 * (1 + self:GetFingers() / 3))
 	end
 
 
@@ -631,8 +645,15 @@ function SWEP:DomainExpansion()
 	self:RemoveCursedEnergy(self.UltimateCost)
 end
 
--- Secondary ability
+function SWEP:StartBlock()
+	self:DefaultStartBlock()
+end
 
+function SWEP:EndBlock()
+	self:DefaultEndBlock()
+end
+
+-- Secondary ability
 
 function SWEP:AddFinger()
 	self:SetFingers(math.min(self:GetFingers() + 1, self.MaxFingers))

@@ -21,23 +21,23 @@ ENT.DebrisEnabled = GetConVar("gjujutsu_fps_debris")
 ENT.Model = Model("models/hunter/misc/sphere2x2.mdl")
 ENT.PredictedThinkName = ""
 
-ENT.ProjectileHealth = 2000 -- The projectile health, when it reaches 0, it will explode
+ENT.ProjectileHealth = 3000 -- The projectile health, when it reaches 0, it will explode
 
 ENT.Particle = NULL
 ENT.ParticleGlow = NULL
 ENT.GlowStart = 1.3
 
-ENT.DamageMin = 250
-ENT.DamageMax = 2500
-ENT.MaxCharge = 10
+ENT.DamageMin = 500
+ENT.DamageMax = 2750
+ENT.MaxCharge = 6
 ENT.DamageMultiplier = 1 -- Used to save damage multiplier before firing a reversal red projectile
 
 ENT.HitBoxMins = Vector(-35, -35, -35)
 ENT.HitBoxMaxs = Vector(35, 35, 35)
 
-ENT.MinHoldTime = 4.5
+ENT.MinHoldTime = 2
 
-ENT.ExplosionRadius = 150
+ENT.ExplosionRadius = 400
 ENT.ExplosionForce = 10000
 
 ENT.FireVelocity = 40

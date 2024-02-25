@@ -165,6 +165,16 @@ SWEP.DamageMultiplier = 1
 SWEP.DefaultHealth = 1000
 SWEP.DefaultMaxHealth = 1000
 
+SWEP.BrainRecover = false
+SWEP.BrainRecoverTimer = 60
+SWEP.NextBrainRecoverTimer = 0
+SWEP.BrainRecoverLimit = 5
+SWEP.BrainRecoverDrain = 500
+SWEP.BrainRecoverCD = 5
+
+SWEP.CanHealOthers = false
+SWEP.HealRange = 150
+
 SWEP.DefaultHealthGain = 2 -- Per tick
 SWEP.HealthGain = 2 -- Per tick
 SWEP.ExtinguishDrain = 25
@@ -201,6 +211,8 @@ SWEP.ReverseCurseSound = Sound("misc/reverse_curse_activate.wav")
 SWEP.BlockStartSound = Sound("misc/cloth_whoosh_1.wav")
 SWEP.BlockEndSound = Sound("misc/cloth_whoosh_1_reverse.wav")
 
+SWEP.BrainRecoverConvar = GetConVar("gjujutsu_misc_brain_recover_limit")
+
 gebLib.ImportFile("includes/thinks.lua")
 
 gJujutsu_EntsBlacklist = {
@@ -218,6 +230,7 @@ function SWEP:DefaultDataTables()
 	self:NetworkVar("Bool", 30, "ReverseTechniqueEnabled")
 	self:NetworkVar("Bool", 31, "BlockCamera")
 
+	self:NetworkVar("Float", 14, "BrainRecoverCount")
 	self:NetworkVar("Float", 15, "NextBlock")
 	self:NetworkVar("Float", 16, "BlockStart")
 	self:NetworkVar("Float", 17, "Primary")
@@ -360,7 +373,11 @@ function SWEP:RemoveCursedEnergy(substractAmount)
 	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy() - substractAmount, 0, self:GetMaxCursedEnergy()))
 end
 
-function SWEP:SetGlobalCD(cdAmount)
+function SWEP:SetGlobalCD(cdAmount, disableTechniques)
+	if disableTechniques == nil then
+		disableTechniques = true
+	end
+
 	local curTime = CurTime()
 
 	self:SetPrimary(math.max(self:GetPrimary() + cdAmount, curTime + cdAmount))
@@ -374,11 +391,26 @@ function SWEP:SetGlobalCD(cdAmount)
 	self:SetNextUltimate(math.max(self:GetNextUltimate() + cdAmount, curTime + cdAmount))
 	self:SetNextTaunt(math.max(self:GetNextTaunt() + cdAmount, curTime + cdAmount))
 
-	self:DisableReverseCursed()
-
-	if self:Gjujutsu_IsGojo() then
-		self:SetInfinity(false)
+	if disableTechniques then
+		self:DisableReverseCursed()
+		
+		if self:Gjujutsu_IsGojo() then
+			self:SetInfinity(false)
+		end
 	end
+end
+
+function SWEP:ResetCds()
+	self:SetPrimary(0)
+	self:SetSecondary(0)
+	self:SetNextAbility3(0)
+	self:SetNextAbility4(0)
+	self:SetNextAbility5(0)
+	self:SetNextAbility6(0)
+	self:SetNextAbility7(0)
+	self:SetNextAbility8(0)
+	self:SetNextUltimate(0)
+	self:SetNextTaunt(0)
 end
 
 function SWEP:WindEffect(endSize, endTime)
@@ -396,13 +428,16 @@ function SWEP:WindEffect(endSize, endTime)
 	windWaveEnt:Spawn()
 end
 
-function SWEP:ReverseCursedEffect()
+function SWEP:ReverseCursedEffect(alwaysPlay)
+	if alwaysPlay == nil then
+		alwaysPlay = false
+	end
 	local owner = self:GetOwner()
 
 	if not owner:IsValid() then return end
 	
-	if self:GetReverseTechniqueEnabled() and owner:Health() < owner:GetMaxHealth() then
-		self:EmitSound(self.ReverseCurseSound)
+	if self:GetReverseTechniqueEnabled() or alwaysPlay then
+		self:EmitSound(self.ReverseCurseSound, 75, math.random(90, 110), 1, CHAN_STATIC)
 
 		if CLIENT and IsFirstTimePredicted() then
 			CreateParticleSystemNoEntity("blood_impact_red_01", owner:EyePos() - owner:GetUp() * 15)
@@ -410,7 +445,7 @@ function SWEP:ReverseCursedEffect()
 	end
 end
 
-function SWEP:StartBlock()
+function SWEP:DefaultStartBlock()
 	if self:GetBlock() then return end
 	if CurTime() < self:GetNextBlock() then return end
 
@@ -424,7 +459,7 @@ function SWEP:StartBlock()
 	hook.Run("gJujutsu_OnBlockStart", self)
 end
 
-function SWEP:EndBlock()
+function SWEP:DefaultEndBlock()
 	if not self:GetBlock() then return end
 
 	self:SetBlock(false)
@@ -446,22 +481,62 @@ end
 
 function SWEP:EnableReverseCursed()
 	local owner = self:GetOwner()
-
+	
 	self:SetReverseTechniqueEnabled(true)
 
 	if not owner:IsValid() then return end
+	
+	if owner:KeyDown(IN_SPEED) and self.BrainRecover then
+		self:RecoverBrain()
+	end
+	
+	if not self:GetReverseTechniqueEnabled() then return end
 
 	self:ReverseCursedEffect()
 
-	if CLIENT then
+	if CLIENT and owner:gebLib_PredictedOrDifferentPlayer() then
+		print("Reverse cursed particles")
 		self.ReverseCursedParticle = CreateParticleSystem(owner, "reverse_cursed", PATTACH_ABSORIGIN_FOLLOW, 0)
 	end
 end
 
+function SWEP:RecoverBrain()
+	local owner = self:GetOwner()
+
+	self:RemoveCursedEnergy(self.BrainRecoverDrain)
+	owner:SetHealth(owner:Health() - self.BrainRecoverDrain)
+	self.NextBrainRecoverTimer = CurTime() + self.BrainRecoverTimer
+
+	if self:GetBrainRecoverCount() < self.BrainRecoverLimit then	
+		self:ResetCds()
+		self:SetBrainRecoverCount(self:GetBrainRecoverCount() + 1)
+	else
+		if SERVER then
+			owner:EmitSound(Sound("misc/brain_recover_fail.wav"), 75, math.random(90, 110), 1, CHAN_STATIC)
+		end
+
+		if CLIENT and owner:gebLib_PredictedOrDifferentPlayer() then
+			CreateParticleSystem(owner, "blood_advisor_puncture_withdraw", PATTACH_ABSORIGIN_FOLLOW, 0, owner:GetUp() * 50)
+		end
+	end
+	self:SetNextAbility8(CurTime() + self.BrainRecoverCD)
+
+	print("Recovered techniques", self:GetBrainRecoverCount())
+
+	self:ReverseCursedEffect(true)
+	self:SetReverseTechniqueEnabled(false)
+end
+
 function SWEP:DisableReverseCursed()
 	self:SetReverseTechniqueEnabled(false)
+	local owner = self:GetOwner()
+
+	if owner:KeyDown(IN_SPEED) and self.BrainRecover then
+		self:RecoverBrain()
+	end
 
 	if CLIENT and self.ReverseCursedParticle:IsValid() then
+		owner:StopParticlesNamed("reverse_cursed")
 		self.ReverseCursedParticle:StopEmission()
 	end
 end
@@ -489,8 +564,6 @@ hook.Add("gJujutsu_OnPerfectBlock", "gJujutsu_PerfectBlockEffects", function(wea
 			CreateParticleSystemNoEntity("debris_2", pos)
 		end
 	end
-
-
 end)
 
 hook.Add("gJujutsu_OnBlock", "test", function(weapon, dmg)

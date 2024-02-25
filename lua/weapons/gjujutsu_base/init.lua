@@ -42,6 +42,7 @@ hook.Add("EntityTakeDamage", "gJujutsu_BlockHandling", function(ent, dmg)
 	if not ent:IsPlayer() then return end
 	if dmg:IsFallDamage() then return end
 	if ent:IsOnFire() and dmg:GetDamageType() == DMG_BURN and dmg:GetDamage() <= fireDamageMin then return end
+	if dmg:GetInflictor().Base == "domain_base" then return end
 	local weapon = ent:GetActiveWeapon()
 
 	if weapon:IsValid() and weapon:IsGjujutsuSwep() and weapon:GetBlock() then
@@ -74,5 +75,17 @@ hook.Add("EntityTakeDamage", "gJujutsu_BlockHandling", function(ent, dmg)
 
 			dmg:ScaleDamage(weapon.BlockMult)
 		end
+	end
+end)
+
+hook.Add("EntityTakeDamage", "gJujutsu_DamageInsideDomain", function(ent, dmg)
+	if not ent:IsPlayer() then return end
+	local weapon = ent:GetActiveWeapon()
+
+	if weapon:IsGjujutsuSwep() then return end
+	local domain = weapon:GetDomain()
+
+	if domain:IsValid() and domain:IsInDomain() then
+		return 0
 	end
 end)

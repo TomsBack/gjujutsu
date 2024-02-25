@@ -102,6 +102,10 @@ function MSWEP:Gjujutsu_IsGojo()
 	return self:GetClass() == "gjujutsu_gojo"
 end
 
+function MSWEP:Gjujutsu_IsSukuna()
+	return self:GetClass() == "gjujutsu_sukuna"
+end
+
 function NiceDuration(inSoundDuration)
 	local dur = inSoundDuration * 2 --Gives us minutes:second notation in decimal
 	dur = dur/100 --Separates minutes and seconds where minutes is whole and seconds is decimal

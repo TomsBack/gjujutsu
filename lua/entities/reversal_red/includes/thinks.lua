@@ -76,7 +76,7 @@ function ENT:HitDetectionThink()
 
 	local traceData = {
 		start = redPos,
-		endpos = redPos + self:GetFireVelocity() * 2,
+		endpos = redPos + self:GetFireVelocity() * 10,
 		mins = self.HitBoxMins,
 		maxs = self.HitBoxMaxs,
 		filter = {self, owner},
