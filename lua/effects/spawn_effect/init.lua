@@ -11,8 +11,7 @@ function EFFECT:Init( data )
 	-- takes from start to finish.
 
 	local time = data:GetRadius()
-
-	if not time then
+	if not time or time <= 0 then
 		time = 0.5
 	end
 

@@ -49,8 +49,8 @@ function ENT:Think()
 		local fraction = CurTime() - self.Start
 
 		local bezierPos = math.QuadraticBezier(math.min(fraction * 1.5, 1), self.StartPos, self.BezierPos, self.EndPos)
+		print(bezierPos)
 		self:SetPos(bezierPos)
-
         self:NextThink(CurTime())
         return true
     end

@@ -170,7 +170,7 @@ SWEP.BrainRecoverTimer = 60
 SWEP.NextBrainRecoverTimer = 0
 SWEP.BrainRecoverLimit = 5
 SWEP.BrainRecoverDrain = 500
-SWEP.BrainRecoverCD = 5
+SWEP.BrainRecoverCD = 2
 
 SWEP.CanHealOthers = false
 SWEP.HealRange = 150

@@ -434,7 +434,7 @@ function ENT:DoDamage()
 
 		local damageInfo = DamageInfo()
 		if owner:IsValid() then damageInfo:SetAttacker(owner) end
-		if self:IsValid() then damageInfo:SetInflictor(self) end
+		if self.Weapon:IsValid() then damageInfo:SetInflictor(self.Weapon) end
 		damageInfo:SetDamage(finalDamage * self.DamageMultiplier)
 		
 		if (self.DamageExceptions[v:GetClass()]) then
@@ -474,7 +474,7 @@ function ENT:ExplosionDamage(size, damageMin, damageMax)
 
 	local dmg = DamageInfo()
 	if owner:IsValid() then dmg:SetAttacker(owner) end
-	if self:IsValid() then dmg:SetInflictor(self) end
+	if self.Weapon:IsValid() then dmg:SetInflictor(self.Weapon) end
 
 	for _, ent in ipairs(ents.FindInSphere(purplePos, size)) do
 		if not ent:IsValid() then continue end

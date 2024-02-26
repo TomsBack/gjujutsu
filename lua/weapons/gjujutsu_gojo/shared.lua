@@ -108,6 +108,10 @@ SWEP.SixEyesDamageMultiplier = 2.6
 
 SWEP.ClashPressScore = 1.9
 
+SWEP.InfinityBlacklist = {
+	["mahoraga_wheel"] = true,
+}
+
 SWEP.BlueActivateSound = Sound("gjujutsu_kaisen/sfx/gojo/amplification_bluev2.mp3")
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
 SWEP.BlueSummonSound = Sound("gjujutsu_kaisen/sfx/gojo/hollow_deploy.wav") -- For hollow purple anim

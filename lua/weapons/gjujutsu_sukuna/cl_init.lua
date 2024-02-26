@@ -54,3 +54,14 @@ function SWEP:DrawHUD()
 	cam.End3D()
 	DisableClipping(false)
 end
+
+
+-- Nets handling
+
+net.Receive("gJujutsu_cl_dismantle_slash", function()
+	local ent = net.ReadEntity()
+	local pos = ent:GetPos()
+
+	CreateParticleSystemNoEntity("dismantle_slash", pos)
+	CreateParticleSystemNoEntity("blood_impact_red_01", pos)
+end)

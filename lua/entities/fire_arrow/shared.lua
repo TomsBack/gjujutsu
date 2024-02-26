@@ -248,6 +248,7 @@ function ENT:ExplosionDamage()
 	local damageInfo = DamageInfo()
 	if owner:IsValid() then damageInfo:SetAttacker(owner) end
 	if self:IsValid() then damageInfo:SetInflictor(self) end
+	if weapon:IsValid() then damageInfo:SetInflictor(weapon) end
 	damageInfo:SetDamageType(DMG_DISSOLVE)
 	damageInfo:SetDamageForce(vector_up * 150 + VectorRand() * 150)
 	damageInfo:SetDamage(finalDamage)

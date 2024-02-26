@@ -196,8 +196,9 @@ function ENT:AttractThink()
 	local phys = self:GetPhysicsObject()
 
 	local dmg = DamageInfo()
+	dmg:SetDamageType(DMG_CRUSH)
 	if owner:IsValid() then dmg:SetAttacker(owner) end
-	if self:IsValid() then dmg:SetInflictor(self) end
+	if weapon:IsValid() then dmg:SetInflictor(weapon) end
 
 	for _, ent in ipairs(ents.FindInSphere(self:GetPos(), self.Radius)) do
 		if not ent:IsValid() then continue end

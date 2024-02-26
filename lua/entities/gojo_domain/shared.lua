@@ -170,6 +170,11 @@ function ENT:FreezeEntity(ent)
 	if ent:IsPlayer() then
 		local weapon = ent:GetActiveWeapon()
 
+		if weapon:Gjujutsu_IsSukuna() and weapon:AdaptedToInfinity() then
+			print("Infinity Void adapted")
+			return
+		end
+
 		if weapon:IsGjujutsuSwep() then
 			weapon:DisableReverseCursed()
 		end

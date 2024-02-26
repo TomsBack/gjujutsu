@@ -1,3 +1,7 @@
+if SERVER then
+	util.AddNetworkString("gJujutsu_cl_dismantle_slash")
+end
+
 SWEP.PrintName = "Sukuna"
 SWEP.Author = "Tom"
 SWEP.Instructions = "Limitless Techniques"
@@ -32,7 +36,7 @@ SWEP.Abilities = {
 	[AbilityKey.Ability4] = "Cleave",
 	[AbilityKey.Ability5] = "FireArrowStart",
 	[AbilityKey.Ability6] = "InfinityActivate",
-	[AbilityKey.Ability7] = "SixEyesActivate",
+	[AbilityKey.Ability7] = "MahoragaWheelActivate",
 	[AbilityKey.Ability8] = "ReverseTechnique",
 	[AbilityKey.Ultimate] = "StartDomain",
 	[AbilityKey.Taunt] = nil,
@@ -106,6 +110,8 @@ SWEP.CleaveRange = 150
 
 SWEP.ClashPressScore = 2
 
+SWEP.AdaptationEnts = {}
+
 SWEP.FireArrowVoice = Sound("sukuna/voice/fire_arrow.wav")
 
 gebLib.ImportFile("includes/thinks.lua")
@@ -152,13 +158,6 @@ function SWEP:PostInitialize()
 
 	if SERVER and owner:IsValid() then
 		owner:SetBodygroup(1, 0)
-
-		local wheel = ents.Create("mahoraga_wheel")
-		self:SetMahoragaWheel(wheel)
-		wheel:SetOwner(owner)
-		wheel:FollowBone(owner, owner:LookupBone("head"))
-		wheel:SetPos(owner:EyePos() + owner:GetUp() * 10)
-		wheel:Spawn()
 	end
 end
 
@@ -180,6 +179,10 @@ function SWEP:Holster()
 	if self:GetDomainClash() then return end
 	if self:GetInCinematic() then return end
 	if self:GetDomain():IsValid() then return end
+
+	if SERVER and self:GetMahoragaWheel():IsValid() then
+		self:GetMahoragaWheel():Remove()
+	end
 
 	self:DefaultHolster()
 	return true
@@ -250,6 +253,9 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:OnRemove()
+	if SERVER and self:GetMahoragaWheel():IsValid() then
+		self:GetMahoragaWheel():Remove()
+	end
 end
 
 -- Ability3
@@ -261,6 +267,8 @@ function SWEP:Dismantle()
 	local owner = self:GetOwner()
 
 	local cd = self.Ability3CD
+
+	owner:gebLib_PlayAction("dismantle", 1.35)
 	
 	if owner:KeyDown(IN_SPEED) then
 		local nextSlash = 0
@@ -281,9 +289,13 @@ function SWEP:Dismantle()
 	self:SetNextAbility3(CurTime() + cd)
 end
 
+local angleKnockback = Angle(-5, 0, 0)
 function SWEP:DismantleSlash(damage)
+	if CLIENT then return end
+
 	local owner = self:GetOwner()
 	local ownerPos = owner:GetPos()
+	local eyePos = owner:EyePos()
 	local aimVector = owner:GetAimVector()
 
 	local force = aimVector * 50000
@@ -295,19 +307,15 @@ function SWEP:DismantleSlash(damage)
 	damageInfo:SetDamage(damage)
 	damageInfo:SetDamageForce(force)
 
-	owner:gebLib_PlayAction("dismantle", 1.35)
-
 	timer.Simple(0.3, function()
-		if SERVER then
-			owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
-			owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
-		end
+		owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
+		owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
 
-		owner:ViewPunch( Angle( -10, 0, 0 ) )
+		owner:ViewPunch(angleKnockback)
 
 		owner:LagCompensation(true)
-		for _, ent in ipairs(ents.FindInCone(ownerPos, aimVector, self.DismantleRange, self.DismantleAngle)) do
-			if self.HitBlacklist[ent:GetClass()] then continue end
+		for _, ent in ipairs(ents.FindInCone(eyePos - owner:GetForward() * 25, aimVector, self.DismantleRange, self.DismantleAngle)) do
+			if gebLib_ClassBlacklist[ent:GetClass()] then continue end
 			if ent == self or ent == owner then continue end
 			if ent:GetOwner() == owner then continue end
 			if ent == self:GetDomain() then continue end
@@ -319,29 +327,24 @@ function SWEP:DismantleSlash(damage)
 			else
 				damageInfo:SetDamageType(5)
 			end
+			if owner:IsValid() then damageInfo:SetAttacker(owner) end
+			if self:IsValid() then damageInfo:SetInflictor(self) end
+			damageInfo:SetDamage(damage)
+			damageInfo:SetDamageForce(force)
+
+			SuppressHostEvents(nil)
+			ent:TakeDamageInfo(damageInfo)
+			SuppressHostEvents(owner)
+
+			-- Nothing else worked sigh...
+			net.Start("gJujutsu_cl_dismantle_slash")
+			net.WriteEntity(ent)
+			net.Broadcast()
 			
-			if SERVER then
-				SuppressHostEvents(nil)
-				ent:TakeDamageInfo(damageInfo)
-				SuppressHostEvents(owner)
-			end
-			
-			if CLIENT and ent:IsSolid() then
-				CreateParticleSystemNoEntity("dismantle_slash", ent:GetPos())
-				
-				if ent:gebLib_IsPerson() then
-					CreateParticleSystemNoEntity("blood_impact_red_01", ent:GetPos())
-				end
-			end
-			
-			if SERVER then
-				ent:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
-			end
+			ent:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
 			
 			if ent:gebLib_IsPerson() then
-				if SERVER then
-					ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
-				end
+				ent:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
 			end
 			
 			if ent:gebLib_IsProp() then
@@ -353,9 +356,7 @@ function SWEP:DismantleSlash(damage)
 					phys:SetVelocity(force)
 				end
 				
-				if SERVER then
-					SukunaPropCut(owner, ent, -45)
-				end
+				SukunaPropCut(owner, ent, -45)
 			end
 		end
 		owner:LagCompensation(false)
@@ -516,11 +517,29 @@ function SWEP:InfinityActivate()
 end
 
 -- Ability7
-function SWEP:SixEyesActivate() 
+function SWEP:MahoragaWheelActivate() 
 	if CurTime() < self:GetNextAbility7() then return end
 	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability7Cost then return end
 	self:SetNextAbility7(CurTime() + self.Ability7CD)
+
+	local owner = self:GetOwner()
+
+	if not owner:gebLib_ValidAndAlive() then return end
+
+	if SERVER then
+		if not self:GetMahoragaWheel():IsValid() then		
+			local wheel = ents.Create("mahoraga_wheel")
+			self:SetMahoragaWheel(wheel)
+			wheel:SetOwner(owner)
+			wheel:FollowBone(owner, owner:LookupBone("head"))
+			wheel:SetPos(owner:EyePos() + owner:GetUp() * 10)
+			wheel:Spawn()
+		else
+			self:GetMahoragaWheel():Remove()
+			self:SetMahoragaWheel(NULL)
+		end
+	end
 end
 
 -- Ability8
@@ -654,6 +673,32 @@ function SWEP:EndBlock()
 end
 
 -- Secondary ability
+
+function SWEP:AdaptedToInfinity()
+	if not self:GetMahoragaWheel():IsValid() then return end
+	local adaptedCount = 0
+
+	for entClass, data in pairs(self.AdaptationEnts) do
+		if entClass ~= "gjujutsu_gojo" then continue end
+
+		for dmgType, adaptData in pairs(data) do
+			if adaptedCount >= 2 then
+				return true
+			end
+
+			if adaptData.Percentage >= 100 then
+				adaptedCount = adaptedCount + 1
+			end
+		end
+	end
+
+	if adaptedCount >= 2 then
+		return true
+	end
+
+	print(adaptedCount)
+	return false
+end
 
 function SWEP:AddFinger()
 	self:SetFingers(math.min(self:GetFingers() + 1, self.MaxFingers))

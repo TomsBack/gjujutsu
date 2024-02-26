@@ -38,7 +38,7 @@ ENT.HitBoxMaxs = Vector(35, 35, 35)
 ENT.MinHoldTime = 2
 
 ENT.ExplosionRadius = 400
-ENT.ExplosionForce = 10000
+ENT.ExplosionForce = 4000
 
 ENT.FireVelocity = 40
 ENT.SavedScale = -1
@@ -371,7 +371,7 @@ function ENT:Explode()
         local dmgInfo = DamageInfo()
         dmgInfo:SetDamage(finalDamage)
         if owner:IsValid() then dmgInfo:SetAttacker(owner) end
-		if self:IsValid() then dmgInfo:SetInflictor(self) end
+		if weapon:IsValid() then dmgInfo:SetInflictor(weapon) end
         dmgInfo:SetDamageForce(velocity)
 		
         for _, ent in ipairs(ents.FindInCone(ownerPos, owner:GetAimVector(), 3000, 0.7)) do
@@ -444,7 +444,7 @@ function ENT:ProjectileExplode()
 	
 	local dmg = DamageInfo()
 	if owner:IsValid() then dmg:SetAttacker(owner) end
-	if self:IsValid() then dmg:SetInflictor(self) end
+	if self.Weapon:IsValid() then dmg:SetInflictor(self.Weapon) end
 	dmg:SetDamage(finalDamage)
 
 	local redPos = self:GetPos()

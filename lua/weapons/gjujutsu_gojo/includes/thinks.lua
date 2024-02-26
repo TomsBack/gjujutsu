@@ -27,6 +27,7 @@ function SWEP:InfinityThink()
 
 	for _, ent in ents.Pairs() do
 		if not ent:IsValid() then continue end
+		if self.InfinityBlacklist[ent:GetClass()] then return end
 		if ent:IsPlayer() or ent:IsNextBot() then continue end
 
 		local entPos = ent:GetPos()

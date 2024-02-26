@@ -424,6 +424,8 @@ function ENT:SetDomainType(domainType)
 end
 
 function ENT:IsInDomain(ent, useCache)
+	if not ent:IsValid() then return false end
+	
 	if useCache == nil then useCache = true end
 
 	if useCache and self.EntsInDomain[ent] then
