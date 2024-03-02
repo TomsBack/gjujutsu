@@ -17,3 +17,13 @@ function SWEP:FingerStatsThink()
 		owner:SetMaxHealth(self.DefaultMaxHealth + (self.HealthPerFinger * fingers))
 	end
 end
+
+function SWEP:SukunaConvarsThink()
+	if SERVER and not self.MahoragaWheelConvar:GetBool() and self:GetMahoragaWheel():IsValid() then
+		self:GetMahoragaWheel():Remove()
+	end
+
+	if SERVER and self:GetFingers() < self.MahoragaWheelFingerConVar:GetInt() and self:GetMahoragaWheel():IsValid() then
+		self:GetMahoragaWheel():Remove()
+	end
+end

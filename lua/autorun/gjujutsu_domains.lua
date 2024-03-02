@@ -216,8 +216,6 @@ end)
 hook.Add("Think", "gJujutsu_DomainClashConvars", function()
 	gjujutsu_ClashWindUp = clashWindowConvar:GetFloat()
 	gjujutsu_ClashTime = clashLengthConvar:GetFloat()
-
-	print(gjujutsu_ClashWindUp)
 end)
 
 if SERVER then return end

@@ -115,6 +115,10 @@ SWEP.AdaptationEnts = {}
 
 SWEP.FireArrowVoice = Sound("sukuna/voice/fire_arrow.wav")
 
+SWEP.MahoragaWheelConvar = GetConVar("gjujutsu_sukuna_mahoraga_wheel")
+SWEP.MahoragaWheelFingerConVar = GetConVar("gjujutsu_sukuna_mahoraga_wheel_finger_req")
+SWEP.FireArrowConvar = GetConVar("gjujutsu_sukuna_fire_arrow_finger_req")
+
 gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
 
@@ -237,6 +241,7 @@ function SWEP:Think()
 	self:BrainRecoverThink()
 	self:HealOthersThink()
 	-- self:FingerStatsThink()
+	self:SukunaConvarsThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -366,6 +371,8 @@ function SWEP:DismantleSlash(damage)
 		owner:LagCompensation(false)
 	end)
 end
+
+-- FIXME: Fix cleave knockback
 	
 -- Ability4
 function SWEP:Cleave()
@@ -405,7 +412,7 @@ function SWEP:Cleave()
 				if owner:IsValid() then damageInfo:SetAttacker(owner) end
 				if self:IsValid() then damageInfo:SetInflictor(self) end
 				damageInfo:SetDamageForce(force)
-				if ent:IsPlayer() and ent:GetActiveWeapon():IsGjujutsuSwep() then
+				if ent:IsPlayer() and ent:GetActiveWeapon():IsValid() and ent:GetActiveWeapon():IsGjujutsuSwep() then
 					damageInfo:SetDamage(finalDamage / 2)
 				else
 					damageInfo:SetDamage(finalDamage)
@@ -441,6 +448,7 @@ end
 
 -- Ability5
 function SWEP:FireArrowStart()
+	if self:GetFingers() < self.FireArrowConvar:GetInt() then return end
 	if CurTime() < self:GetNextAbility5() then return end
 	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability5Cost.Min then return end
@@ -525,6 +533,8 @@ end
 
 -- Ability7
 function SWEP:MahoragaWheelActivate() 
+	if not self.MahoragaWheelConvar:GetBool() then return end
+	if self:GetFingers() < self.MahoragaWheelFingerConVar:GetInt() then return end
 	if CurTime() < self:GetNextAbility7() then return end
 	if self:GetBusy() then return end
 	if self:GetCursedEnergy() < self.Ability7Cost then return end

@@ -464,13 +464,17 @@ function ENT:DoDamage()
     end
 end
 
-function ENT:ExplosionDamage(size, damageMin, damageMax)
+function ENT:ExplosionDamage(size, damageMin, damageMax, defaultDamageType)
 	if not size then size = self.ExplosionRadius end
 	if not damageMin then damageMin = self.DamageMin end
 	if not damageMax then damageMax = self.DamageMax end
 
 	local purplePos = self:GetPos()
 	local owner = self:GetOwner()
+
+	if defaultDamageType == nil then
+		defaultDamageType = bit.bor(DMG_DISSOLVE, DMG_PREVENT_PHYSICS_FORCE)
+	end
 
 	local dmg = DamageInfo()
 	if owner:IsValid() then dmg:SetAttacker(owner) end
@@ -495,7 +499,7 @@ function ENT:ExplosionDamage(size, damageMin, damageMax)
 		if (self.DamageExceptions[ent:GetClass()]) then
 			dmg:SetDamageType(self.DamageExceptions[ent:GetClass()])
 		else
-			dmg:SetDamageType(bit.bor(DMG_DISSOLVE, DMG_PREVENT_PHYSICS_FORCE))
+			dmg:SetDamageType(defaultDamageType)
 		end
 
 		for _, strMatch in ipairs(self.DamageExceptionsMatch) do
@@ -580,7 +584,7 @@ function ENT:HollowPurpleClash(otherEnt)
 
 	if SERVER then
 		timer.Simple(clashExplosionFinish, function()
-			self:ExplosionDamage(self.PurpleClashRadius, finalDamage * 0.1, finalDamage)
+			self:ExplosionDamage(self.PurpleClashRadius, finalDamage * 0.1, finalDamage, bit.bor(DMG_DISSOLVE, DMG_PREVENT_PHYSICS_FORCE, DMG_BLAST))
 			self:Remove()
 		end)
 	end

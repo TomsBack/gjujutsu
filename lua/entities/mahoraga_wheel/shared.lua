@@ -23,6 +23,9 @@ ENT.DamageReduction = {Min = 0, Max = 100}
 
 ENT.SpinSound = Sound("sukuna/sfx/mahoraga_wheel_turn.wav")
 
+local damageReductionConvar = GetConVar("gjujutsu_sukuna_mahoraga_wheel_damage_reduction")
+local spinTimeConvar = GetConVar("gjujutsu_sukuna_mahoraga_wheel_spin_time")
+
 gebLib.ImportFile("includes/thinks.lua")
 
 function ENT:SetupDataTables()
@@ -68,6 +71,9 @@ function ENT:Think()
     if self.Initialized and not self.PostInitialized then
         self:PostInitialize()
     end
+
+	self.AdaptationTime = spinTimeConvar:GetFloat()
+	self.DamageReduction.Max = damageReductionConvar:GetFloat()
 
 	self:SpinThink()
 	self:AdaptThink()

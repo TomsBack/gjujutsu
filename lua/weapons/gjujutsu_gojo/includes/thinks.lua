@@ -224,6 +224,9 @@ function SWEP:GojoConvarsThink()
 	nextConvarUpdate = CurTime() + convarCD
 
 	self.SixEyesDamageMultiplier = sixEyesMultConvar:GetFloat()
+	if self:GetSixEyes() then
+		self.DamageMultiplier = self.SixEyesDamageMultiplier
+	end
 	
 	if self:GetInfinity() and not self.InfinityConvar:GetBool() then
 		self:SetInfinity(false)

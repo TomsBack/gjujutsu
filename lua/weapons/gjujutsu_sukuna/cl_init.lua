@@ -32,8 +32,9 @@ function SWEP:DrawHUD()
 		local pos = EyePos() + (forward * 7) + (up * upperindex) + (right * -2.1 )
 
 		cam.Start3D2D(pos, ang, 0.011)
-
-			self:DrawCDAbilityBox(-13, -120, "Fuga (Open)", ability5:GetInt(), self:GetNextAbility5())
+			if self:GetFingers() >= self.FireArrowConvar:GetInt() then
+				self:DrawCDAbilityBox(-13, -120, "Fuga (Open)", ability5:GetInt(), self:GetNextAbility5())
+			end
 			if self.DomainConvar:GetBool() then
 				if self:GetDomain():IsValid() then
 					self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
@@ -46,7 +47,9 @@ function SWEP:DrawHUD()
 				self:DrawCDAbilityBox(-5, -40, "Dismantle", ability3:GetInt(), self:GetNextAbility3())
 				self:DrawActivateAbilityBox(7, 80, "Reverse Cursed Technique (Inactive)", ability8:GetInt(), self:GetNextAbility8(), "Reverse Cursed Technique (Active)", self:GetReverseTechniqueEnabled())
 			end
-			self:DrawActivateAbilityBox(3, 40, "Mahoraga Wheel (Inactive)", ability7:GetInt(), self:GetNextAbility7(), "Mahoraga Wheel (Active)", self:GetMahoragaWheel():IsValid())
+			if self.MahoragaWheelConvar:GetBool() and self:GetFingers() >= self.MahoragaWheelFingerConVar:GetInt() then 
+				self:DrawActivateAbilityBox(3, 40, "Mahoraga Wheel (Inactive)", ability7:GetInt(), self:GetNextAbility7(), "Mahoraga Wheel (Active)", self:GetMahoragaWheel():IsValid())
+			end
 			if owner:KeyDown(IN_SPEED) then
 				self:DrawCDAbilityBox(-5, -40, "Dismantle Barrage", ability3:GetInt(), self:GetNextAbility3())
 				self:DrawCDAbilityBox(7, 80, "Brain Recover", ability8:GetInt(), self:GetNextAbility8())

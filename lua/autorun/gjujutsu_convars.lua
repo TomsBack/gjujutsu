@@ -1,5 +1,5 @@
-CreateClientConVar( "gjujutsu_thirdperson_offset", "0,0,5", true, false, "#gjujutsu.offset" )
-CreateConVar( "gjujutsu_show_hitboxes", 0, {FCVAR_NONE, FCVAR_CHEAT}, "#gjujutsu.hitboxes" ) 
+CreateClientConVar("gjujutsu_thirdperson_offset", "0,0,5", true, false, "The third person camera offset")
+CreateConVar("gjujutsu_show_hitboxes", 0, {FCVAR_NONE, FCVAR_CHEAT}, "Shows hitboxes") 
 
 CreateClientConVar("gjujutsu_fps_debris", 1, true, false, "If enabled, then debris is going to spawn", 0, 1)
 
@@ -37,4 +37,5 @@ CreateConVar("gjujutsu_sukuna_max_fingers", 20, {FCVAR_REPLICATED, FCVAR_ARCHIVE
 CreateConVar("gjujutsu_sukuna_fire_arrow_finger_req", 5, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How many fingers do you need to have to use fire arrow", 1, 1000)
 CreateConVar("gjujutsu_sukuna_mahoraga_wheel", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows Sukuna to use Mahoraga's wheel", 0, 1)
 CreateConVar("gjujutsu_sukuna_mahoraga_wheel_damage_reduction", 90, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "The max damage reduction from Mahoraga's wheel", 1, 100)
+CreateConVar("gjujutsu_sukuna_mahoraga_wheel_spin_time", 30, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How much time it takes to spin the wheel", 0.1, 100)
 CreateConVar("gjujutsu_sukuna_mahoraga_wheel_finger_req", 10, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How many fingers do you need to have to use mahoraga wheel", 1, 1000)
