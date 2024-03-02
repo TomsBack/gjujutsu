@@ -17,7 +17,7 @@ ENT.PredictedThinkName = ""
 
 ENT.SpinSpeed = 0.25
 
-ENT.AdaptationTime = 2
+ENT.AdaptationTime = 30
 ENT.AdaptGain = 12.5 -- 8 spins each having 12.5% adaptation
 ENT.DamageReduction = {Min = 0, Max = 100}
 

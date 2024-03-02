@@ -99,7 +99,7 @@ function SWEP:DrawStatsHud()
 			surface.SetDrawColor(255, 255, 255, 255)
 			surface.DrawTexturedRect(-100, -120, 663, 155)
 
-			DrawCircularBar(-32, -51, cursedEnergyProgress, 67, 9, 0, cursedEnergyColor)
+			gebLib_DrawCircularBar(-32, -51, cursedEnergyProgress, 67, 9, 0, cursedEnergyColor)
 			draw.SimpleTextOutlined(cursedEnergyString, "gJujutsuFont2", -84.5, -50, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 		cam.End3D2D()
 

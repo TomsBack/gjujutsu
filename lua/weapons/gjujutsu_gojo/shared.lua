@@ -106,7 +106,7 @@ SWEP.SixEyesCursedEnergyRegen = 0.35
 SWEP.SixEyesHealthGain = 12
 SWEP.SixEyesDamageMultiplier = 2.6
 
-SWEP.ClashPressScore = 1.9
+SWEP.ClashPressScore = 1.95
 
 SWEP.InfinityBlacklist = {
 	["mahoraga_wheel"] = true,
@@ -116,6 +116,8 @@ SWEP.BlueActivateSound = Sound("gojo/sfx/blue_summon.mp3")
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
 SWEP.BlueSummonSound = Sound("gjujutsu_kaisen/sfx/gojo/hollow_deploy.wav") -- For hollow purple anim
 SWEP.InfinityActivateSound = Sound("gojo/sfx/infinity_activate.wav")
+
+SWEP.InfinityConvar = GetConVar("gjujutsu_gojo_infinity_enabled")
 
 gebLib.ImportFile("includes/thinks.lua")
 gebLib.ImportFile("includes/cinematics.lua")
@@ -229,6 +231,7 @@ function SWEP:Think()
 	self:DomainClearThink()
 	self:FlightThink()
 	self:BrainRecoverThink()
+	self:GojoConvarsThink()
 
 	if SERVER then
 		self:NextThink(CurTime())
@@ -298,6 +301,7 @@ function SWEP:HollowPurple()
 
 	local hollowPurple = self:GetHollowPurple()
 
+	-- TODO: Fix hollow purple when explosion is turned off, only blue gets summoned
 	if hollowPurple:IsValid() and hollowPurple:GetFired() then
 		hollowPurple:Explode()
 		return
@@ -311,6 +315,7 @@ end
 
 -- Ability6
 function SWEP:InfinityActivate()
+	if not self.InfinityConvar:GetBool() then return end
 	if CurTime() < self:GetNextAbility6() then return end
 	if self:GetBusy() then return end
 	if not self:GetInfinity() and self:GetCursedEnergy() < self.Ability6Cost then return end
@@ -403,6 +408,7 @@ end
 
 -- Ultimate
 function SWEP:StartDomain()
+	if not self.DomainConvar:GetBool() then return end
 	if self:GetClashStart() then return end
 	if self:GetDomainClash() then return end
 
@@ -428,6 +434,11 @@ function SWEP:StartDomain()
 	if self:GetCursedEnergy() < self.UltimateCost and not domain:IsValid() then return end
 
 	local owner = self:GetOwner()
+
+	if not self.DomainClashConvar:GetBool() then
+		self:DomainExpansion()
+		return
+	end
 
 	self:WindEffect(200, 0.55)
 

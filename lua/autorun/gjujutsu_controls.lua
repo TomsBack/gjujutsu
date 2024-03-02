@@ -8,10 +8,7 @@ local MPLY = FindMetaTable("Player")
 local keysUpdateTime = 0.5
 local nextKeysUpdate = 0
 
-local allowedWeapons = { -- Table of weapons it should check for keys
-	["gjujutsu_gojo"] = true,
-	["gjujutsu_sukuna"] = true
-}
+local allowedWeapons = gJujutsu_Sweps -- Table of weapons it should check for keys
 
 function MPLY:gJujutsu_SetupKeys()
 	local ability = AbilityKey

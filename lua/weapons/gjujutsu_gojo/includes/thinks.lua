@@ -1,4 +1,9 @@
--- TODO: Optimize
+-- TODO: Optimize infinity
+
+local sixEyesMultConvar = GetConVar("gjujutsu_gojo_six_eyes_damage_mult")
+
+local convarCD = 0.5
+local nextConvarUpdate = 0
 
 function SWEP:InfinityThink()
 	if not self:GetInfinity() then return end
@@ -212,4 +217,15 @@ function SWEP:FlightThink()
 	end
 
 	self:RemoveCursedEnergy(self.FlightDrain)
+end
+
+function SWEP:GojoConvarsThink()
+	if CurTime() < nextConvarUpdate then return end
+	nextConvarUpdate = CurTime() + convarCD
+
+	self.SixEyesDamageMultiplier = sixEyesMultConvar:GetFloat()
+	
+	if self:GetInfinity() and not self.InfinityConvar:GetBool() then
+		self:SetInfinity(false)
+	end
 end

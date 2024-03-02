@@ -34,10 +34,12 @@ function SWEP:DrawHUD()
 			if self:GetSixEyes() then
 				self:DrawCDAbilityBox(-13, -120, "Hollow Technique: Purple", ability5:GetInt(), self:GetNextAbility5())
 				
-				if self:GetDomain():IsValid() then
-					self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
-				else 
-					self:DrawCDAbilityBox(11, 120, "Domain Expansion: Infinite Void", abilityUltimate:GetInt(), self:GetNextUltimate())
+				if self.DomainConvar:GetBool() then
+					if self:GetDomain():IsValid() then
+						self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
+					else 
+						self:DrawCDAbilityBox(11, 120, "Domain Expansion: Infinite Void", abilityUltimate:GetInt(), self:GetNextUltimate())
+					end
 				end
 			end
 			if not owner:KeyDown(IN_SPEED) then
@@ -50,7 +52,9 @@ function SWEP:DrawHUD()
 				self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse (Around): Blue", ability3:GetInt(), self:GetNextAbility3())
 				self:DrawCDAbilityBox(7, 80, "Brain Recover", ability8:GetInt(), self:GetNextAbility8())
 			end
-			self:DrawActivateAbilityBox(-1, 0, "Infinite Technique (Inactive)", ability6:GetInt(), self:GetNextAbility6(), "Infinite Technique (Active)", self:GetInfinity())
+			if self.InfinityConvar:GetBool() then
+				self:DrawActivateAbilityBox(-1, 0, "Infinite Technique (Inactive)", ability6:GetInt(), self:GetNextAbility6(), "Infinite Technique (Active)", self:GetInfinity())
+			end
 			self:DrawActivateAbilityBox(3, 40, "Six Eyes Mode (Inactive)", ability7:GetInt(), self:GetNextAbility7(), "Six Eyes Mode (Active)", self:GetSixEyes())
 		cam.End3D2D()
 

@@ -13,10 +13,20 @@ local matOverlay_Normal = Material( "gui/gstands-contenticon-normal.png" )
 local matOverlay_Hovered = Material( "gui/gstands-contenticon-hovered.png" )
 local matOverlay_AdminOnly = Material( "icon16/shield.png" )
 
-spawnmenu.AddContentType( "gJujutsu", function( container, obj )
-	if ( !obj.material ) then return end
-	if ( !obj.nicename ) then return end
-	if ( !obj.spawnname ) then return end
+local white = color_white
+local black = color_black
+local blackNoOpacity = Color(0, 0, 0, 0)
+
+local sweps = gJujutsu_Sweps
+
+spawnmenu.AddContentType("gJujutsu", function( container, obj)
+	if not container:IsValid() then return end
+	if !obj.material then return end
+	if !obj.nicename then return end
+	if !obj.spawnname then return end
+
+	local textColor = white
+
 	local icon = vgui.Create( "ContentIcon", container )
 	icon:SetContentType( "gJujutsu" )
 	icon:SetSpawnName( obj.spawnname )
@@ -25,19 +35,19 @@ spawnmenu.AddContentType( "gJujutsu", function( container, obj )
 	icon:SetMaterial( obj.material )
 	icon:SetAdminOnly( obj.admin )
 	icon:SetSize( 128, 128 )
-	local clr = Color( 255, 255, 255, 255 )
-	icon:SetTextColor( clr )
-	icon.Label:SetExpensiveShadow(0,Color(0,0,0,0))
+	icon:SetTextColor(textColor)
+	icon.Label:SetExpensiveShadow(0, blackNoOpacity)
 	icon.Label:SetFont("Trebuchet18")
+
 	icon.Paint = function( self, w, h )
-		surface.SetDrawColor( clr.r, clr.g, clr.b, 255 )
+		surface.SetDrawColor( textColor.r, textColor.g, textColor.b, 255 )
 		if ( self.Depressed && !self.Dragging ) then
-			if ( self.Border != 8 ) then
+			if self.Border != 8 then
 				self.Border = 8
 				self:OnDepressionChanged( true )
 			end
-			else
-			if ( self.Border != 0 ) then
+		else
+			if self.Border != 0 then
 				self.Border = 0
 				self:OnDepressionChanged( false )
 			end
@@ -47,77 +57,77 @@ spawnmenu.AddContentType( "gJujutsu", function( container, obj )
 		self.Image:PaintAt( 3 + self.Border, 3 + self.Border, 128 - 8 - self.Border * 2, 128 - 8 - self.Border * 2 )
 		render.PopFilterMin()
 		render.PopFilterMag()
-		if ( !dragndrop.IsDragging() && ( self:IsHovered() || self.Depressed || self:IsChildHovered() ) ) then
+		if (!dragndrop.IsDragging() && ( self:IsHovered() or self.Depressed or self:IsChildHovered() )) then
 			surface.SetMaterial( matOverlay_Hovered )
 			self.Label:Hide()
-			else
+		else
 			surface.SetMaterial( matOverlay_Normal )
 			self.Label:Show()
 		end
-		surface.SetDrawColor( clr.r, clr.g, clr.b, 255 )
+		surface.SetDrawColor( textColor.r, textColor.g, textColor.b, 255 )
 		surface.DrawTexturedRect( self.Border, self.Border, w-self.Border*2, h-self.Border*2 )
 	end
+
 	icon.DoClick = function()
 		RunConsoleCommand( "gm_giveswep", obj.spawnname )
 		surface.PlaySound( "ui/buttonclickrelease.wav" )
 	end
-	icon.DoMiddleClick = function()
-		RunConsoleCommand( "gm_spawnswep", obj.spawnname )
-		surface.PlaySound( "ui/buttonclickrelease.wav" )
-	end
-	icon.OpenMenu = function( icon )
-	end
-	if ( IsValid( container ) ) then
-		container:Add( icon )
-	end
+
+	container:Add(icon)
+
 	return icon
-end )
-hook.Add( "PopulategJujutsu", "AddgJujutsuContent", function( pnlContent, tree, node )
-	local Weapons = weapons.GetList()
-	local Categorised = {}
-	for k, weapon in pairs( Weapons ) do
-		if ( !string.StartWith( weapon.ClassName, "gjujutsu_" ) or (weapon.AdminSpawnable)) or not weapon.Spawnable then continue end
-		weapon.SubCategory = weapon.SubCategory or "gJujutsu"
-		Categorised[ weapon.SubCategory ] = Categorised[ weapon.SubCategory ] or {}
-		table.insert( Categorised[ weapon.SubCategory ], weapon )
+end)
+
+hook.Add( "PopulateGJujutsu", "AddgJujutsuContent", function( pnlContent, tree, node )
+	local allWeapons = weapons.GetList()
+	local gJujutsuSweps = {}
+
+	-- Getting all the gJujutsu sweps
+	for k, weapon in ipairs(allWeapons) do
+		if weapon.Base ~= "gjujutsu_base" then continue end
+		if not weapon.Spawnable then continue end
+
+		table.insert(gJujutsuSweps, weapon)
 	end
-	Weapons = nil
-	for CategoryName, v in SortedPairs( Categorised ) do
-		local node = tree:AddNode( CategoryName, "icon16/gjujutsu_icon16.png" )
-		node.DoPopulate = function( self )
-			if ( self.PropPanel ) then return end
-			self.PropPanel = vgui.Create( "ContentContainer", self.PropPanel )
-			self.PropPanel:SetVisible( false )
-			self.PropPanel:SetTriggerSpawnlistChange( false )
-			for k, ent in SortedPairsByMemberValue( v, "PrintName" ) do
-				local pnl = spawnmenu.CreateContentIcon( ent.ScriptedEntityType or "gJujutsu", self.PropPanel, {
-					nicename	= ent.PrintName or ent.ClassName,
-					spawnname	= ent.ClassName,
-					material	= "entities/" .. ent.ClassName .. ".png",
-					standmodel	= ent.StandModel,
-					instructions	= ent.Instructions,
-					admin		= ent.AdminSpawnable
-				} )
-				pnl:SetTooltip(ent.Instructions)
-			end
+
+	-- Creating the gJujutsu weapons
+	local node = tree:AddNode("Characters", "icon16/finger16.png" )
+	node.DoPopulate = function( self )
+		if self.PropPanel then return end
+
+		self.PropPanel = vgui.Create("ContentContainer", self.PropPanel)
+		self.PropPanel:SetVisible(false)
+		self.PropPanel:SetTriggerSpawnlistChange(false)
+
+		for _, swep in ipairs(gJujutsuSweps) do
+			local pnl = spawnmenu.CreateContentIcon( swep.ScriptedEntityType or "gJujutsu", self.PropPanel, {
+				nicename = swep.PrintName or swep.ClassName,
+				spawnname = swep.ClassName,
+				material = "entities/" .. swep.ClassName .. ".png",
+				instructions = swep.Instructions,
+				admin = swep.AdminSpawnable
+			})
+
+			pnl:SetTooltip(swep.Instructions)
 		end
-		node.DoClick = function( self )
-			self:DoPopulate()
-			pnlContent:SwitchPanel( self.PropPanel )
-		end
 	end
-	local FirstNode = tree:Root():GetChildNode( 0 )
-	if ( IsValid( FirstNode ) ) then
-		FirstNode:InternalDoClick()
+
+	node.DoClick = function(self)
+		self:DoPopulate()
+		pnlContent:SwitchPanel(self.PropPanel)
 	end
-end )
+
+	node:InternalDoClick()
+end)
+
 spawnmenu.AddCreationTab("gJujutsu", function() 
 	local ctrl = vgui.Create( "SpawnmenuContentPanel" )
-	ctrl:EnableSearch( "stands", "PopulategJujutsu" )
-	ctrl:CallPopulateHook( "PopulategJujutsu" )
+	ctrl:EnableSearch("gJujutsuSweps", "PopulateGJujutsu")
+	ctrl:CallPopulateHook( "PopulateGJujutsu" )
 	return ctrl
 end
-,"icon16/gjujutsu_icon16.png", 21, "gJujutsu")
+,"icon16/finger16.png", 21, "gJujutsu")
+
 function gJujutsuControls(panel)
 	panel:SetName( "Controls" )
 	local AppList = vgui.Create( "DListView" )
@@ -126,27 +136,27 @@ function gJujutsuControls(panel)
 	AppList:SetMultiSelect( false )
 
 	local vars = {
-		["Способность 1"] = ability3,
-		["Способность 2"] = ability4,
-		["Спец.способность 2"] = ability5,
-		["Спец.способность 1"] = ability6,
-		["Обратная проклятая техника"] = ability7,
-		["Ульт.способность 1"] = ability8,
-		["Ульт.способность 2"] = abilityUltimate,
-		["Основное"] = primary,
-		["Дополнительное"] = secondary,
+		["Ability 1"] = ability3,
+		["Ability 2"] = ability4,
+		["Ability 3"] = ability5,
+		["Ability 4"] = ability6,
+		["Ability 5"] = ability7,
+		["Ability 6"] = ability8,
+		["Ability Ultimate"] = abilityUltimate,
+		["Primary"] = primary,
+		["Secondary"] = secondary,
 	}
 	AppList:AddColumn("Ability")
 	AppList:AddColumn("Key")
-	AppList:AddLine( "Способность 1", input.GetKeyName(ability3:GetInt()) )
-	AppList:AddLine( "Способность 2", input.GetKeyName(ability4:GetInt()) )
-	AppList:AddLine( "Спец.способность 1", input.GetKeyName(ability5:GetInt()) )
-	AppList:AddLine( "Спец.способность 2", input.GetKeyName(ability6:GetInt()) )
-	AppList:AddLine( "Обратная проклятая техника", input.GetKeyName(ability7:GetInt()) )
-	AppList:AddLine( "Ульт.способность 1", input.GetKeyName(ability8:GetInt()) )
-	AppList:AddLine( "Ульт.способность 2", input.GetKeyName(abilityUltimate:GetInt()) )
-	AppList:AddLine( "Основное", input.GetKeyName(primary:GetInt()) )
-	AppList:AddLine( "Дополнительное", input.GetKeyName(secondary:GetInt()) )
+	AppList:AddLine("Ability 1", input.GetKeyName(ability3:GetInt()) )
+	AppList:AddLine("Ability 2", input.GetKeyName(ability4:GetInt()) )
+	AppList:AddLine("Ability 3", input.GetKeyName(ability5:GetInt()) )
+	AppList:AddLine("Ability 4", input.GetKeyName(ability6:GetInt()) )
+	AppList:AddLine("Ability 5", input.GetKeyName(ability7:GetInt()) )
+	AppList:AddLine("Ability 6", input.GetKeyName(ability8:GetInt()) )
+	AppList:AddLine("Ability Ultimate", input.GetKeyName(abilityUltimate:GetInt()) )
+	AppList:AddLine("Primary", input.GetKeyName(primary:GetInt()) )
+	AppList:AddLine("Secondary", input.GetKeyName(secondary:GetInt()) )
 	function AppList:DoDoubleClick(lineID, line)
 		input.StartKeyTrapping()
 		self.Trapping = true
@@ -177,7 +187,6 @@ function gJujutsuControls(panel)
 		end
 	end
 	panel:AddItem(AppList)
-	
 end
 
 function gJujutsuMenu()

@@ -34,10 +34,12 @@ function SWEP:DrawHUD()
 		cam.Start3D2D(pos, ang, 0.011)
 
 			self:DrawCDAbilityBox(-13, -120, "Fuga (Open)", ability5:GetInt(), self:GetNextAbility5())
-			if self:GetDomain():IsValid() then
-				self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
-			else 
-				self:DrawCDAbilityBox(11, 120, "Domain Expansion: Malevolent shrine", abilityUltimate:GetInt(), self:GetNextUltimate())
+			if self.DomainConvar:GetBool() then
+				if self:GetDomain():IsValid() then
+					self:DrawCDAbilityBox(11, 120, "Clear Domain", abilityUltimate:GetInt(), self:GetNextUltimate())
+				else 
+					self:DrawCDAbilityBox(11, 120, "Domain Expansion: Malevolent shrine", abilityUltimate:GetInt(), self:GetNextUltimate())
+				end
 			end
 			self:DrawCDAbilityBox(-9, -80, "Cleave", ability4:GetInt(), self:GetNextAbility4())
 			if not owner:KeyDown(IN_SPEED) then

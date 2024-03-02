@@ -23,6 +23,9 @@ local keyChangeSounds = {
 	Sound("misc/key_change_3.wav"),
 }
 
+local clashWindowConvar = GetConVar("gjujutsu_domain_clash_window")
+local clashLengthConvar = GetConVar("gjujutsu_domain_clash_length")
+
 -- Helper functions
 local function GenerateNewKey()
 	return math.random(keyRange.Min, keyRange.Max)
@@ -66,7 +69,6 @@ if SERVER then
 end
 
 hook.Add("Tick", "gJujutsu_DomainHandling", function()
-
 	-- Remove domains from global table if they are not valid
 	for owner, domain in pairs(gJujutsuDomains) do
 		if not owner:IsValid() or not domain:IsValid() then
@@ -78,7 +80,6 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 	if CLIENT then return end
 
 	for owner, data in pairs(gJujutsuDomainClashes) do
-
 		-- Domain clash start
 		if CurTime() >= data.ClashStart and data.ClashStart ~= 0 then
 			hook.Run("gJujutsu_DomainClashStart", owner, data)
@@ -201,7 +202,7 @@ hook.Add("gJujutsu_DomainClashStart", "DomainClashStart", function(owner, data)
 	data.ClashEnd = CurTime() + gjujutsu_ClashTime
 end)
 
-hook.Add("PlayerNoClip", "gJUjutsu_DomainClashNoClip", function(ply)
+hook.Add("PlayerNoClip", "gJujutsu_DomainClashNoClip", function(ply)
 	local weapon = ply:GetActiveWeapon()
 
 	if not weapon:IsValid() then return end
@@ -210,6 +211,13 @@ hook.Add("PlayerNoClip", "gJUjutsu_DomainClashNoClip", function(ply)
 	if weapon:GetDomainClash() then
 		return false
 	end
+end)
+
+hook.Add("Think", "gJujutsu_DomainClashConvars", function()
+	gjujutsu_ClashWindUp = clashWindowConvar:GetFloat()
+	gjujutsu_ClashTime = clashLengthConvar:GetFloat()
+
+	print(gjujutsu_ClashWindUp)
 end)
 
 if SERVER then return end

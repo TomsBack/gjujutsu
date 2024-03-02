@@ -204,16 +204,19 @@ function ENT:Release()
 	-- Substract the minimum charge time so the final calculations are accurate
 	local finalHoldTime = math.Clamp(holdTime - self.Charge.Min, self.Charge.Min, self.Charge.Max)
 	local finalSpeed = math.Remap(finalHoldTime, self.Charge.Min, self.Charge.Max, self.Velocity.Min, self.Velocity.Max)
+	local finalCost = math.Remap(finalHoldTime, self.Charge.Min, self.Charge.Max, weapon.Ability5Cost.Min, weapon.Ability5Cost.Max)
 
 	self:SetHoldTime(finalHoldTime)
 	self:SetSpeed(finalSpeed)
 	self:SetFireTime(curTime)
 	self:SetFireVelocity(aimVector)
 	self:SetFired(true)
+	weapon:RemoveCursedEnergy(finalCost)
 	
 	print("Released fire arrow")
 	print("HoldTime:", finalHoldTime)
 	print("Speed:", finalSpeed)
+	print("Cost:", finalCost)
 end
 
 function ENT:Explode()

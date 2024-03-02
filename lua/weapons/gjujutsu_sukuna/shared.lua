@@ -270,7 +270,7 @@ function SWEP:Dismantle()
 
 	owner:gebLib_PlayAction("sukuna_dismantel", 1.7)
 
-	local curseEnergyDrain = self.Ability3Cost
+	local finalCost = self.Ability3Cost
 	
 	if owner:KeyDown(IN_SPEED) then
 		local nextSlash = 0
@@ -282,14 +282,14 @@ function SWEP:Dismantle()
 			nextSlash = nextSlash + 0.1
 		end
 
-		curseEnergyDrain = self.Ability3Cost * 3
+		finalCost = self.Ability3Cost * 3
 
 		cd = cd * 3
 	else 
 		self:DismantleSlash(150 * (1 + self:GetFingers() / 3))
 	end
 
-	self:RemoveCursedEnergy(self.Ability3Cost)
+	self:RemoveCursedEnergy(finalCost)
 	self:SetNextAbility3(CurTime() + cd)
 end
 
@@ -311,7 +311,7 @@ function SWEP:DismantleSlash(damage)
 	damageInfo:SetDamage(damage)
 	damageInfo:SetDamageForce(force)
 
-	timer.Simple(0.3, function()
+	timer.Simple(0.35, function()
 		owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
 		owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
 
@@ -435,6 +435,7 @@ function SWEP:Cleave()
 		end
 	end
 
+	self:RemoveCursedEnergy(self.Ability4Cost)
 	self:SetNextAbility4(CurTime() + self.Ability4CD)
 end
 
@@ -592,6 +593,11 @@ function SWEP:StartDomain()
 	if self:GetCursedEnergy() < self.UltimateCost and not domain:IsValid() then return end
 
 	local owner = self:GetOwner()
+
+	if not self.DomainClashConvar:GetBool() then
+		self:DomainExpansion()
+		return
+	end
 
 	self:WindEffect(200, 0.55)
 

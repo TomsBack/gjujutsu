@@ -18,10 +18,23 @@ CreateClientConVar("gjujutsu_block_key", 16, true, true, "Sets the block key", B
 -- Misc convars
 CreateConVar("gjujutsu_misc_brain_recover_limit", 5, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Maximum amounts of time you can recover your brain. 0 For disabling", 0, 1000)
 
+-- Domain convars
+CreateConVar("gjujutsu_domain_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if domains can be used", 0, 1)
+CreateConVar("gjujutsu_domain_max_time", 30, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How long can domain be active", 1, 1000)
+CreateConVar("gjujutsu_domain_end_cd", 10, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the cooldown for abilities after domain ends", 1, 1000)
+CreateConVar("gjujutsu_domain_clash_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if domain clashing can be used", 0, 1)
+CreateConVar("gjujutsu_domain_clash_window", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the time before domain clash starts", 1, 1000)
+CreateConVar("gjujutsu_domain_clash_length", 10, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the length of a domain clash", 1, 1000)
+
 -- Gojo convars
-CreateConVar("gjujutsu_gojo_unrestricted_teleport", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to teleport while holding other cursed techniques", 0, 1)
-CreateConVar("gjujutsu_gojo_detonate_purple", 0, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to detonate hollow purple when you press the button again", 0, 1)
+CreateConVar("gjujutsu_gojo_unrestricted_teleport", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to teleport while holding other cursed techniques", 0, 1)
+CreateConVar("gjujutsu_gojo_infinity_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if infinity can be used", 0, 1)
+CreateConVar("gjujutsu_gojo_detonate_purple", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to detonate hollow purple when you press the button again", 0, 1)
+CreateConVar("gjujutsu_gojo_six_eyes_damage_mult", 2.65, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the damage multiplier when six eyes are active", 1, 1000)
 
 -- Sukuna convars
 CreateConVar("gjujutsu_sukuna_max_fingers", 20, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines how much fingers sukuna can have", 1, 1000)
+CreateConVar("gjujutsu_sukuna_fire_arrow_finger_req", 5, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How many fingers do you need to have to use fire arrow", 1, 1000)
 CreateConVar("gjujutsu_sukuna_mahoraga_wheel", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows Sukuna to use Mahoraga's wheel", 0, 1)
+CreateConVar("gjujutsu_sukuna_mahoraga_wheel_damage_reduction", 90, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "The max damage reduction from Mahoraga's wheel", 1, 100)
+CreateConVar("gjujutsu_sukuna_mahoraga_wheel_finger_req", 10, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How many fingers do you need to have to use mahoraga wheel", 1, 1000)

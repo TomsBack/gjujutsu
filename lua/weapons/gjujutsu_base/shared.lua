@@ -212,6 +212,8 @@ SWEP.BlockStartSound = Sound("misc/cloth_whoosh_1.wav")
 SWEP.BlockEndSound = Sound("misc/cloth_whoosh_1_reverse.wav")
 
 SWEP.BrainRecoverConvar = GetConVar("gjujutsu_misc_brain_recover_limit")
+SWEP.DomainConvar = GetConVar("gjujutsu_domain_enabled")
+SWEP.DomainClashConvar = GetConVar("gjujutsu_domain_clash_enabled")
 
 gebLib.ImportFile("includes/thinks.lua")
 

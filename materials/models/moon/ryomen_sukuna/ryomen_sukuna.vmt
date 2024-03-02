@@ -1,0 +1,13 @@
+VertexLitGeneric
+{
+   "$basetexture" "models\moon\Ryomen_Sukuna\Ryomen_Sukuna"
+   "$bumpmap" "models\moon\Ryomen_Sukuna\Ryomen_Sukuna_bump"
+    $lightwarptexture "models\moon\Ryomen_Sukuna\toon"
+
+    $rimlight "1"
+    $rimmask "1"
+    $rimlightboost "1"
+    $rimlightexponent "100"
+	
+    $nocull 1
+}

@@ -75,6 +75,9 @@ ENT.DomainBaseBlacklist = {
 
 ENT.EnergyDrain = 1 -- How much cursed energy it drains per tick
 
+local domainCdConvar = GetConVar("gjujutsu_domain_end_cd")
+local domainLifetimeConvar = GetConVar("gjujutsu_domain_max_time")
+
 function ENT:DefaultDataTables()
 	self:NetworkVar("String", 0, "Event")
 
@@ -106,6 +109,9 @@ function ENT:DefaultInitialize()
 	self:DrawShadow(false)
 	self:SetDomainType(self.DomainType)
 	self:SetNoDraw(true)
+
+	self.LifeTime = domainLifetimeConvar:GetFloat()
+	print(self.LifeTime)
 
 	if CLIENT then
 		self:SetPredictable(true)
@@ -384,7 +390,7 @@ function ENT:DefaultOnRemove()
 
 	if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 		if SERVER then
-			weapon:SetGlobalCD(10)
+			weapon:SetGlobalCD(domainCdConvar:GetFloat())
 		end
 		
 		weapon:SetNextUltimate(CurTime() + weapon.UltimateCD)

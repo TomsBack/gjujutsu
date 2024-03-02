@@ -202,8 +202,8 @@ function ENT:AttractThink()
 
 	for _, ent in ipairs(ents.FindInSphere(self:GetPos(), self.Radius)) do
 		if not ent:IsValid() then continue end
-		if ent == self or ent == owner then continue end
 		if gJujutsu_EntsBlacklist[ent:GetClass()] then continue end
+		if ent == self or ent == owner then continue end
 		if self.AttractBlacklistBase[ent.Base] or self.AttractBlacklistClass[ent:GetClass()] then continue end
 		if ent == weapon:GetDomain() then continue end
 
