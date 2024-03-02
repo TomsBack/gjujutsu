@@ -269,20 +269,11 @@ local hudToHide = {
 	["CHudSecondaryAmmo"] = true,
 }
 
-hook.Add("HUDShouldDraw", "gJujutsu_NoDefaultHUD", function(currentElement)
-	local ply = LocalPlayer()
-
-	if not ply:IsValid() then return true end
-
-	local weapon = ply:GetActiveWeapon()
-
-	if not weapon:IsValid() then return true end
-	if not weapon:IsGjujutsuSwep() then return true end
-
+function SWEP:HUDShouldDraw( currentElement )
 	if hudToHide[currentElement] then
 		return false
 	end
-end)
+end
 
 local clashKeyMaterial = Material("hud/key_box_white.png","smooth")
 local pressedColor = Color(0, 150, 0)
