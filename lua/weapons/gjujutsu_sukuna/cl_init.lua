@@ -44,8 +44,8 @@ function SWEP:DrawHUD()
 				self:DrawCDAbilityBox(-5, -40, "Dismantle", ability3:GetInt(), self:GetNextAbility3())
 				self:DrawActivateAbilityBox(7, 80, "Reverse Cursed Technique (Inactive)", ability8:GetInt(), self:GetNextAbility8(), "Reverse Cursed Technique (Active)", self:GetReverseTechniqueEnabled())
 			end
+			self:DrawActivateAbilityBox(3, 40, "Mahoraga Wheel (Inactive)", ability7:GetInt(), self:GetNextAbility7(), "Mahoraga Wheel (Active)", self:GetMahoragaWheel():IsValid())
 			if owner:KeyDown(IN_SPEED) then
-				-- self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal (Projectile): Red", ability4:GetInt(), self:GetNextAbility4())
 				self:DrawCDAbilityBox(-5, -40, "Dismantle Barrage", ability3:GetInt(), self:GetNextAbility3())
 				self:DrawCDAbilityBox(7, 80, "Brain Recover", ability8:GetInt(), self:GetNextAbility8())
 			end
@@ -55,13 +55,27 @@ function SWEP:DrawHUD()
 	DisableClipping(false)
 end
 
-
 -- Nets handling
 
 net.Receive("gJujutsu_cl_dismantle_slash", function()
 	local ent = net.ReadEntity()
+	if not ent:IsValid() then return end
 	local pos = ent:GetPos()
 
 	CreateParticleSystemNoEntity("dismantle_slash", pos)
 	CreateParticleSystemNoEntity("blood_impact_red_01", pos)
+end)
+
+net.Receive("gJujutsu_cl_cleave_slash", function()
+	local ent = net.ReadEntity()
+
+	if not ent:IsValid() then return end
+
+	CreateParticleSystem(ent, "cleave", 0, 0)
+	
+	timer.Simple(1, function()
+		if not ent:IsValid() then return end
+
+		ent:StopParticlesNamed("cleave")
+	end)
 end)

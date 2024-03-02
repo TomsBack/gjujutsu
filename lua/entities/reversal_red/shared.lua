@@ -255,6 +255,8 @@ function ENT:FireEffects()
 		end
 	end
 
+	owner:gebLib_ResumeAction()
+
 	if CLIENT then
 		local ply = LocalPlayer()
 
@@ -303,15 +305,17 @@ function ENT:Explode()
 	
 	self:FireEffects()
 
-	owner:gebLib_ResumeAction()
-
 	if SERVER then
 		owner:EmitSound(self.ProjectileFireSound)
 		owner:EmitSound(self.ExplosionSound)
 
 		net.Start("gJujutsu_cl_explode")
 		gebLib_net.WriteEntity(self)
-		gebLib_net.SendToAllExcept(owner)
+		if game.SinglePlayer() then
+			net.Broadcast()
+		else
+			gebLib_net.SendToAllExcept(self)
+		end
 	end
 
     if CLIENT and self.DebrisEnabled:GetBool() then

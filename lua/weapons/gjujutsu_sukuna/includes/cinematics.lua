@@ -29,7 +29,7 @@ function SWEP:DomainExpansionCinematic()
 	local forw = nil
 
 	if CLIENT then
-		copy:SetSequence(owner:LookupSequence("domain"))
+		copy:SetSequence(owner:LookupSequence("sukuna_domain_anim"))
 	end
 
 	local caughtInDomain = false
@@ -57,6 +57,8 @@ function SWEP:DomainExpansionCinematic()
 	local playedGif = false
 	local screenEffectPaused = true
 	local playedTheme = false
+
+	print(copy)
 
 	hook.Add("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect", function()
 		if not localPlayer:gebLib_Alive() then hook.Remove("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect") return end

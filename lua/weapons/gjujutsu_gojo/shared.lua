@@ -112,7 +112,7 @@ SWEP.InfinityBlacklist = {
 	["mahoraga_wheel"] = true,
 }
 
-SWEP.BlueActivateSound = Sound("gjujutsu_kaisen/sfx/gojo/amplification_bluev2.mp3")
+SWEP.BlueActivateSound = Sound("gojo/sfx/blue_summon.mp3")
 SWEP.TeleportSound = Sound("gjujutsu_kaisen/sfx/gojo/teleport.mp3")
 SWEP.BlueSummonSound = Sound("gjujutsu_kaisen/sfx/gojo/hollow_deploy.wav") -- For hollow purple anim
 SWEP.InfinityActivateSound = Sound("gojo/sfx/infinity_activate.wav")
@@ -163,7 +163,7 @@ function SWEP:PostInitialize()
 end
 
 function SWEP:Deploy()
-	self:DefaultDeploy()
+	self:DefaultDeploy() 
 end
 
 function SWEP:Holster()
@@ -237,8 +237,7 @@ function SWEP:Think()
 end
 
 function SWEP:PrimaryAttack()
-	self:SetCursedEnergy(self:GetCursedEnergy() - 50)
-	self:SetGlobalCD(2)
+
 end
 
 function SWEP:SecondaryAttack()
@@ -250,7 +249,6 @@ function SWEP:OnRemove()
 		if self.TeleportIndicator:IsValid() then
 			self.TeleportIndicator:Remove()
 		end
-
 	end
 end
 
@@ -355,8 +353,12 @@ function SWEP:SixEyesActivate()
 	if self:GetSixEyes() then
 		owner:SetBodygroup(1, 1)
 		
-		if owner:PredictedOrDifferentPlayer() then
+		if owner:PredictedOrDifferentPlayer() or game.SinglePlayer() then
 			self:SixEyesCinematic()
+		end
+
+		if SERVER and game.SinglePlayer() then
+			self:CallOnClient("SixEyesCinematic")
 		end
 
 		self.DamageMultiplier = self.SixEyesDamageMultiplier

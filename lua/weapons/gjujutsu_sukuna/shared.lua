@@ -1,5 +1,6 @@
 if SERVER then
 	util.AddNetworkString("gJujutsu_cl_dismantle_slash")
+	util.AddNetworkString("gJujutsu_cl_cleave_slash")
 end
 
 SWEP.PrintName = "Sukuna"
@@ -29,7 +30,7 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 
-SWEP.Model = Model("models/gjujutsu/sukuna/sukuna.mdl")
+SWEP.Model = Model("models/moon/ryomen_sukuna/ryomen_sukuna.mdl")
 
 SWEP.Abilities = {
 	[AbilityKey.Ability3] = "Dismantle",
@@ -65,7 +66,7 @@ SWEP.DefaultMaxHealth = 3000
 SWEP.PrimaryCD = 0
 SWEP.SecondaryCD = 3
 SWEP.Ability3CD = 3
-SWEP.Ability4CD = 15
+SWEP.Ability4CD = 12
 SWEP.Ability5CD = 20
 SWEP.Ability6CD = 0.5
 SWEP.Ability7CD = 0.5
@@ -200,7 +201,7 @@ function SWEP:SetWeaponHoldType(holdType)
 	if not owner:IsValid() then return end
     if holdType == "sukuna" then
         self.ActivityTranslate = {}
-        self.ActivityTranslate[ACT_MP_STAND_IDLE] = owner:GetSequenceActivity(owner:LookupSequence("Idle"))
+        self.ActivityTranslate[ACT_MP_STAND_IDLE] = owner:GetSequenceActivity(owner:LookupSequence("sukuna_idle_anim"))
         self.ActivityTranslate[ACT_MP_WALK] = ACT_HL2MP_IDLE + 1
         self.ActivityTranslate[ACT_MP_RUN] = ACT_HL2MP_RUN_FAST
         self.ActivityTranslate[ACT_MP_CROUCH_IDLE] = owner:GetSequenceActivity(owner:LookupSequence("pose_ducking_01"))
@@ -244,8 +245,7 @@ function SWEP:Think()
 end
 
 function SWEP:PrimaryAttack()
-	self:SetCursedEnergy(self:GetCursedEnergy() - 50)
-	self:SetGlobalCD(2)
+
 end
 
 function SWEP:SecondaryAttack()
@@ -268,7 +268,9 @@ function SWEP:Dismantle()
 
 	local cd = self.Ability3CD
 
-	owner:gebLib_PlayAction("dismantle", 1.35)
+	owner:gebLib_PlayAction("sukuna_dismantel", 1.7)
+
+	local curseEnergyDrain = self.Ability3Cost
 	
 	if owner:KeyDown(IN_SPEED) then
 		local nextSlash = 0
@@ -277,15 +279,17 @@ function SWEP:Dismantle()
 			timer.Simple(nextSlash, function()
 				self:DismantleSlash(50 * (1 + self:GetFingers() / 3))
 			end)
-			nextSlash = nextSlash + 0.09
+			nextSlash = nextSlash + 0.1
 		end
+
+		curseEnergyDrain = self.Ability3Cost * 3
 
 		cd = cd * 3
 	else 
 		self:DismantleSlash(150 * (1 + self:GetFingers() / 3))
 	end
 
-
+	self:RemoveCursedEnergy(self.Ability3Cost)
 	self:SetNextAbility3(CurTime() + cd)
 end
 
@@ -371,9 +375,11 @@ function SWEP:Cleave()
 
 	local owner = self:GetOwner()
 	local ownerPos = owner:GetPos()
+
+	local finalDamage = 30 * (1 + self:GetFingers() / 3)
 	
 	for k, ent in ipairs(ents.FindInSphere(ownerPos, self.CleaveRange)) do
-		if self.HitBlacklist[ent:GetClass()] then continue end
+		if not ent:gebLib_IsUsableEntity() then continue end
 		if not ent:gebLib_IsProp() and not ent:gebLib_IsPerson() then continue end
 		if ent == self or ent == owner then continue end
 		if ent:GetOwner() == owner then continue end
@@ -381,6 +387,10 @@ function SWEP:Cleave()
 
 		if SERVER then
 			local timerName = "Gjujutsu_Cleave" .. tostring(ent:EntIndex()) .. tostring(ent)
+
+			net.Start("gJujutsu_cl_cleave_slash")
+			net.WriteEntity(ent)
+			net.Broadcast()
 
 			timer.Create(timerName, 0.06, 20, function()
 				if not ent:IsValid() then 
@@ -395,7 +405,11 @@ function SWEP:Cleave()
 				if owner:IsValid() then damageInfo:SetAttacker(owner) end
 				if self:IsValid() then damageInfo:SetInflictor(self) end
 				damageInfo:SetDamageForce(force)
-				damageInfo:SetDamage(100)
+				if ent:IsPlayer() and ent:GetActiveWeapon():IsGjujutsuSwep() then
+					damageInfo:SetDamage(finalDamage / 2)
+				else
+					damageInfo:SetDamage(finalDamage)
+				end
 	
 				local customDamageType = self.DamageExceptions[ent:GetClass()]
 		
@@ -419,17 +433,9 @@ function SWEP:Cleave()
 				SuppressHostEvents(owner)
 			end)
 		end
-
-		if CLIENT then
-			local particle = CreateParticleSystem(ent, "cleave", PATTACH_ABSORIGIN_FOLLOW, 0)
-
-			timer.Simple(1, function()
-				if not particle:IsValid() then return end
-
-				particle:StopEmission()
-			end)
-		end
 	end
+
+	self:SetNextAbility4(CurTime() + self.Ability4CD)
 end
 
 -- Ability5
@@ -448,9 +454,9 @@ function SWEP:FireArrowStart()
 	if SERVER then
 		owner:EmitSound(Sound("sukuna/sfx/fire_arrow_start.wav"))
 	end
-	owner:gebLib_PlayAction("FireArrow", 1)
+	owner:gebLib_PlayAction("sukuna_fire_arrow", 1)
 
-	timer.Simple(0.8, function()
+	timer.Simple(0.6, function()
 		if not owner:IsValid() then return end
 		if not self:IsValid() then return end
 		if not self:GetHoldingFireArrow() then return end
@@ -532,8 +538,8 @@ function SWEP:MahoragaWheelActivate()
 			local wheel = ents.Create("mahoraga_wheel")
 			self:SetMahoragaWheel(wheel)
 			wheel:SetOwner(owner)
-			wheel:FollowBone(owner, owner:LookupBone("head"))
-			wheel:SetPos(owner:EyePos() + owner:GetUp() * 10)
+			wheel:SetPos(owner:GetPos() + owner:GetForward() * 13 - owner:GetRight() * 4)
+			wheel:FollowBone(owner, owner:LookupBone("ValveBiped.Bip01_Head1"))
 			wheel:Spawn()
 		else
 			self:GetMahoragaWheel():Remove()
@@ -715,6 +721,7 @@ function SWEP:UpdateFingerStats(fingers)
 
 	self.HealthGain = self.DefaultHealthGain + (self.HealthGainPerFinger * fingers)
 
+	print(owner, fingers)
 	if SERVER and owner:IsValid() then
 		owner:SetMaxHealth(self.DefaultMaxHealth + (self.HealthPerFinger * fingers))
 		owner:SetHealth(owner:GetMaxHealth())

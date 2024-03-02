@@ -8,7 +8,6 @@ gJujutsu_Debris = {
 }
 
 if SERVER then
-	resource.AddWorkshop( "3056680936" )
 	resource.AddFile( "resource/fonts/20686.ttf" )
 end
 

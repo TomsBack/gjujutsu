@@ -185,7 +185,7 @@ SWEP.DefaultCursedEnergyRegen = 0.15 -- Per tick
 SWEP.CursedEnergyDrain = 1.75 -- Per tick
 
 SWEP.RunSpeed = 800
-SWEP.WalkSpeed = 350
+SWEP.WalkSpeed = 300
 SWEP.SlowWalkSpeed = 100
 SWEP.JumpPower = 300
 
@@ -275,7 +275,7 @@ end
 
 function SWEP:DefaultPostInitialize()
 	self.PostInitialized = true
-	self:SetupModel()
+	-- self:SetupModel() -- Runs two times otherwise
 	self:SetupDefaultValues(true)
 
 	self:SetHoldType(self.HoldType)
@@ -286,7 +286,6 @@ end
 function SWEP:DefaultDeploy()
 	self:SetupModel()
 	self:SetupDefaultValues()
-
 	self:EnableFlashlight(false)
 
 	if SERVER then
@@ -346,12 +345,14 @@ end
 function SWEP:SetupModel()
 	local owner = self:GetOwner()
 
+	if SERVER and game.SinglePlayer() then
+		self:CallOnClient("SetupModel")
+	end
+	
 	if owner:IsValid() then
 		self.OldModel = owner:GetModel()
 		owner:SetModel(self.Model)
-		print(owner:GetModel())
 	end
-
 end
 
 function SWEP:EnableFlashlight(allow)
@@ -548,7 +549,7 @@ function SWEP:SetTimedEvent(name, time)
 	self:SetEvent(name)
 end
 
--- Adding hooks
+-- Handling hooks
 
 hook.Add("gJujutsu_OnPerfectBlock", "gJujutsu_PerfectBlockEffects", function(weapon, dmg)
 	local owner = weapon:GetOwner()
@@ -571,12 +572,13 @@ hook.Add("gJujutsu_OnBlock", "test", function(weapon, dmg)
 	print(weapon, dmg)
 end)
 
-
 -- Handling nets
 if SERVER then return end
 
 net.Receive("gJujutsu_cl_deploy", function()
 	local weapon = net.ReadEntity()
+
+	if game.SinglePlayer() then return end
 
 	if weapon:IsValid() then
 		weapon:Deploy()
