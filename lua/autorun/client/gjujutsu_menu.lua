@@ -67,6 +67,36 @@ hook.Add("InitPostEntity", "gebLib_Missing", function()
 	end
 end)
 
+hook.Add("InitPostEntity", "gJujutsu_PlayingSingleplayer", function()
+	if not game.SinglePlayer() then return end
+
+	local frame = vgui.Create("DFrame")
+	frame:SetSize(600, 160)
+	frame:SetPos((ScrW() - frame:GetWide()) / 2, (ScrH() - frame:GetTall()) / 2)
+	frame:SetTitle("Warning: playing gJujutsu in singleplayer")
+	frame:SetBackgroundBlur(true)
+	frame:MakePopup()
+
+	local labelTitle = vgui.Create("DLabel", frame)
+	labelTitle:SetPos(230, 35)
+	labelTitle:SetText("playing gJujutsu in singleplayer")
+	labelTitle:SetTextColor(Color(255,128,128))
+	labelTitle:SizeToContents()
+	
+	local label1 = vgui.Create("DLabel", frame)
+	label1:SetPos(25, 60)
+	label1:SetText("For optimal experience, you should play gJujutsu in a private empty server or with friends.\n		Single player functions differently and this addon was coded for multiplayer in mind. You have been warned.")
+	label1:SizeToContents()
+	
+	local buttonClose = vgui.Create("DButton", frame)
+	buttonClose:SetText("CLOSE")
+	buttonClose:SetPos(260, 100)
+	buttonClose:SetSize(80, 35)
+	buttonClose.DoClick = function()
+		frame:Close()
+	end
+end)
+
 spawnmenu.AddContentType("gJujutsu", function( container, obj)
 	if not container:IsValid() then return end
 	if !obj.material then return end

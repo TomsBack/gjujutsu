@@ -1,0 +1,11 @@
+SpriteCard
+{
+	$basetexture "particle/fire_anim_nocolor"
+
+	$addoverblend 1
+	$addself 1
+	$depthblend 1
+	$depthblendscale 16
+	$extractgreenalpha 1
+	$overbrightfactor 2
+}

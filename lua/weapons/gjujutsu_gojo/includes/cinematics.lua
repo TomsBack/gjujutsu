@@ -196,7 +196,7 @@ function SWEP:DomainExpansionCinematic()
 		if not domain:IsValid() then return end
 		if not domain.EntsInDomain then return end
 
-		if CLIENT then
+		if CLIENT and not game.SinglePlayer() then
 			caughtInDomain = domain.EntsInDomain[LocalPlayer()]
 			camera.Simulated = caughtInDomain
 		end

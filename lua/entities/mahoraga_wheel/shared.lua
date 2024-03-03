@@ -5,7 +5,7 @@ ENT.PrintName = "Mahoraga's Wheel"
 ENT.Author = "El Tomlino"
 ENT.Purpose = "To adapt to all phenomena"
 ENT.Category = "El Tomlino"
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.AutomaticFrameAdvance = true
 

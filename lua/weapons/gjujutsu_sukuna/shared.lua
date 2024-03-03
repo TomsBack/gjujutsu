@@ -244,7 +244,7 @@ function SWEP:Think()
 end
 
 function SWEP:PrimaryAttack()
-	print( self )
+	return false
 end
 
 function SWEP:SecondaryAttack()
@@ -676,7 +676,10 @@ function SWEP:DomainExpansion()
 		domain:Activate()
 	end
 
-	print("domain expansion")
+	if SERVER and game.SinglePlayer() then
+		self:CallOnClient("DomainExpansion")
+	end
+
 	self:DomainExpansionCinematic()
 
 	self:RemoveCursedEnergy(self.UltimateCost)

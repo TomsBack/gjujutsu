@@ -82,18 +82,19 @@ function ENT:Initialize()
 	self:SetPlaybackRate(2)
 
 	self:SetMoveType(MOVETYPE_NONE)
-    -- self:DrawShadow(false)
 	self:SetHealth(self.DefaultHealth)
 
 	local owner = self:GetOwner()
 
 	if CLIENT and owner:IsValid() then
-		local fireRing = CreateParticleSystem(self, "fire_ring", PATTACH_POINT, 0, owner:GetPos() + vector_up * 15)
-		local fireAura = CreateParticleSystem(self, "fire_aura", PATTACH_ABSORIGIN_FOLLOW, 0)
-		
-		self.FireRing = fireRing
-		table.insert(self.Particles, fireRing)
-		table.insert(self.Particles, fireAura)
+		timer.Simple(0, function()
+			local fireRing = CreateParticleSystem(self, "fire_ring", PATTACH_POINT, 0, owner:GetPos() + vector_up * 15)
+			local fireAura = CreateParticleSystem(self, "fire_aura", PATTACH_ABSORIGIN_FOLLOW, 0)
+
+			self.FireRing = fireRing
+			table.insert(self.Particles, fireRing)
+			table.insert(self.Particles, fireAura)
+		end)
 	end
 
 	if CLIENT and LocalPlayer() == owner then

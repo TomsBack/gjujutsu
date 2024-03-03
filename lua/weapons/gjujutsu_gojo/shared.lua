@@ -484,6 +484,10 @@ function SWEP:DomainExpansion()
 
 	local owner = self:GetOwner()
 
+	if SERVER and game.SinglePlayer() then
+		self:CallOnClient("DomainExpansion")
+	end
+
 	if SERVER then
 		owner:Freeze(true)
 	end
@@ -519,11 +523,25 @@ function SWEP:TeleportHold()
 	local owner = self:GetOwner()
 
 	if owner:Gjujutsu_IsInDomain() then return end
+
+	if SERVER and game.SinglePlayer() then
+		self:CallOnClient("CreateTeleportIndicator")
+	end
+
+	self:CreateTeleportIndicator()
 	
 	self:SetHoldingTeleport(true)
 	self:SetBusy(true)
+
+	return true
+end
+
+function SWEP:CreateTeleportIndicator()
+	if SERVER then return end
 	
-	if CLIENT and IsFirstTimePredicted() then
+	if IsFirstTimePredicted() or game.SinglePlayer() then
+		local owner = self:GetOwner()
+
 		local angles = owner:GetAngles()
 		angles.x = 0
 
@@ -541,8 +559,21 @@ function SWEP:TeleportHold()
 
 		self.TeleportIndicator = indicator
 	end
+end
 
-	return true
+function SWEP:RemoveTeleportIndicator()
+	if SERVER then return end
+	local owner = self:GetOwner()
+
+	if LocalPlayer() == owner then
+		owner:ScreenFade(SCREENFADE.PURGE, color_white, 0.01, 0.01)
+
+		local indicator = self.TeleportIndicator
+	
+		if indicator and indicator:IsValid() then
+			indicator:Remove()
+		end
+	end
 end
 
 function SWEP:Teleport()
@@ -576,15 +607,11 @@ function SWEP:Teleport()
 	local finalCost = math.Remap(math.max(startPos:Distance(tr.HitPos), 0), 0, self.TeleportDistance, self.SecondaryCost.Min, self.SecondaryCost.Max)
 	self:RemoveCursedEnergy(finalCost)
 
-	if CLIENT and LocalPlayer() == owner then
-		owner:ScreenFade(SCREENFADE.PURGE, color_white, 0.01, 0.01)
-
-		local indicator = self.TeleportIndicator
-	
-		if indicator and indicator:IsValid() then
-			indicator:Remove()
-		end
+	if SERVER and game.SinglePlayer() then
+		self:CallOnClient("RemoveTeleportIndicator")
 	end
+
+	self:RemoveTeleportIndicator()
 
 	self:SetSecondary(CurTime() + self.SecondaryCD)
 end

@@ -114,10 +114,10 @@ function ENT:Initialize()
 	if CLIENT then
         self.Particle = CreateParticleSystem(self, "technique_red", 1)
 		table.insert(self.Particles, self.Particle)
-		self:EmitSound(self.ActivateSound)
     end
-
+	
 	if SERVER then
+		owner:EmitSound(self.ActivateSound)
 		self:SetLagCompensated(true)
 	end
 
@@ -185,9 +185,9 @@ function ENT:OnRemove()
 
 	-- Stop all reversal red sounds
 	self:StopSound(self.ReadySound)
-	self:StopSound(self.ActivateSound)
-
+	
 	if not self:GetFired() and owner:IsValid() then
+		owner:StopSound(self.ActivateSound)
 		local weapon = owner:GetActiveWeapon()
 		
 		if weapon:IsValid() and weapon:IsGjujutsuSwep() then
@@ -215,6 +215,10 @@ function ENT:FireOff()
 	local weapon = owner:GetActiveWeapon()
 	local ownerPos = owner:GetPos()
 	local heldTime = curTime - self:GetSpawnTime()
+
+	if owner:IsValid() then
+		owner:StopSound(self.ActivateSound)
+	end
 
 	if heldTime <= self.MinHoldTime then
 		timer.Remove("reversal_red_key_pause" .. tostring(owner))

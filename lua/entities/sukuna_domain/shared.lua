@@ -1,5 +1,9 @@
 AddCSLuaFile()
 
+if SERVER then
+	util.AddNetworkString("gjujutsu_cl_domainParticles")
+end
+
 ENT.PrintName = "Domain Expansion: Malevolent Shrine"
 ENT.Author = "Tom" 
 ENT.Contact = "Steam"
@@ -91,6 +95,10 @@ function ENT:Think()
         self:PostInitialize()
     end
 
+	if game.SinglePlayer() then
+		SlashThink(self)
+	end
+
 	if SERVER then
 		self:NextThink(CurTime())
 		return true
@@ -115,7 +123,9 @@ function ENT:Draw()
 end
 
 function ENT:DefaultPredictedThink(ply, mv)
-	SlashThink(self)
+	if not game.SinglePlayer() then
+		SlashThink(self)
+	end
 	self:CheckEntsInDomain()
 	self:LifeTimeThink()
 	self:OwnerDiedThink()
@@ -149,10 +159,19 @@ function ENT:StartDomain()
 
 	self:SetSpawnTime(CurTime())
 	self:SetDomainReady(true)
-	self:SpawnParticles()
 
-	if CLIENT and IsFirstTimePredicted() then
-		owner:EmitSound(self.DomainBurstSound)
+	if SERVER and game.SinglePlayer() then
+		net.Start("gjujutsu_cl_domainParticles")
+		net.WriteEntity(self)
+		net.Broadcast()
+	end
+
+	if CLIENT then
+		self:SpawnParticles()
+		
+		if IsFirstTimePredicted() or game.SinglePlayer() then
+			owner:EmitSound(self.DomainBurstSound)
+		end
 	end
 end
 
@@ -179,12 +198,14 @@ function ENT:SpawnParticles()
 
 	local owner = self:GetDomainOwner()
 
-	if not owner:gebLib_PredictedOrDifferentPlayer() then return end
+	if not owner:gebLib_PredictedOrDifferentPlayer() and not game.SinglePlayer() then return end
 	if self.SpawnedParticles then return end
 	self.SpawnedParticles = true
 
 	if not owner:IsValid() then return end
 	local ownerPos = owner:EyePos()
+
+	print("spawning particles for domain")
 
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
@@ -286,3 +307,21 @@ hook.Add("gJujutsu_EntEnteredDomain", "sukuna_enterDomain", function(domain, ent
 		end
 	end
 end)
+
+
+-- Handling nets
+
+if CLIENT then
+	net.Receive("gjujutsu_cl_domainParticles", function()
+		local domain = net.ReadEntity()
+
+		if not domain:IsValid() then return end
+		local owner = domain:GetDomainOwner()
+
+		domain:SpawnParticles()
+
+		if owner:IsValid() then
+			owner:EmitSound(domain.DomainBurstSound)
+		end
+	end)
+end
