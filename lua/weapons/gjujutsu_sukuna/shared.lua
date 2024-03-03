@@ -555,8 +555,6 @@ function SWEP:MahoragaWheelActivate()
 			local wheel = ents.Create("mahoraga_wheel")
 			self:SetMahoragaWheel(wheel)
 			wheel:SetOwner(owner)
-			wheel:SetPos(owner:GetPos() + owner:GetForward() * 13 - owner:GetRight() * 4)
-			wheel:FollowBone(owner, owner:LookupBone("ValveBiped.Bip01_Head1"))
 			wheel:Spawn()
 		else
 			self:GetMahoragaWheel():Remove()

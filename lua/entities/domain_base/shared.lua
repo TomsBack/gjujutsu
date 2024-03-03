@@ -333,9 +333,6 @@ function ENT:DefaultOnRemove()
 	hook.Remove("FinishMove", self.PredictedThinkName)
 	hook.Run("gJujutsu_DomainEnd", self)
 
-	local owner = self:GetDomainOwner()
-	local weapon = owner:GetActiveWeapon()
-
 	if CLIENT then
 		local myPos = self:GetPos()
 
@@ -358,26 +355,32 @@ function ENT:DefaultOnRemove()
 	end
 	self:StopSound(Sound("gjujutsu_kaisen/sfx/general/other/Domain_Ambien.wav"))
 
+	local owner = self:GetDomainOwner()
+
+	if not owner:IsValid() then return end
+	
 	-- Now play the domain destroyed sound and remove the domain
 	if SERVER then
 		if owner:IsValid() then
 			owner:GodDisable()
 			owner:Freeze(false)
 		end
-
+		
 		local domainFloor = self:GetDomainFloor()
-
+		
 		if domainFloor:IsValid() then
 			domainFloor:Remove()
 		end
-
+		
 		-- Remove children of the domain entity
 		for child, _ in pairs(self.Children) do
 			child:Remove()
 		end
-
+		
 		self:EmitSound(self.DomainBreakSound)
 	end
+	
+	local weapon = owner:GetActiveWeapon()
 
 	if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 		if SERVER then

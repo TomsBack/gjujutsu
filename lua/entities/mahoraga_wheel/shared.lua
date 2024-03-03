@@ -47,6 +47,14 @@ function ENT:Initialize()
 		self:SetNoDraw(true)
 		self:SetPredictable(true)
 	end
+
+	local owner = self:GetOwner()
+
+	if owner:IsValid() then
+		self:FollowBone(owner, owner:LookupBone("ValveBiped.Bip01_Head1"))
+		self:SetLocalAngles(angle_zero)
+		self:SetLocalPos(vector_origin + Vector(13, 3, 0))
+	end
 end
 
 function ENT:PostInitialize()

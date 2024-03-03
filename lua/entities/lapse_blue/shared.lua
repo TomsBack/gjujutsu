@@ -242,6 +242,8 @@ end
 
 local vector_up = vector_up
 function ENT:SpawnDebrisThink()
+	if not self:IsValid() then return end
+
     self.NextDebris = SysTime() + (self.DebrisCD / timeScale:GetFloat())
     local startPos = self:GetPos() + vector_up * 50
 
