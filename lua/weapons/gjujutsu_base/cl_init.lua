@@ -26,7 +26,6 @@ local armorColor = Color(16, 73, 158)
 
 -- TODO: Broken in older gmod versions
 hook.Add("OnScreenSizeChanged", "gJujutsu_CacheScreenSize", function(oldW, oldH, newW, newH)
-	print(newW, newH)
 	width = newW
 	healthBox = newH
 	mult = width / 1920
@@ -269,10 +268,8 @@ local hudToHide = {
 	["CHudSecondaryAmmo"] = true,
 }
 
-function SWEP:HUDShouldDraw( currentElement )
-	if hudToHide[currentElement] then
-		return false
-	end
+function SWEP:HUDShouldDraw(currentElement)
+	return not hudToHide[currentElement]
 end
 
 local clashKeyMaterial = Material("hud/key_box_white.png","smooth")

@@ -53,8 +53,8 @@ function ENT:Initialize()
 			self.Range = self.Range * (1 + fingers / 5)
 			self.SlashDamage = self.SlashDamage * (1 + fingers / 5)
 
-			print("Range", self.Range)
-			print("Slash damage", self.SlashDamage)
+			gebLib.PrintDebug("Range", self.Range)
+			gebLib.PrintDebug("Slash damage", self.SlashDamage)
 		end 
 	end
 
@@ -186,7 +186,6 @@ function ENT:SpawnParticles()
 	if not owner:IsValid() then return end
 	local ownerPos = owner:EyePos()
 
-	print("spawning particles")
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 end
@@ -280,7 +279,7 @@ hook.Add("gJujutsu_EntEnteredDomain", "sukuna_enterDomain", function(domain, ent
 	if ent:IsPlayer() then
 		local weapon = ent:GetWeapon("gjujutsu_gojo")
 
-		print("Turning infinity off because of domain for", ent)
+		gebLib.PrintDebug("Turning infinity off because of domain for", ent)
 
 		if weapon:IsValid() then
 			weapon:SetInfinity(false)

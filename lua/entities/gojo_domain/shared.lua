@@ -171,7 +171,6 @@ function ENT:FreezeEntity(ent)
 		local weapon = ent:GetActiveWeapon()
 
 		if weapon:Gjujutsu_IsSukuna() and weapon:AdaptedToInfinity() then
-			print("Infinity Void adapted")
 			return
 		end
 

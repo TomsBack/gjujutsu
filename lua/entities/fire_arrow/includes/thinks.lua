@@ -51,7 +51,7 @@ function ENT:HitDetectionThink()
 
 	-- Found entity, explode red
 	if trace.Hit then
-		print("Fire Arrow hit")
+		gebLib.PrintDebug("Fire Arrow hit")
 		self:Remove()
 	end
 end
@@ -68,13 +68,13 @@ function ENT:LifeTimeThink()
 	end
 
 	if self:Health() <= 0 then
-		print("Removing FireArrow: No health")
+		gebLib.PrintDebug("Removing FireArrow: No health")
 		self:Remove()
 		return
 	end
 
 	if self:GetFired() and currentLifeTime > self.LifeTime then
-		print("Removing FireArrow: No life time")
+		gebLib.PrintDebug("Removing FireArrow: No life time")
 		self:Remove()
 	end
 end
@@ -87,7 +87,7 @@ function ENT:BurstThink()
 
 	local owner = self:GetOwner()
 	local ownerPos = owner:GetPos()
-	print("Burst")
+	gebLib.PrintDebug("Burst")
 
 	if not owner:IsValid() then return end
 	

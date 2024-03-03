@@ -41,9 +41,7 @@ function SWEP:SixEyesCinematic()
 	local camera = gebLib_Camera.New("Six_Eyes", owner)
 	owner.gJujutsu_Camera = camera
 
-	--FIXME: angles are not right, because the NEW stupid model is bad and is defaulty rotated on a different side
     local copy = camera.Copy
-	print(copy:GetModel())
 	owner.gJujutsu_Copy = copy
 	copy:SetSequence(owner:LookupSequence("gojo_idle"))
 	local headPos = copy:GetPos() + copy:GetUp() * 70
@@ -459,8 +457,6 @@ function SWEP:DomainExpansionCinematic()
 		
         return pos, ang
     end)
-
-	print("starting camera")
     
     if caughtInDomain then
         camera:Play()

@@ -92,8 +92,6 @@ function ENT:StartDomain()
 	self:SetSpawnTime(CurTime())
 	self:SetDomainReady(true)
 	self:SpawnParticles()
-
-	print("Domain ready")
 end
 
 function ENT:SpawnParticles()

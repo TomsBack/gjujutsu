@@ -100,8 +100,6 @@ function SWEP:BrainRecoverThink()
 	self.NextBrainRecoverTimer = CurTime() + self.BrainRecoverTimer
 
 	self:SetBrainRecoverCount(self:GetBrainRecoverCount() - 1)
-
-	print("Recovered brain recover", self:GetBrainRecoverCount())
 end
 
 local maxs = Vector(10, 10, 10)
@@ -128,7 +126,6 @@ function SWEP:HealOthersThink()
 	local ent = trace.Entity
 	
 	if ent:IsValid() then
-		print("Healing others")
 		ent:SetHealth(math.min(ent:Health() + self.HealthGain, ent:GetMaxHealth()))
 		self:RemoveCursedEnergy(self.CursedEnergyDrain * 2)
 

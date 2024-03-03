@@ -87,7 +87,7 @@ end
 function ENT:StartAdaptation()
 	if self:GetAdaptTimer() <= 0 then
 		self:SetAdaptTimer(CurTime() + self.AdaptationTime)
-		print("Started Adaptation")
+		gebLib.PrintDebug("Started Adaptation")
 	end
 end
 
@@ -109,13 +109,13 @@ function ENT:Adapt()
 		end
 	end
 
-	print("Adapted")
+	gebLib.PrintDebug("Adapted")
 	PrintTable(weapon.AdaptationEnts)
 
 	if self:EntsNeedAdapting() then
 		self:SetAdaptTimer(curTime + self.AdaptationTime)
 	else
-		print("Adapted to everything, resetting timer to 0")
+		gebLib.PrintDebug("Adapted to everything, resetting timer to 0")
 		self:SetAdaptTimer(0)
 	end
 
@@ -162,7 +162,7 @@ function ENT:CreateAdaptationRow(entClass, dmgType)
 	if not weapon:IsValid() then return end
 
 	if not weapon.AdaptationEnts[entClass] then
-		print("New enemy adaptation", entClass, dmgType)
+		gebLib.PrintDebug("New enemy adaptation", entClass, dmgType)
 		weapon.AdaptationEnts[entClass] = {[dmgType] = {Percentage = 0, ShownMessage = false}}
 		return
 	end
@@ -171,7 +171,7 @@ function ENT:CreateAdaptationRow(entClass, dmgType)
 		local dmgTypeExists = weapon.AdaptationEnts[entClass][dmgType]
 
 		if not dmgTypeExists then
-			print("New Damage Type adaptation", dmgType, entClass)
+			gebLib.PrintDebug("New Damage Type adaptation", dmgType, entClass)
 
 			weapon.AdaptationEnts[entClass][dmgType] = {Percentage = 0, ShownMessage = false}
 		end
@@ -209,7 +209,7 @@ if SERVER then
 		end
 
 		if not finalEnt:IsValid() then
-			print("Entity is not valid, cannot adapt")
+			gebLib.PrintDebug("Entity is not valid, cannot adapt")
 			return
 		end
 
@@ -227,7 +227,7 @@ if SERVER then
 			dmgInfo:ScaleDamage(1 - finalDamageReduction / 100)
 
 			if adaptData.Percentage < 100 and wheel:GetAdaptTimer() <= 0 then 
-				print("Adapting to existing")
+				gebLib.PrintDebug("Adapting to existing")
 				wheel:StartAdaptation()
 			end
 		else

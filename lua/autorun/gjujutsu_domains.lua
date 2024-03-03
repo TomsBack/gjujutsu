@@ -101,7 +101,7 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 					weapon:SetBusy(false)
 				end
 				
-				print(ply.gJujutsu_ClashPresses, winner.gJujutsu_ClashPresses)
+				gebLib.PrintDebug(ply.gJujutsu_ClashPresses, winner.gJujutsu_ClashPresses)
 
 				-- Determining winner
 				if ply.gJujutsu_ClashPresses > winner.gJujutsu_ClashPresses then
@@ -125,8 +125,8 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 					end
 				end
 			end
-			print("Domain clash end")
-			print("Winner: ", winner)
+			gebLib.PrintDebug("Domain clash end")
+			gebLib.PrintDebug("Winner: ", winner)
 
 			if winner:IsValid() then
 				local weapon = winner:GetActiveWeapon()

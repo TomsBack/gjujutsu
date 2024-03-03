@@ -52,7 +52,7 @@ local function onButtonDown(ply, btn)
 		end
 
 		ply.gJujutsu_ClashPresses = ply.gJujutsu_ClashPresses + weapon.ClashPressScore -- TODO: Make dynamic score point that depends on the swep you are using
-		print(ply, "Presses", ply.gJujutsu_ClashPresses)
+		gebLib.PrintDebug(ply, "Presses", ply.gJujutsu_ClashPresses)
 		return
 	end
 
@@ -74,7 +74,7 @@ local function onButtonDown(ply, btn)
 	local abilityFunction = weapon.Abilities[abilityType]
 
 	if not weapon[abilityFunction] then
-		print(tostring(weapon) .. " does not have assigned ability: " .. abilityType .. " please assign this ability a function, so it can do anything")
+		gebLib.PrintDebug(tostring(weapon) .. " does not have assigned ability: " .. abilityType .. " please assign this ability a function, so it can do anything")
 		return
 	end
 

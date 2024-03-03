@@ -457,7 +457,6 @@ function SWEP:DefaultStartBlock()
 	self:SetBusy(true)
 
 	self:EmitSound(self.BlockStartSound)
-	print("Blocking")
 
 	hook.Run("gJujutsu_OnBlockStart", self)
 end
@@ -469,7 +468,6 @@ function SWEP:DefaultEndBlock()
 	self:SetBusy(false)
 
 	self:EmitSound(self.BlockEndSound)
-	print("Blocking ended")
 
 	hook.Run("gJujutsu_OnBlockEnd", self)
 
@@ -498,7 +496,6 @@ function SWEP:EnableReverseCursed()
 	self:ReverseCursedEffect()
 
 	if CLIENT and owner:gebLib_PredictedOrDifferentPlayer() then
-		print("Reverse cursed particles")
 		self.ReverseCursedParticle = CreateParticleSystem(owner, "reverse_cursed", PATTACH_ABSORIGIN_FOLLOW, 0)
 	end
 end
@@ -523,8 +520,6 @@ function SWEP:RecoverBrain()
 		end
 	end
 	self:SetNextAbility8(CurTime() + self.BrainRecoverCD)
-
-	print("Recovered techniques", self:GetBrainRecoverCount())
 
 	self:ReverseCursedEffect(true)
 	self:SetReverseTechniqueEnabled(false)
@@ -567,11 +562,6 @@ hook.Add("gJujutsu_OnPerfectBlock", "gJujutsu_PerfectBlockEffects", function(wea
 			CreateParticleSystemNoEntity("debris_2", pos)
 		end
 	end
-end)
-
-hook.Add("gJujutsu_OnBlock", "test", function(weapon, dmg)
-	print("block")
-	print(weapon, dmg)
 end)
 
 -- Handling nets

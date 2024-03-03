@@ -13,6 +13,18 @@ local matOverlay_Normal = Material( "gui/gstands-contenticon-normal.png" )
 local matOverlay_Hovered = Material( "gui/gstands-contenticon-hovered.png" )
 local matOverlay_AdminOnly = Material( "icon16/shield.png" )
 
+local convarMap = {
+	["Ability 1"] = ability3,
+	["Ability 2"] = ability4,
+	["Ability 3"] = ability5,
+	["Ability 4"] = ability6,
+	["Ability 5"] = ability7,
+	["Ability 6"] = ability8,
+	["Ability Ultimate"] = abilityUltimate,
+	["Primary"] = primary,
+	["Secondary"] = secondary,
+}
+
 local white = color_white
 local black = color_black
 local blackNoOpacity = Color(0, 0, 0, 0)
@@ -128,69 +140,122 @@ spawnmenu.AddCreationTab("gJujutsu", function()
 end
 ,"icon16/finger16.png", 21, "gJujutsu")
 
-function gJujutsuControls(panel)
-	panel:SetName( "Controls" )
+function gJujutsuControlsTab(panel)
+	panel:SetName("Controls")
+
 	local AppList = vgui.Create( "DListView" )
 	AppList:SetHeight(250)
-	AppList:Dock( FILL )
-	AppList:SetMultiSelect( false )
-
-	local vars = {
-		["Ability 1"] = ability3,
-		["Ability 2"] = ability4,
-		["Ability 3"] = ability5,
-		["Ability 4"] = ability6,
-		["Ability 5"] = ability7,
-		["Ability 6"] = ability8,
-		["Ability Ultimate"] = abilityUltimate,
-		["Primary"] = primary,
-		["Secondary"] = secondary,
-	}
+	AppList:Dock(FILL)
+	AppList:SetMultiSelect(false)
 	AppList:AddColumn("Ability")
 	AppList:AddColumn("Key")
-	AppList:AddLine("Ability 1", input.GetKeyName(ability3:GetInt()) )
-	AppList:AddLine("Ability 2", input.GetKeyName(ability4:GetInt()) )
-	AppList:AddLine("Ability 3", input.GetKeyName(ability5:GetInt()) )
-	AppList:AddLine("Ability 4", input.GetKeyName(ability6:GetInt()) )
-	AppList:AddLine("Ability 5", input.GetKeyName(ability7:GetInt()) )
-	AppList:AddLine("Ability 6", input.GetKeyName(ability8:GetInt()) )
-	AppList:AddLine("Ability Ultimate", input.GetKeyName(abilityUltimate:GetInt()) )
-	AppList:AddLine("Primary", input.GetKeyName(primary:GetInt()) )
-	AppList:AddLine("Secondary", input.GetKeyName(secondary:GetInt()) )
+
+	for abilityText, abilityConvar in pairs(convarMap) do
+		AppList:AddLine(abilityText, input.GetKeyName(abilityConvar:GetInt()) )
+	end
+
 	function AppList:DoDoubleClick(lineID, line)
 		input.StartKeyTrapping()
 		self.Trapping = true
 		self.selectedline = line
 	end
+
 	function AppList:Think()
 		if input.IsKeyTrapping() and self.Trapping then
 			local key =	input.CheckKeyTrapping()
+
 			if key then
-			if key != KEY_ESCAPE then
-			local _, line = self:GetSelectedLine()
-				LocalPlayer():ConCommand(vars[line:GetColumnText(1)]:GetName().." "..tostring(key))
-				self.selectedline:SetColumnText(2, input.GetKeyName(key))
-				LocalPlayer().gJujutsuControlsTable = {
-					["ability3"] = ability3:GetInt(),
-					["ability4"] = ability4:GetInt(),
-					["ability5"] = ability5:GetInt(),
-					["ability6"] = ability6:GetInt(),
-					["ability7"] = ability7:GetInt(),
-					["ability8"] = ability8:GetInt(),
-					["abilityUltimate"] = abilityUltimate:GetInt(),
-					["primary"] = primary:GetInt(),
-					["secondary"] = secondary:GetInt(),
-				}
-			end
-			self.Trapping = false
+				if key != KEY_ESCAPE then
+					local _, line = self:GetSelectedLine()
+					local convar = convarMap[line:GetColumnText(1)]
+
+					RunConsoleCommand(convar:GetName(), key)
+
+					self.selectedline:SetColumnText(2, input.GetKeyName(key))
+				end
+				self.Trapping = false
 			end
 		end
 	end
+
 	panel:AddItem(AppList)
 end
 
+function gJujutsuPerfomanceTab(panel)
+	panel:SetName("Performance")
+
+	panel:CheckBox("Enable debris", "gjujutsu_fps_debris")
+	panel:ControlHelp("Enables all debris and smoke created by abilities. HIGH FPS GAIN")
+end
+
+function gJujutsuGeneralTab(panel)
+	if not LocalPlayer():IsAdmin() then return end
+	
+	panel:SetName("General")
+
+	panel:NumSlider("Brain recover limit", "gjujutsu_misc_brain_recover_limit", 0, 1000, 0)
+	panel:ControlHelp("How many times you can recover cooldowns until your brain gives up on you")
+end
+
+function gJujutsuDomainTab(panel)
+	if not LocalPlayer():IsAdmin() then return end
+
+	panel:SetName("Domains")
+
+	panel:CheckBox("Enable domains", "gjujutsu_domain_enabled")
+	panel:NumSlider("Domain max time", "gjujutsu_domain_max_time", 0, 1000)
+	panel:ControlHelp("How long can you keep domain active until it clears on its own")
+	panel:NumSlider("Domain end CD", "gjujutsu_domain_end_cd", 0, 1000)
+	panel:ControlHelp("How big will be the cooldown on all abilities after domain ends")
+
+	panel:CheckBox("Enable domain clashing", "gjujutsu_domain_clash_enabled")
+	panel:NumSlider("Domain clash window", "gjujutsu_domai_clash_window", 1, 1000)
+	panel:ControlHelp("How much time players have to join domain clash before it starts")
+	panel:NumSlider("Domain clash length", "gjujutsu_domai_clash_length", 1, 1000)
+	panel:ControlHelp("How long is the domain clash")
+end
+
+function gJujutsuGojoTab(panel)
+	if not LocalPlayer():IsAdmin() then return end
+
+	panel:SetName("Gojo Settings")
+
+	panel:CheckBox("Unrestricted teleport", "gjujutsu_gojo_unrestricted_teleport")
+	panel:ControlHelp("Enables teleporting with abilities like reversal red and hollow purple")
+	panel:CheckBox("Infinity enabled", "gjujutsu_gojo_infinity_enabled")
+	panel:CheckBox("Detonate hollow purple", "gjujutsu_gojo_detonate_purple")
+	panel:ControlHelp("Will allow you to detonate hollow purple after firing one")
+	panel:NumSlider("Six eyes damage mult", "gjujutsu_gojo_six_eyes_damage_mult", 1, 1000)
+	panel:ControlHelp("Multiplies the damage of abilities when you have six eyes active")
+end
+
+function gJujutsuSukunaTab(panel)
+	if not LocalPlayer():IsAdmin() then return end
+
+	panel:SetName("Sukuna Settings")
+
+	panel:NumSlider("Max fingers", "gjujutsu_sukuna_max_fingers", 1, 1000)
+
+	panel:NumSlider("Fire arrow fingers", "gjujutsu_sukuna_fire_arrow_finger_req", 1, 1000, 0)
+	panel:ControlHelp("How many fingers you need to have to use fire arrow")
+	panel:CheckBox("Mahoraga wheel", "gjujutsu_sukuna_mahoraga_wheel")
+	panel:ControlHelp("Enables the mahoraga wheel")
+	panel:NumSlider("Wheel fingers", "gjujutsu_sukuna_mahoraga_wheel_finger_req", 1, 1000, 0)
+	panel:ControlHelp("How many fingers you need to have to use mahoraga wheel")
+	panel:NumSlider("Wheel dmg reduction", "gjujutsu_sukuna_mahoraga_wheel_damage_reduction", 1, 100)
+	panel:ControlHelp("How much resistance you will have to attacks at max adaptation. Numbers are in percentages %")
+	panel:NumSlider("Wheel adapt speed", "gjujutsu_sukuna_mahoraga_wheel_spin_time", 0.1, 1000)
+	panel:ControlHelp("How fast you will adapt to phenomena")
+end
+
 function gJujutsuMenu()
-	spawnmenu.AddToolMenuOption("Options", "gJujutsu", "gJujutsuControls", "Binds", "", "", gJujutsuControls)
+	spawnmenu.AddToolMenuOption("Options", "gJujutsu", "gJujutsuControls", "Binds", "", "", gJujutsuControlsTab)
+	spawnmenu.AddToolMenuOption("Options", "gJujutsu", "gJujutsuPerformance", "Performance", "", "", gJujutsuPerfomanceTab)
+
+	spawnmenu.AddToolMenuOption("Options", "gJujutsu", "gJujutsuGeneral", "General", "", "", gJujutsuGeneralTab)
+	spawnmenu.AddToolMenuOption("Options", "gJujutsu", "gJujutsuDomain", "Domain", "", "", gJujutsuDomainTab)
+	spawnmenu.AddToolMenuOption("Options", "gJujutsu", "gJujutsuGojo", "Gojo", "", "", gJujutsuGojoTab)
+	spawnmenu.AddToolMenuOption("Options", "gJujutsu", "gJujutsuSukuna", "Sukuna", "", "", gJujutsuSukunaTab)
 end
 
 hook.Add("PopulateToolMenu", "gJujutsuMenu", gJujutsuMenu)

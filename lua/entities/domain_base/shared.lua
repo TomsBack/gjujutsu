@@ -111,7 +111,6 @@ function ENT:DefaultInitialize()
 	self:SetNoDraw(true)
 
 	self.LifeTime = domainLifetimeConvar:GetFloat()
-	print(self.LifeTime)
 
 	if CLIENT then
 		self:SetPredictable(true)
@@ -292,14 +291,6 @@ function ENT:CheckEntsInDomain()
 
 	self.EntsInDomain = newEnts
 end
-
-hook.Add("gJujutsu_EntLeftDomain", "test", function(domain, ent)
-	print(tostring(ent) .. " Left domain: " .. tostring(domain) .. " Solid: " .. tostring(ent:IsSolid()))
-end)
-
-hook.Add("gJujutsu_EntEnteredDomain", "test", function(domain, ent)
-	print(tostring(ent) .. " Entered domain: " .. tostring(domain) .. " Solid: " .. tostring(ent:IsSolid()))
-end)
 
 --I use this instead of timers, as it can support prediction
 function ENT:SetTimedEvent(name, time)

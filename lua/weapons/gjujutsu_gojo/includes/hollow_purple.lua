@@ -189,7 +189,6 @@ function SWEP:FireHollowPurple()
 	self:SetNextAbility5(CurTime() + self.Ability5CD)
 	self:SetHoldingPurple(false)
 
-	print("Fired hollow purple")
 
 	if hollowPurple:IsValid() and hollowPurple:GetFired() then
 		return

@@ -21,7 +21,7 @@ CreateConVar("gjujutsu_misc_brain_recover_limit", 5, {FCVAR_REPLICATED, FCVAR_AR
 -- Domain convars
 CreateConVar("gjujutsu_domain_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if domains can be used", 0, 1)
 CreateConVar("gjujutsu_domain_max_time", 30, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How long can domain be active", 1, 1000)
-CreateConVar("gjujutsu_domain_end_cd", 10, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the cooldown for abilities after domain ends", 1, 1000)
+CreateConVar("gjujutsu_domain_end_cd", 10, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the cooldown for abilities after domain ends", 0, 1000)
 CreateConVar("gjujutsu_domain_clash_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if domain clashing can be used", 0, 1)
 CreateConVar("gjujutsu_domain_clash_window", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the time before domain clash starts", 1, 1000)
 CreateConVar("gjujutsu_domain_clash_length", 10, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the length of a domain clash", 1, 1000)

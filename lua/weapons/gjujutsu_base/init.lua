@@ -26,8 +26,6 @@ hook.Add("DoPlayerDeath", "gJujutsu_ClearCinematic", function(ply, attacker, dmg
 	if weapon:GetInCinematic() then
 		ply:Freeze(false)
 
-		print("In cinematic. Clearing")
-
 		-- Clear camera of this entity for all clients
 		net.Start("gJujutsu_cl_clearCamera")
 		net.WriteEntity(ply)
@@ -87,7 +85,7 @@ hook.Add("EntityTakeDamage", "gJujutsu_DamageInsideDomain", function(ent, dmg)
 	local domain = weapon:GetDomain()
 
 	if domain:IsValid() and domain:IsInDomain(ent) then
-		print("Player domain protecting from other player's domain damage")
+		gebLib.PrintDebug("Player domain protecting from other player's domain damage")
 		return 0
 	end
 end)

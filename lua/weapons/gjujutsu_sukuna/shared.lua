@@ -240,7 +240,6 @@ function SWEP:Think()
 	self:DomainClearThink()
 	self:BrainRecoverThink()
 	self:HealOthersThink()
-	-- self:FingerStatsThink()
 	self:SukunaConvarsThink()
 
 	if SERVER then
@@ -455,7 +454,7 @@ function SWEP:FireArrowStart()
 	self:SetBusy(true)
 	self:SetHoldingFireArrow(true)
 
-	print("Started holding fire arrow")
+	gebLib.PrintDebug("Started holding fire arrow")
 
 	self:EmitSound(self.FireArrowVoice)
 	
@@ -513,7 +512,7 @@ function SWEP:FireArrowEnd()
 		owner:SetMoveType(self.LastMoveType)
 	end
 
-	print("Stopped holding fire arrow")
+	gebLib.PrintDebug("Stopped holding fire arrow")
 
 	if arrow:IsValid() then
 		arrow:Release()
@@ -579,6 +578,7 @@ end
 
 -- Ultimate
 function SWEP:StartDomain()
+	if not self.DomainConvar:GetBool() then return end
 	if self:GetClashStart() then return end
 	if self:GetDomainClash() then return end
 
@@ -637,18 +637,18 @@ function SWEP:StartDomain()
 			local distance = owner:GetPos():Distance(ply:GetPos())
 
 			if distance <= weapon.DomainRange + self.DomainRange then
-				print("Close in to clash")
+				gebLib.PrintDebug("Close in to clash")
 
 				local nearClashData = ply:Gjujutsu_GetDomainClashData()
 
-				print(tostring(owner) .. " joined the clash of " .. tostring(nearClashData.Players[1]))
+				gebLib.PrintDebug(tostring(owner) .. " joined the clash of " .. tostring(nearClashData.Players[1]))
 
 				table.insert(nearClashData.Players, owner)
 				return
 			end
 		end
 
-		print("Creating own clash")
+		gebLib.PrintDebug("Creating own clash")
 		owner:CreateDomainClashTable()
 	end
 
@@ -718,7 +718,6 @@ function SWEP:AdaptedToInfinity()
 		return true
 	end
 
-	print(adaptedCount)
 	return false
 end
 
@@ -729,15 +728,12 @@ end
 function SWEP:UpdateFingerStats(fingers)
 	local owner = self:GetOwner()
 
-	print("Updated Stats", fingers)
-
 	self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy + (self.EnergyPerFinger * fingers))
 	self:SetCursedEnergy(self:GetMaxCursedEnergy())
 	self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen + (self.EnergyGainPerFinger * fingers))
 
 	self.HealthGain = self.DefaultHealthGain + (self.HealthGainPerFinger * fingers)
 
-	print(owner, fingers)
 	if SERVER and owner:IsValid() then
 		owner:SetMaxHealth(self.DefaultMaxHealth + (self.HealthPerFinger * fingers))
 		owner:SetHealth(owner:GetMaxHealth())

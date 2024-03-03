@@ -15,8 +15,7 @@ function SWEP:DomainExpansionCinematic()
 	
 	if SERVER then
 		owner:Freeze(true)
-
-		self:EmitSound("sukuna/sfx/domain_cinematic.mp3")
+		owner:EmitSound("sukuna/sfx/domain_cinematic.mp3")
 	end
 
 	local camera = gebLib_Camera.New("Sukuna_Domain", ply, 60, 850)
@@ -57,8 +56,6 @@ function SWEP:DomainExpansionCinematic()
 	local playedGif = false
 	local screenEffectPaused = true
 	local playedTheme = false
-
-	print(copy)
 
 	hook.Add("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect", function()
 		if not localPlayer:gebLib_Alive() then hook.Remove("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect") return end

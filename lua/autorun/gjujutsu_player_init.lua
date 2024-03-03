@@ -7,7 +7,7 @@ hook.Add("gebLib_PlayerFullyConnected", "gJujutsu_PlayerInit", function(ply)
 	ply.gJujutsu_ClashKey = 0
 	ply.gJujutsu_ClashKeyTime = 0
 
-	print(tostring(ply) .. " Fully connected")
+	gebLib.PrintDebug(tostring(ply) .. " Fully connected")
 end)
 
 hook.Add("PostPlayerDeath", "gJujutsu_UnFreeze", function(ply)

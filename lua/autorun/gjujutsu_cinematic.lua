@@ -129,13 +129,11 @@ function SUKUNA_DomainExpansionCinematic(ply)
         hook.Remove("DrawOverlay", "SUKUNA_CinematicBars" .. steamID)
         hook.Remove("HUDShouldDraw", "SUKUNA_NoHudCinematic" .. steamID)
 
-		print("sukuna cinematic remove")
         copy:Remove()
         ply:SetNoDraw(false)
 
 		owner.gJujutsu_Camera = nil
     end)
-
     
     if localPlayer == ply then
         camera:Play()

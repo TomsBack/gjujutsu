@@ -107,7 +107,7 @@ function ENT:Initialize()
 		owner:EmitSound(Sound("sukuna/sfx/fire_arrow_ambience.wav"), 75, 100, 1, CHAN_STATIC)
 	end
 
-	print("Spawned fire arrow", owner)
+	gebLib.PrintDebug("Spawned fire arrow", owner)
 
 	-- Spawn predicted think hook
 	local thinkName = "gJujutsu_FireArrow" .. tostring(owner) .. tostring(self)
@@ -168,7 +168,7 @@ function ENT:OnRemove()
 		end
 	end
 
-	print("Removed Fire Arrow")
+	gebLib.PrintDebug("Removed Fire Arrow")
 end
 
 function ENT:Release()
@@ -213,14 +213,14 @@ function ENT:Release()
 	self:SetFired(true)
 	weapon:RemoveCursedEnergy(finalCost)
 	
-	print("Released fire arrow")
-	print("HoldTime:", finalHoldTime)
-	print("Speed:", finalSpeed)
-	print("Cost:", finalCost)
+	gebLib.PrintDebug("Released fire arrow")
+	gebLib.PrintDebug("HoldTime:", finalHoldTime)
+	gebLib.PrintDebug("Speed:", finalSpeed)
+	gebLib.PrintDebug("Cost:", finalCost)
 end
 
 function ENT:Explode()
-	print("Exploded fire arrow")
+	gebLib.PrintDebug("Exploded fire arrow")
 
 	self:ExplosionDamage()
 	if SERVER then
@@ -245,8 +245,8 @@ function ENT:ExplosionDamage()
 	local finalDamage = math.Remap(holdTime, chargeMin, chargeMax, self.Damage.Min, self.Damage.Max) * self.DamageMultiplier
 	local finalRadius = math.Remap(holdTime, chargeMin, chargeMax, self.ExplosionRadius.Min, self.ExplosionRadius.Max)
 
-	print("Fire Arrow Damage", finalDamage)
-	print("Fire Arrow Radius", finalRadius)
+	gebLib.PrintDebug("Fire Arrow Damage", finalDamage)
+	gebLib.PrintDebug("Fire Arrow Radius", finalRadius)
 
 	local damageInfo = DamageInfo()
 	if owner:IsValid() then damageInfo:SetAttacker(owner) end

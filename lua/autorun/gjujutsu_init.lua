@@ -11,6 +11,10 @@ gJujutsu_Sweps = {
 	["gjujutsu_sukuna"] = true
 }
 
+-- TODO: Fix singleplayer bugs
+-- TODO: Panel if gebLib not installed
+-- TODO: Merge particles to gjujutsu
+
 if CLIENT then
 	local function SetNombatSong(weapon)
 		if not weapon:IsValid() then return end
@@ -26,7 +30,7 @@ if CLIENT then
 		if not NOMBAT then return end
 
 		-- Precaching music durations for nombat
-		print("Preacaching sounds for NOMBAT")
+		gebLib.PrintDebug("Precaching sounds for NOMBAT")
 		for swepClass, _ in pairs(gJujutsu_Sweps) do
 			gebLib_SoundDuration("sound/nombat/gjujutsu/" .. swepClass .. ".mp3")
 		end
@@ -91,7 +95,7 @@ if SERVER then
 		end
 	end)
 
-	hook.Add("gebLib_PlayerFullyConnected", "LoadgJujutsuNombatCompat", function(ply, transition)
+	hook.Add("gebLib_PlayerFullyConnected", "gJujutsu_NombatInit", function(ply, transition)
 		if not NOMBAT then return end
 
 		net.Start("gJujutsu.LoadNombat")

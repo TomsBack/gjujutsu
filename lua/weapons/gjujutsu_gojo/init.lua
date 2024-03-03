@@ -17,7 +17,6 @@ hook.Add("EntityTakeDamage", "gJujutsu_InfinityNoDamage", function(ply, dmg)
 		if inflictor:IsValid() and weapon.DamageBypassBase[inflictor.Base] then return false end
 		if attacker:IsValid() and weapon.DamageBypassEnts[attacker:GetClass()] then return false end
 		if inflictor:IsValid() and weapon.DamageBypassEnts[inflictor:GetClass()] then return false end
-		print(attacker, inflictor)
 		if inflictor:IsWeapon() and inflictor:Gjujutsu_IsSukuna() and inflictor:AdaptedToInfinity() then return false end
 
 

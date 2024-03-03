@@ -468,18 +468,15 @@ function SWEP:StartDomain()
 			local distance = owner:GetPos():Distance(ply:GetPos())
 
 			if distance <= weapon.DomainRange + self.DomainRange then
-				print("Close in to clash")
 
 				local nearClashData = ply:Gjujutsu_GetDomainClashData()
 
-				print(tostring(owner) .. " joined the clash of " .. tostring(nearClashData.Players[1]))
+				gebLib.PrintDebug(tostring(owner) .. " joined the clash of " .. tostring(nearClashData.Players[1]))
 
 				table.insert(nearClashData.Players, owner)
 				return
 			end
 		end
-
-		print("Creating own clash")
 		owner:CreateDomainClashTable()
 	end
 
@@ -652,8 +649,6 @@ function SWEP:HollowPurpleFire()
 	self:SetHoldingPurple(false)
 	
 	if not hollowPurple:IsValid() then return end
-
-	print("Stopped holding purple")
 
 	self:SetBusy(false)
 
