@@ -676,6 +676,7 @@ function SWEP:DomainExpansion()
 		domain:Activate()
 	end
 
+	print("domain expansion")
 	self:DomainExpansionCinematic()
 
 	self:RemoveCursedEnergy(self.UltimateCost)

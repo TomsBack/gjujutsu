@@ -12,7 +12,6 @@ gJujutsu_Sweps = {
 }
 
 -- TODO: Fix singleplayer bugs
--- TODO: Panel if gebLib not installed
 -- TODO: Merge particles to gjujutsu
 
 if CLIENT then

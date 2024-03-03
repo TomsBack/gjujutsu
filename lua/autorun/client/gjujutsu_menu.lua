@@ -31,7 +31,9 @@ local blackNoOpacity = Color(0, 0, 0, 0)
 
 local sweps = gJujutsu_Sweps
 
-timer.Simple(1, function()
+hook.Add("InitPostEntity", "gebLib_Missing", function()
+	if gebLib then return end
+
 	local frame = vgui.Create("DFrame")
 	frame:SetSize(600, 160)
 	frame:SetPos((ScrW() - frame:GetWide()) / 2, (ScrH() - frame:GetTall()) / 2)
