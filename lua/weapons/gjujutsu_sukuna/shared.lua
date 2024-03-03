@@ -386,6 +386,8 @@ function SWEP:Cleave()
 		if ent:GetOwner() == owner then continue end
 		if ent == self:GetDomain() then continue end
 
+		local isPlayer = ent:IsPlayer()
+
 		if SERVER then
 			local timerName = "Gjujutsu_Cleave" .. tostring(ent:EntIndex()) .. tostring(ent)
 
@@ -428,10 +430,20 @@ function SWEP:Cleave()
 				end
 
 				ent:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"), 75, math.random(70, 150), 0.7, CHAN_STATIC)
-		
+				
+				local hadFlag
+				if isPlayer then 
+					hadFlag = ent:IsEFlagSet( EFL_NO_DAMAGE_FORCES ) 
+					ent:AddEFlags( EFL_NO_DAMAGE_FORCES ) 
+				end
+				//
 				SuppressHostEvents(nil)
 				ent:TakeDamageInfo(damageInfo)
 				SuppressHostEvents(owner)
+				//
+				if hadFlag then 
+					ent:AddEFlags( EFL_NO_DAMAGE_FORCES ) 
+				end
 			end)
 		end
 	end
