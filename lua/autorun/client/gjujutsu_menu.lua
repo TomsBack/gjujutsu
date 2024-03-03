@@ -31,6 +31,40 @@ local blackNoOpacity = Color(0, 0, 0, 0)
 
 local sweps = gJujutsu_Sweps
 
+timer.Simple(1, function()
+	local frame = vgui.Create("DFrame")
+	frame:SetSize(600, 160)
+	frame:SetPos((ScrW() - frame:GetWide()) / 2, (ScrH() - frame:GetTall()) / 2)
+	frame:SetTitle("Error: gebLib is missing")
+	frame:SetBackgroundBlur(true)
+	frame:MakePopup()
+
+	local labelTitle = vgui.Create("DLabel", frame)
+	labelTitle:SetPos(250, 35)
+	labelTitle:SetText("gebLib is missing!")
+	labelTitle:SetTextColor(Color(255,128,128))
+	labelTitle:SizeToContents()
+	
+	local label1 = vgui.Create("DLabel", frame)
+	label1:SetPos(10, 60)
+	label1:SetText("You have an addon installed that requires gebLib but gebLib is missing. To install gebLib, click on the link below. Once\n                                                   installed, make sure it is enabled and then restart your game.")
+	label1:SizeToContents()
+	
+	local link = vgui.Create("DLabelURL", frame)
+	link:SetPos(195, 90)
+	link:SetSize(300, 20)
+	link:SetText("gebLib_Download_Link_(Steam_Workshop)")
+	link:SetURL("https://steamcommunity.com/sharedfiles/filedetails/?id=3171164705")
+	
+	local buttonClose = vgui.Create("DButton", frame)
+	buttonClose:SetText("CLOSE")
+	buttonClose:SetPos(260, 120)
+	buttonClose:SetSize(80, 35)
+	buttonClose.DoClick = function()
+		frame:Close()
+	end
+end)
+
 spawnmenu.AddContentType("gJujutsu", function( container, obj)
 	if not container:IsValid() then return end
 	if !obj.material then return end
