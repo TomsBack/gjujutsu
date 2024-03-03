@@ -241,15 +241,10 @@ function SWEP:Think()
 	self:BrainRecoverThink()
 	self:HealOthersThink()
 	self:SukunaConvarsThink()
-
-	if SERVER then
-		self:NextThink(CurTime())
-		return true
-	end
 end
 
 function SWEP:PrimaryAttack()
-
+	print( self )
 end
 
 function SWEP:SecondaryAttack()

@@ -232,11 +232,6 @@ function SWEP:Think()
 	self:FlightThink()
 	self:BrainRecoverThink()
 	self:GojoConvarsThink()
-
-	if SERVER then
-		self:NextThink(CurTime())
-		return true
-	end
 end
 
 function SWEP:PrimaryAttack()
