@@ -17,72 +17,50 @@ function SWEP:InfinityThink()
 		return
 	end
 
-	if not owner:IsValid() then return end
+	if not owner:gebLib_ValidAndAlive() then return end
 
 	local ownerPos = owner:GetPos()
 	local ownerCenter = owner:WorldSpaceCenter()
 	local ownerVelocity = owner:GetVelocity()
 
 	local dmgInfo = DamageInfo()
-	if owner:IsValid() then
-		dmgInfo:SetAttacker(owner)
-		dmgInfo:SetInflictor(owner)
-	end
+	if owner:IsValid() then dmgInfo:SetAttacker(owner) end
+	if self:IsValid() then dmgInfo:SetInflictor(self) end
+	dmgInfo:SetInflictor(self)
 	dmgInfo:SetDamageType(DMG_GENERIC)
 
-	for _, ent in ents.Pairs() do
+	local oldEnts = self.InfinityEnts
+	local newEnts = {}
+
+	for _, ent in ipairs(ents.FindInSphere(ownerPos, self.InfinityRadius)) do
 		if not ent:IsValid() then continue end
+		if not ent:gebLib_IsUsableEntity() then continue end
 		if self.InfinityBlacklist[ent:GetClass()] then return end
 		if ent:IsPlayer() or ent:IsNextBot() then continue end
+		if ent == self or ent == owner or ent:GetOwner() == owner then continue end
+		if ent.Base == "domain_base" then continue end
 
-		local entPos = ent:GetPos()
-		local distance = ownerPos:Distance(ent:GetPos())
-		local phys = ent:GetPhysicsObject()
-
-		local repelDirection = (entPos - ownerCenter):GetNormalized()
-		repelDirection.z = 0
-
-		if distance <= self.InfinityRadius and not ent.gJujutsu_InfinityEffect then
-			ent.gJujutsu_InfinityEffect = true
-			ent.gJujutsu_OldMoveType = ent:GetMoveType()
-			
-			ent:SetMoveType(MOVETYPE_NONE)
-			ent:SetVelocity(vector_origin)
-			if not ent:IsNPC() then
-				ent:AddEFlags(EFL_NO_THINK_FUNCTION)
-			end
-			
-			if phys:IsValid() then
-				ent.gJujutsu_OldGravity = phys:IsGravityEnabled()
-				phys:SetVelocityInstantaneous(vector_origin)
-				phys:SetAngleVelocityInstantaneous(vector_origin)
-				phys:EnableGravity(false)
-			end
-
-			continue
-		end
-
-		if distance > self.InfinityRadius and ent.gJujutsu_InfinityEffect then
-			ent.gJujutsu_InfinityEffect = false
-
-			ent:SetMoveType(ent.gJujutsu_OldMoveType)
-			if not ent:IsNPC() then
-				ent:RemoveEFlags(EFL_NO_THINK_FUNCTION)
-			end
-
-			if phys:IsValid() then
-				phys:EnableGravity(ent.gJujutsu_OldGravity)
-				phys:Wake()
-			end
-		end
+		newEnts[ent] = true
 	end
 
-	if true then return end
+	for ent, _ in pairs(oldEnts) do
+		if newEnts[ent] then continue end
+
+		self:RemoveInfinityEffect(ent)
+		print("Out of infinity", ent)
+	end
+
+	for ent, _ in pairs(newEnts) do
+		if oldEnts[ent] then continue end
+
+		self:AddInfinityEffect(ent)
+		print("Entered infinity", ent)
+	end
+
+	self.InfinityEnts = newEnts
 	
-	for _, ent in ents.Pairs() do
-		if not ent:IsValid() then continue end
+	for ent, _ in pairs(self.InfinityEnts) do
 		local entPos = ent:GetPos()
-		local distance = ownerPos:Distance(ent:GetPos())
 
 		local repelDirection = (entPos - ownerCenter):GetNormalized()
 		repelDirection.z = 0
@@ -98,7 +76,7 @@ function SWEP:InfinityThink()
 		local repelTrace = util.TraceLine(traceData)
 
 		if repelTrace.Hit then
-			dmgInfo:SetDamage(math.Rand(0.75, 2))
+			dmgInfo:SetDamage(math.Rand(0.5, 2))
 			if SERVER then
 				SuppressHostEvents(nil)
 				ent:TakeDamageInfo(dmgInfo)

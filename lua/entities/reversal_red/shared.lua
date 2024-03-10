@@ -444,7 +444,7 @@ function ENT:ProjectileExplode()
 	end
 
 	if SERVER then
-		self:EmitSound(self.ExplosionSound)
+		self:EmitSound(self.ExplosionSound, 100)
 	end
 
 	local timeHeld = self:GetHoldTime()
@@ -514,7 +514,7 @@ function ENT:ProjectileExplode()
 	-- Spawn the explosion effect entity
 	if CLIENT then
 		local windWaveEnt = ents.CreateClientside("explosion_ent")
-		windWaveEnt.SphereSize = timeHeld * 350
+		windWaveEnt.SphereSize = timeHeld * 500
 		windWaveEnt.EffectTime = 0.75
 		windWaveEnt.StartAlpha = 100
 		windWaveEnt:SetPos(redPos)
@@ -523,7 +523,7 @@ function ENT:ProjectileExplode()
 		timer.Simple(0.1, function()
 			local explosionEnt = ents.CreateClientside("explosion_ent")
 			explosionEnt.EffectColor = Color(255, 0, 0)
-			explosionEnt.SphereSize = timeHeld * 200
+			explosionEnt.SphereSize = timeHeld * 400
 			explosionEnt:SetPos(redPos)
 			explosionEnt:Spawn()
 		end)

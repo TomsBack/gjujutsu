@@ -2,6 +2,7 @@ local MENT = FindMetaTable("Entity")
 local MPLY = FindMetaTable("Player")
 local MSWEP = FindMetaTable("Weapon")
 
+-- Used to check if an entity is an ability
 local abilityClasses = {
 	["purple_blue"] = true,
 	["purple_red"] = true,
@@ -9,11 +10,31 @@ local abilityClasses = {
 	["lapse_blue"] = true,
 	["reversal_red"] = true,
 	["fire_arrow"] = true,
-	[""] = true,
+	["mahoraga_wheel"] = true,
 }
 
 function MENT:Gjujutsu_IsAbility()
 	return abilityClasses[self:GetClass()]
+end
+
+function MENT:Gjujutsu_IsCursedSpirit()
+	return self.CursedSpirit
+end
+
+function MENT:Gjujutsu_IsEvil()
+	if self:Gjujutsu_IsCursedSpirit() then
+		return true
+	end
+
+	if self:IsPlayer() then
+		local weapon = self:GetActiveWeapon()
+
+		if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+			return weapon.IsEvil
+		end
+	end
+
+	return gJujutsu_EvilClasses[self:GetClass()]
 end
 
 function MENT:Gjujutsu_IsInDomain()

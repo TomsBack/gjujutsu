@@ -1,7 +1,7 @@
 include("shared.lua")
 
-local abilityBox = Material("hud/ability_box_black2.png","smooth")
-local keyBox = Material("hud/ability_box_white.png","smooth")
+local abilityBox = Material("hud/ability_box_black")
+local keyBox = Material("hud/ability_box_white")
 local statsBox = Material("hud/general_box.png","smooth")
 local healthBox = Material("hud/health.png","smooth")
 
@@ -23,6 +23,56 @@ local cursedEnergyColor = Color(72,167,255)
 
 local healthColor = Color(255, 0, 0, 255)
 local armorColor = Color(16, 73, 158)
+
+local energyMat = Material("effects/jujutsu_aura.vmt")
+
+local goodAttunment = Color(0, 190, 238)
+local badAttunment = Color(184, 0, 0)
+
+local auraVisionRangeConvar = GetConVar("gjujutsu_misc_ce_aura_range")
+
+function SWEP:DrawCursedEnergyAura(entsTable, classWhiteList)
+	if auraVisionRangeConvar:GetFloat() <= 0 then return end
+
+	local owner = self:GetOwner()
+
+	if not owner:IsValid() then return end
+
+	for _, ent in ipairs(entsTable) do
+		if not ent:IsValid() then continue end
+		if ent == owner then continue end
+		if classWhiteList and ent:GetClass() ~= classWhiteList then continue end
+
+		local finalCursedEnergy = 0
+		
+		if ent:IsPlayer() then
+			local weapon = ent:GetActiveWeapon()
+
+			if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+				finalCursedEnergy = weapon:GetCursedEnergy()
+			end
+		end
+
+		if isnumber(ent.CursedEnergy) then
+			finalCursedEnergy = ent.CursedEnergy
+		end
+
+		if finalCursedEnergy <= 0 then continue end
+		local energyToScale = math.Remap(finalCursedEnergy, 0, 20000, 3, 200)
+		local isEvil = ent:Gjujutsu_IsEvil()
+
+		cam.Start3D()
+			cam.IgnoreZ(true)
+				render.SetMaterial(energyMat)
+				if isEvil then					
+					render.DrawSprite(ent:WorldSpaceCenter(), energyToScale, energyToScale, badAttunment)
+				else
+					render.DrawSprite(ent:WorldSpaceCenter(), energyToScale, energyToScale, goodAttunment)
+				end
+			cam.IgnoreZ(false)
+		cam.End3D()
+	end
+end
 
 -- TODO: Broken in older gmod versions
 hook.Add("OnScreenSizeChanged", "gJujutsu_CacheScreenSize", function(oldW, oldH, newW, newH)

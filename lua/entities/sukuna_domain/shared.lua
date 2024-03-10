@@ -66,15 +66,16 @@ function ENT:Initialize()
 
 	self:SetSequence(1)
 	self:SetPlaybackRate(0)
-	self:SetNoDraw(true)
-
+	self:DrawShadow(true)
+	
 	if CLIENT then	
+		self:SetNoDraw(true)
 		self:SetRenderBoundsWS(renderMins, renderMaxs)
 		self:SetRenderBounds(renderMins, renderMaxs)
 		self:SetRenderClipPlaneEnabled(false)
 	end
 
-	self:SetTimedEvent("RevealShrine", 6.58)
+	self:SetTimedEvent("RevealShrine", 6.68)
 end
 
 function ENT:PostInitialize()
@@ -136,13 +137,16 @@ function ENT:DefaultPredictedThink(ply, mv)
 end
 
 function ENT:RevealShrine()
-	self:SetNoDraw(false)
-	local effectData = EffectData()
-	effectData:SetEntity(self)
+	if CLIENT then
+		local effectData = EffectData()
+		-- effectData:SetRadius(0.25)
+		effectData:SetEntity(self)
+		
+		util.Effect("spawn_effect", effectData)
+		self:SetNoDraw(false)
+	end
 
-	util.Effect("spawn_effect", effectData)
-
-	self:SetTimedEvent("StartShrine", 4.3)
+	self:SetTimedEvent("StartShrine", 4.2)
 end
 
 function ENT:StartShrine()
@@ -245,9 +249,8 @@ function SlashThink(self)
 	-- Decimate everything in range
 	for ent, _ in pairs(self.EntsInDomain) do
 		if not ent:IsValid() then continue end
-		if self.DomainBlacklist[ent:GetClass()] then continue end
 		if self.Children[ent] then continue end
-		if not ent:IsSolid() or ent == self or ent == owner then continue end
+		if ent == owner then continue end
 
 		local randomVelocity = VectorRand() * 300
 

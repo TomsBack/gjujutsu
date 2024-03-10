@@ -71,6 +71,9 @@ local blackholeExplosionSound = Sound("gjujutsu_kaisen/sfx/gojo/purple_blackhole
 
 local clashExplosionFinish = 5
 
+local renderMins = Vector(-9999999, -9999999, -9999999)
+local renderMaxs = Vector(9999999, 9999999, 9999999)
+
 ENT.DamageExceptions = {
     ["npc_monk"] = DMG_GENERIC,
     ["npc_strider"] = DMG_GENERIC,
@@ -127,6 +130,10 @@ function ENT:Initialize()
 		
         self.HollowPurpleParticle = hollowPurpleParticle
 		table.insert(self.Particles, self.HollowPurpleParticle)
+
+		self:SetRenderBoundsWS(renderMins, renderMaxs)
+		self:SetRenderBounds(renderMins, renderMaxs)
+		self:SetRenderClipPlaneEnabled(false)
     end
 
 	local owner = self:GetOwner()
@@ -244,7 +251,6 @@ function ENT:SpawnDebris()
     local startPos = self:GetPos() + vector_up * 50
 
 	local finalSize = math.Remap(self:GetFinalHoldTime(), 0, self.MaxHoldTime, self.HitBoxSize.Min, self.HitBoxSize.Max)
-
 
     local traceData = {
         start = startPos,
@@ -365,8 +371,9 @@ function ENT:Explode()
 		  
 		local explosionParticle = CreateParticleSystemNoEntity("hollow_purple_explosion", self:GetPos())
 
-		self.HollowPurpleParticle:StopEmissionAndDestroyImmediately()
-
+		if self.HollowPurpleParticle:IsValid() then
+			self.HollowPurpleParticle:StopEmissionAndDestroyImmediately()
+		end
 		table.insert(self.Particles, explosionParticle)
 
 		--Spawn an epxlosion light
@@ -408,22 +415,20 @@ function ENT:DoDamage()
     if CLIENT then return end
 
     local owner = self:GetOwner()
+	local weapon = owner:GetActiveWeapon()
 
 	local finalHitbox = math.Remap(self:GetFinalHoldTime(), 0, self.MaxHoldTime, self.HitBoxSize.Min, self.HitBoxSize.Max)
 	local finalDamage = math.Remap(self:GetFinalHoldTime(), 0, self.MaxHoldTime, self.DamageMin, self.DamageMax)
 
 	local purplePos = self:GetPos()
 
-    for _, v in ents.Pairs() do
+    for _, v in ipairs(ents.FindInSphere(purplePos, finalHitbox)) do
 		if not v:IsValid() then continue end
 		if v == self or v == owner or v:GetOwner() == owner then continue end
+		if weapon:IsGjujutsuSwep() and v == weapon:GetDomain() then continue end
 		if gJujutsu_EntsBlacklist[v:GetClass()] then continue end
 		if self.Weapon:IsValid() and v == self.Weapon:GetDomain() then continue end
 		if self.DamagedList[v] then continue end
-		
-		local distance = purplePos:Distance(v:GetPos())
-
-		if distance > finalHitbox then continue end
 
 		self.DamagedList[v] = v
 

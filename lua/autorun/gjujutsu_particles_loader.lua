@@ -14,6 +14,7 @@ game.AddParticles("particles/infinite_void.pcf")
 game.AddParticles("particles/hollow_purple.pcf")
 game.AddParticles("particles/reverse_cursed.pcf")
 game.AddParticles("particles/fire_arrow.pcf")
+game.AddParticles("particles/blue.pcf")
 
 ------------------------------------------------------------------------------
 
@@ -110,3 +111,5 @@ PrecacheParticleSystem("dismantle_slash")
 PrecacheParticleSystem("cleave")
 
 PrecacheParticleSystem("reverse_cursed")
+
+PrecacheParticleSystem("gj_blue_projectile")

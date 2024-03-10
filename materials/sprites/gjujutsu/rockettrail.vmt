@@ -1,7 +1,8 @@
-"SpriteCard"
+SpriteCard
 {
-	"$basetexture" "sprites/gjujutsu/rockettrail"
-	"$vertexcolor" "1"
-	"$translucent" "1"
-	"$addself" "100"
+	$basetexture "sprites/gjujutsu/rockettrail"
+	$vertexcolor "1"
+	$addself "100"
+	$minfadesize "0.25"
+	$maxfadesize "0.5"
 }

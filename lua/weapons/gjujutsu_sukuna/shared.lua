@@ -60,6 +60,8 @@ SWEP.AbilitiesUp = {
 	[AbilityKey.Block] = "EndBlock",
 }
 
+SWEP.IsEvil = true
+
 SWEP.DefaultHealth = 3000
 SWEP.DefaultMaxHealth = 3000
 

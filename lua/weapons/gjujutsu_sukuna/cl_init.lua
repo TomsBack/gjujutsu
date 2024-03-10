@@ -9,6 +9,8 @@ local ability8 = GetConVar("gjujutsu_ability8_key")
 local abilityUltimate = GetConVar("gjujutsu_ultimate_key")
 local abilityTaunt = GetConVar("gjujutsu_taunt_key")
 
+local auraVisionRangeConvar = GetConVar("gjujutsu_misc_ce_aura_range")
+
 function SWEP:DrawHUD()
 	local owner = self:GetOwner()
 	local ang = EyeAngles()
@@ -58,6 +60,9 @@ function SWEP:DrawHUD()
 
 	cam.End3D()
 	DisableClipping(false)
+
+	-- Drawing cursed energy
+	self:DrawCursedEnergyAura(ents.FindInSphere(owner:GetPos(), auraVisionRangeConvar:GetFloat()), "sukuna_finger")
 end
 
 -- Nets handling

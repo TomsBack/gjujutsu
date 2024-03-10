@@ -11,8 +11,12 @@ gJujutsu_Sweps = {
 	["gjujutsu_sukuna"] = true
 }
 
+-- Used to determine the color of the aura for the item 
+gJujutsu_EvilClasses = {
+	["sukuna_finger"] = true
+}
+
 -- TODO: Fix singleplayer bugs
--- TODO: Merge particles to gjujutsu
 
 if CLIENT then
 	local function SetNombatSong(weapon)

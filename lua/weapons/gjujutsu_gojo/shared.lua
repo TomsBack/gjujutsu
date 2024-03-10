@@ -95,15 +95,16 @@ SWEP.TeleportDistance = 3500
 SWEP.TeleportIndicator = NULL
 
 SWEP.InfinityRadius = 175
+SWEP.InfinityEnts = {}
 SWEP.FlightDrain = 0.2 -- Per tick
 
-SWEP.DefaultCursedEnergy = 8000
-SWEP.DefaultMaxCursedEnergy = 8000
+SWEP.DefaultCursedEnergy = 15000
+SWEP.DefaultMaxCursedEnergy = 15000
 SWEP.CursedEnergyDrain = 1.25
 
-SWEP.SixEyesMaxCursedEnergy = 16000
-SWEP.SixEyesCursedEnergyRegen = 0.35
-SWEP.SixEyesHealthGain = 12
+SWEP.SixEyesCursedEnergyDrainMult = 0.5
+SWEP.SixEyesCursedEnergyRegen = 0.28
+SWEP.SixEyesHealthGain = 11
 SWEP.SixEyesDamageMultiplier = 2.6
 
 SWEP.ClashPressScore = 1.95
@@ -156,7 +157,7 @@ end
 
 function SWEP:PostInitialize()
 	self:DefaultPostInitialize()
-
+	
 	local owner = self:GetOwner()
 
 	if owner:IsValid() then
@@ -257,10 +258,25 @@ function SWEP:LapseBlue()
 	if self:GetCursedEnergy() < self.Ability3Cost then return end
 	local owner = self:GetOwner()
 
-	self:SetBusy(true)
-	self:EmitSound(self.BlueActivateSound)
+	if not owner:KeyDown(IN_WALK) then
+		self:SetBusy(true)
+		self:EmitSound(self.BlueActivateSound)
+		
+		self:BlueSpawn(owner:KeyDown(IN_SPEED))
+	else
+		if SERVER then
+			local angles = owner:GetAngles()
 
-	self:BlueSpawn(owner:KeyDown(IN_SPEED))
+			local blue = ents.Create("blue_projectile")
+			blue:SetOwner(owner)
+			blue:SetPos(owner:GetPos() + angles:Up() * 63 + angles:Forward() * 19)
+			blue:SetFireVelocity(owner:GetAimVector())
+			blue:Spawn()
+		end
+
+		self:SetNextAbility3(CurTime() + self.Ability3CD)
+	end
+		
 	self:RemoveCursedEnergy(self.Ability3Cost)
 	return true
 end
@@ -278,6 +294,7 @@ function SWEP:ReversalRed()
 	owner:gebLib_PlayAction("gojo_red")
 
 	timer.Create("reversal_red_key_pause" .. tostring(owner), 2, 1, function()
+		if not self:IsValid() then return end
 		if not owner:IsValid() then return end
 		if not self:GetRed():IsValid() then return end
 
@@ -363,20 +380,16 @@ function SWEP:SixEyesActivate()
 
 		self.DamageMultiplier = self.SixEyesDamageMultiplier
 		self.HealthGain = self.SixEyesHealthGain
+		self.CursedEnergyDrainMult = self.SixEyesCursedEnergyDrainMult
 
-		self:SetMaxCursedEnergy(self.SixEyesMaxCursedEnergy)
 		self:SetCursedEnergyRegen(self.SixEyesCursedEnergyRegen)
-		
-		if self:GetCursedEnergy() >= self.DefaultMaxCursedEnergy then
-			self:SetCursedEnergy(self.SixEyesMaxCursedEnergy)
-		end
 	else
 		owner:SetBodygroup(1, 0)
 
 		self.DamageMultiplier = self.DefaultDamageMultiplier
 		self.HealthGain = self.DefaultHealthGain
+		self.CursedEnergyDrainMult = self.CursedEnergyDrainMult
 
-		self:SetMaxCursedEnergy(self.DefaultMaxCursedEnergy)
 		self:SetCursedEnergyRegen(self.DefaultCursedEnergyRegen)
 	end
 
@@ -623,28 +636,65 @@ function SWEP:DisableInfinityProps()
 
 	local ownerPos = owner:GetPos()
 
-	for _, ent in ents.Pairs() do
-		if not ent:IsValid() then continue end
-		if ent:IsPlayer() or ent:IsNextBot() then continue end
-		local distance = ownerPos:Distance(ent:GetPos())
-		local phys = ent:GetPhysicsObject()
-
-		if distance <= self.InfinityRadius and ent.gJujutsu_InfinityEffect then
-			ent.gJujutsu_InfinityEffect = false
-
-			ent:SetMoveType(ent.gJujutsu_OldMoveType)
-
-			if not ent:IsNPC() then
-				ent:RemoveEFlags(EFL_NO_THINK_FUNCTION)
-			end
-
-			if phys:IsValid() then
-				phys:EnableGravity(ent.gJujutsu_OldGravity)
-				phys:Wake()
-			end
-			continue
-		end
+	for ent, _ in pairs(self.InfinityEnts) do
+		self:RemoveInfinityEffect(ent)
 	end
+
+	self.InfinityEnts = {}
+end
+
+local vector_origin = vector_origin
+function SWEP:AddInfinityEffect(ent)
+	if not ent:IsValid() then return end
+	
+	ent.gJujutsu_InfinityEffect = true
+	ent.gJujutsu_OldMoveType = ent:GetMoveType()
+	
+	ent:SetMoveType(MOVETYPE_NONE)
+	ent:SetVelocity(vector_origin)
+	if not ent:IsNPC() then
+		ent:AddEFlags(EFL_NO_THINK_FUNCTION)
+	end
+
+	local phys = ent:GetPhysicsObject()
+	
+	if phys:IsValid() then
+		ent.gJujutsu_OldGravity = phys:IsGravityEnabled()
+		phys:SetVelocityInstantaneous(vector_origin)
+		phys:SetAngleVelocityInstantaneous(vector_origin)
+		phys:EnableGravity(false)
+	end
+end
+
+function SWEP:RemoveInfinityEffect(ent)
+	if not ent:IsValid() then return end
+	if not ent.gJujutsu_InfinityEffect then return end
+
+	local oldPos = ent:GetPos()
+
+	ent.gJujutsu_InfinityEffect = false
+
+	if ent.gJujutsu_OldMoveType ~= nil then
+		ent:SetMoveType(ent.gJujutsu_OldMoveType)
+	end
+
+	if not ent:IsNPC() then
+		ent:RemoveEFlags(EFL_NO_THINK_FUNCTION)
+	end
+
+	local phys = ent:GetPhysicsObject()
+	
+	if phys:IsValid() then
+		phys:EnableGravity(ent.gJujutsu_OldGravity)
+		phys:Wake()
+		phys:SetVelocityInstantaneous(vector_origin)
+		phys:SetAngleVelocityInstantaneous(vector_origin)
+	end
+	ent:SetVelocity(vector_origin)
+
+	ent:SetPos(oldPos)
+
+	self.InfinityEnts[ent] = nil
 end
 
 function SWEP:RedSpawn(projectileMode)

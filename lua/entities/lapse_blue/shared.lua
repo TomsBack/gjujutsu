@@ -1,8 +1,5 @@
-if SERVER then
-	AddCSLuaFile("shared.lua")
-end
+AddCSLuaFile()
 
---
 ENT.PrintName = "Gojo Blue"
 ENT.Author = "El Tomlino" 
 ENT.Contact = "Steam"
@@ -33,7 +30,9 @@ ENT.DamageMax = 20
 ENT.DamageCD = 0.1
 
 -- Entities that are not attracted by blue, identified by entity class
-ENT.AttractBlacklistClass = {}
+ENT.AttractBlacklistClass = {
+	["mahoraga_wheel"] = true
+}
 
 -- Entities that are not attracted by blue, identified by entity base
 ENT.AttractBlacklistBase = {
@@ -53,6 +52,9 @@ ENT.Particles = {}
 
 -- FIXME: Sound is not playing for some reason, possibly corrupted?
 local loopSound = Sound("gjujutsu_kaisen/sfx/gojo/blue_on.mp3")
+
+local renderMins = Vector(-9999999, -9999999, -9999999)
+local renderMaxs = Vector(9999999, 9999999, 9999999)
 
 function ENT:SetupDataTables()
 	self:NetworkVar("Bool", 0, "AroundMode")
@@ -74,6 +76,12 @@ function ENT:Initialize()
 		self:SetLagCompensated(true)
 	end
 
+	if CLIENT then	
+		self:SetRenderBoundsWS(renderMins, renderMaxs)
+		self:SetRenderBounds(renderMins, renderMaxs)
+		self:SetRenderClipPlaneEnabled(false)
+	end
+
 	local owner = self:GetOwner()
 	local weapon = owner:GetActiveWeapon()
 
@@ -86,7 +94,7 @@ function ENT:Initialize()
 		if SERVER and (not owner:Alive() or not weapon:IsValid()) then self:Remove() return end
 		if not weapon:IsValid() then return end
 
-		weapon:SetCursedEnergy(math.max(weapon:GetCursedEnergy() - self.CursedEnergyDrain))
+		weapon:RemoveCursedEnergy(self.CursedEnergyDrain)
 
 		if weapon:GetCursedEnergy() <= 0 then
 			weapon:BlueRemove()
@@ -100,7 +108,7 @@ function ENT:Initialize()
 
 	if CLIENT then	
 		table.insert(self.Particles, CreateParticleSystem(self, "YLapse", PATTACH_ABSORIGIN_FOLLOW, 1))
-		table.insert(self.Particles, CreateParticleSystem(self, "YLapse", PATTACH_ABSORIGIN_FOLLOW, 1))
+		-- table.insert(self.Particles, CreateParticleSystem(self, "YLapse", PATTACH_ABSORIGIN_FOLLOW, 1))
 	end
 
 	if SERVER then
@@ -200,9 +208,9 @@ function ENT:AttractThink()
 	if owner:IsValid() then dmg:SetAttacker(owner) end
 	if weapon:IsValid() then dmg:SetInflictor(weapon) end
 
-	for _, ent in ipairs(ents.FindInSphere(self:GetPos(), self.Radius)) do
+	for _, ent in ipairs(ents.FindInSphere(bluePos, self.Radius)) do
 		if not ent:IsValid() then continue end
-		if gJujutsu_EntsBlacklist[ent:GetClass()] then continue end
+		if not ent:gebLib_IsUsableEntity() then continue end
 		if ent == self or ent == owner then continue end
 		if self.AttractBlacklistBase[ent.Base] or self.AttractBlacklistClass[ent:GetClass()] then continue end
 		if ent == weapon:GetDomain() then continue end

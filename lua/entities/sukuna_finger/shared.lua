@@ -14,6 +14,8 @@ ENT.RenderGroup	= RENDERGROUP_OPAQUE
 
 ENT.Model = Model("models/gjujutsu/sukuna_finger/sukuna_finger.mdl")
 
+ENT.CursedEnergy = 5000
+
 ENT.FingerEatSound = Sound("sukuna/sfx/finger_eat.mp3")
 ENT.LaughSound = Sound("sukuna/voice/sukuna_laugh.mp3")
 

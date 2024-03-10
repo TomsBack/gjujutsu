@@ -76,16 +76,15 @@ function ENT:HitDetectionThink()
 
 	local traceData = {
 		start = redPos,
-		endpos = redPos + self:GetFireVelocity() * 10,
+		endpos = redPos + self:GetFireVelocity() * 15,
 		mins = self.HitBoxMins,
 		maxs = self.HitBoxMaxs,
-		filter = {self, owner},
-		mask = MASK_ALL
+		filter = {self, owner}
 	}
 
-	if SERVER then owner:LagCompensation(true) end
+	owner:LagCompensation(true)
 	local trace = util.TraceHull(traceData)
-	if SERVER then owner:LagCompensation(false) end
+	owner:LagCompensation(false)
 
 	-- Found entity, explode red
 	if trace.Hit then

@@ -78,7 +78,7 @@ end)
 
 hook.Add("EntityTakeDamage", "gJujutsu_DamageInsideDomain", function(ent, dmg)
 	if not ent:IsPlayer() then return end
-	if  dmg:GetInflictor().Base ~= "domain_base" then return end
+	if dmg:GetInflictor().Base ~= "domain_base" then return end
 	local weapon = ent:GetActiveWeapon()
 
 	if not weapon:IsGjujutsuSwep() then return end
@@ -86,6 +86,6 @@ hook.Add("EntityTakeDamage", "gJujutsu_DamageInsideDomain", function(ent, dmg)
 
 	if domain:IsValid() and domain:IsInDomain(ent) then
 		gebLib.PrintDebug("Player domain protecting from other player's domain damage")
-		return 0
+		return true
 	end
 end)

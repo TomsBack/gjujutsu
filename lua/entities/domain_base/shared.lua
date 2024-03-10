@@ -125,6 +125,7 @@ function ENT:DefaultInitialize()
 
 		self:SetMaterial(self.BarrierMaterial)
 		self:SetModelScale(self.DefaultScale, 0)
+		self:Activate()
 
 		-- Creating domain floor
 		if SERVER then
@@ -257,24 +258,20 @@ function ENT:CheckEntsInDomain()
 	local oldEnts = self.EntsInDomain
 	local newEnts = {}
 
-	for _, ent in ents.Pairs() do
+	local owner = self:GetDomainOwner()
+
+	for _, ent in ipairs(ents.FindInSphere(self:GetPos(), self.Range)) do
 		if not ent:IsValid() then continue end
+		if not ent:gebLib_IsUsableEntity() then continue end
 		if self.Children[ent] then continue end
 		if ent == self then continue end
 		if self.DomainBlacklist[ent:GetClass()] then continue end
-		if self.DomainBaseBlacklist[ent.Base] then continue end
-		if not ent:IsSolid() and not ent:Gjujutsu_IsAbility() then continue end
-		if ent:IsWeapon() then continue end
 
-		if (self:IsInDomain(ent, false)) then
-			newEnts[ent] = true
-		end
+		newEnts[ent] = true
 	end
 
 	-- Run custom hooks based on ent's state
 	for oldEnt, _ in pairs(oldEnts) do
-		if not oldEnt:IsValid() then continue end
-
 		if not newEnts[oldEnt] then
 			hook.Run("gJujutsu_EntLeftDomain", self, oldEnt)
 		end
@@ -282,8 +279,6 @@ function ENT:CheckEntsInDomain()
 
 	-- Run custom hooks based on ent's state
 	for newEnt, _ in pairs(newEnts) do
-		if not newEnt:IsValid() then continue end
-
 		if not oldEnts[newEnt] then
 			hook.Run("gJujutsu_EntEnteredDomain", self, newEnt)
 		end
@@ -357,6 +352,8 @@ function ENT:DefaultOnRemove()
 
 	local owner = self:GetDomainOwner()
 
+	gJujutsuDomains[owner] = nil
+
 	if not owner:IsValid() then return end
 	
 	-- Now play the domain destroyed sound and remove the domain
@@ -423,18 +420,8 @@ function ENT:SetDomainType(domainType)
 	self.DomainType = domainType
 end
 
-function ENT:IsInDomain(ent, useCache)
+function ENT:IsInDomain(ent)
 	if not ent:IsValid() then return false end
-	
-	if useCache == nil then useCache = true end
 
-	if useCache and self.EntsInDomain[ent] then
-		return true
-	end
-
-	local rangeSquared = self.Range * self.Range
-
-	local distance = ent:GetPos():DistToSqr(self:GetPos())
-
-	return distance <= rangeSquared
+	return self.EntsInDomain[ent]
 end

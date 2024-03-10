@@ -9,6 +9,9 @@ local ability8 = GetConVar("gjujutsu_ability8_key")
 local abilityUltimate = GetConVar("gjujutsu_ultimate_key")
 local abilityTaunt = GetConVar("gjujutsu_taunt_key")
 
+local sixEyesVisionConvar = GetConVar("gjujutsu_gojo_six_eyes_vision")
+local auraVisionRangeConvar = GetConVar("gjujutsu_misc_ce_aura_range")
+
 function SWEP:DrawHUD()
 	local owner = self:GetOwner()
 	local ang = EyeAngles()
@@ -60,4 +63,29 @@ function SWEP:DrawHUD()
 
 	cam.End3D()
 	DisableClipping(false)
+
+	local startPos = owner:WorldSpaceCenter()
+
+	-- Drawing cursed energy
+	self:DrawCursedEnergyAura(ents.FindInSphere(startPos, auraVisionRangeConvar:GetFloat()))
 end
+
+hook.Add("PreRender", "gJujutsu_SixEyesVision", function()
+	if not sixEyesVisionConvar:GetBool() then return end
+	local ply = LocalPlayer()
+
+	if not ply:IsValid() then return end
+
+	local weapon = ply:GetActiveWeapon()
+
+	if weapon:IsValid() and weapon:Gjujutsu_IsGojo() and weapon:GetSixEyes() then
+		render.SetLightingMode(1)
+	end
+end)
+
+local function DisableSixEyesVision()
+	render.SetLightingMode(0)
+end
+
+hook.Add("PostRender", "gJujutsu_DisableSixEyesVision", DisableSixEyesVision)
+hook.Add("PreDrawHUD", "gJujutsu_DisableSixEyesVision", DisableSixEyesVision)

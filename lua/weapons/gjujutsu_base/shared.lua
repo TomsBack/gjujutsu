@@ -158,6 +158,7 @@ SWEP.UltimateCost = 0
 SWEP.TauntCost = 0
 
 SWEP.Grade = Grade.NoGrade
+SWEP.IsEvil = false
 
 SWEP.DefaultDamageMultiplier = 1
 SWEP.DamageMultiplier = 1
@@ -183,6 +184,8 @@ SWEP.DefaultCursedEnergy = 1000
 SWEP.DefaultMaxCursedEnergy = 1000
 SWEP.DefaultCursedEnergyRegen = 0.15 -- Per tick
 SWEP.CursedEnergyDrain = 1.75 -- Per tick
+
+SWEP.CursedEnergyDrainMult = 1
 
 SWEP.RunSpeed = 800
 SWEP.WalkSpeed = 300
@@ -220,6 +223,8 @@ gebLib.ImportFile("includes/thinks.lua")
 gJujutsu_EntsBlacklist = {
 	["ba_stand_rewritten"] = true,
 }
+
+local ceDrainMultConvar = GetConVar("gjujutsu_misc_ce_drain_mult")
 
 function SWEP:DefaultDataTables()
 	self:NetworkVar("Entity", 31, "Domain")
@@ -283,6 +288,10 @@ function SWEP:DefaultPostInitialize()
 	self:SetHoldType(self.HoldType)
 
 	self:EnableFlashlight(false)
+
+	if CLIENT then
+		self:DefaultDeploy()
+	end
 end
 
 function SWEP:DefaultDeploy()
@@ -350,7 +359,9 @@ function SWEP:SetupModel()
 	if SERVER and game.SinglePlayer() then
 		self:CallOnClient("SetupModel")
 	end
-	
+
+	print("Switching models")
+
 	if owner:IsValid() then
 		self.OldModel = owner:GetModel()
 		owner:SetModel(self.Model)
@@ -373,7 +384,7 @@ function SWEP:AddCursedEnergy(addAmount)
 end
 
 function SWEP:RemoveCursedEnergy(substractAmount)
-	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy() - substractAmount, 0, self:GetMaxCursedEnergy()))
+	self:SetCursedEnergy(math.Clamp(self:GetCursedEnergy() - ((substractAmount * self.CursedEnergyDrainMult) * ceDrainMultConvar:GetFloat()), 0, self:GetMaxCursedEnergy()))
 end
 
 function SWEP:SetGlobalCD(cdAmount, disableTechniques)

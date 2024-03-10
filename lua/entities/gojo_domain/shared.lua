@@ -14,16 +14,11 @@ ENT.RenderGroup	= RENDERGROUP_BOTH
 
 ENT.DomainType = DomainType.Barrier
 
-ENT.SlashCD = 0.07
-ENT.SlashDamageMin = 10
-ENT.SlashDamageMax = 30
-ENT.NextSlash = 0
-
 ENT.VoidCore = NULL
 ENT.DomainSplatters = NULL
 ENT.AfterCinematic = false
 
-ENT.EnergyDrain = 0.5
+ENT.EnergyDrain = 1
 
 local cinematicSound = Sound("gjujutsu_kaisen/sfx/domain_expansion/infinity_voide/gojo_domain_v2.wav")
 local domainAmbienceSound = Sound("gjujutsu_kaisen/sfx/gojo/domain_ambience.wav")
@@ -154,6 +149,8 @@ function ENT:OnRemove()
 	self:StopSound(domainAmbienceSound)
 
 	for ent, _ in pairs(self.EntsInDomain) do
+		if not ent:IsValid() then continue end
+
 		self:UnfreezeEntity(ent)
 
 		ent:StopSound(cinematicSound)
@@ -162,7 +159,9 @@ end
 
 function ENT:FreezeEntity(ent)
 	if not ent:IsValid() then return end
-	if ent:GetClass() == "hollow_purple" then return end
+	if ent:Gjujutsu_IsAbility() then return end
+
+	print("Freezing", ent)
 
 	local owner = self:GetDomainOwner()
 	if ent == owner then return end
@@ -197,7 +196,9 @@ end
 
 function ENT:UnfreezeEntity(ent)
 	if not ent:IsValid() then return end
-	if ent:GetClass() == "hollow_purple" then return end
+	if ent:Gjujutsu_IsAbility() then return end
+
+	print("Unfreezing", ent)
 
 	local owner = self:GetDomainOwner()
 	if ent == owner then return end

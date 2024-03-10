@@ -1,0 +1,5 @@
+"UnlitGeneric"
+{
+	"$basetexture" "hud/ability_box_white"
+	"$translucent" 1
+}
