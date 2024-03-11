@@ -33,7 +33,9 @@ ENT.FireVelocity = 20
 ENT.HitBoxMins = Vector(-35, -35, -35)
 ENT.HitBoxMaxs = Vector(35, 35, 35)
 
-ENT.StopTime = 3
+ENT.Health = 2000
+
+ENT.StopTime = 2
 ENT.LifeTime = 10
 
 -- Entities that are not attracted by blue, identified by entity class
@@ -155,6 +157,14 @@ function ENT:Think()
 	if SERVER then
 		self:NextThink(CurTime())
 		return true
+	end
+end
+
+function ENT:OnTakeDamage(dmg)
+	self:SetHealth(math.max(0, self:Health() - dmg:GetDamage()))
+
+	if self:Health() <= 0 then
+		self:Remove()
 	end
 end
 

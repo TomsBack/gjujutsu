@@ -584,7 +584,7 @@ function ENT:HollowPurpleClash(otherEnt)
 	self:EmitSound(clashSound, 10)
 
 	timer.Simple(0.75, function()
-		self:EmitSound(blackholeExplosionSound, 130)
+		self:EmitSound(blackholeExplosionSound, 100)
 	end)
 
 	if SERVER then

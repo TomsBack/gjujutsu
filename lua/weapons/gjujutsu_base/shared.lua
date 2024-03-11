@@ -218,6 +218,8 @@ SWEP.BrainRecoverConvar = GetConVar("gjujutsu_misc_brain_recover_limit")
 SWEP.DomainConvar = GetConVar("gjujutsu_domain_enabled")
 SWEP.DomainClashConvar = GetConVar("gjujutsu_domain_clash_enabled")
 
+local cdMultConvar = GetConVar("gjujutsu_misc_cd_mult")
+
 gebLib.ImportFile("includes/thinks.lua")
 
 gJujutsu_EntsBlacklist = {
@@ -288,6 +290,7 @@ function SWEP:DefaultPostInitialize()
 	self:SetHoldType(self.HoldType)
 
 	self:EnableFlashlight(false)
+	self:InitializeCooldowns()
 
 	if CLIENT then
 		self:DefaultDeploy()
@@ -298,6 +301,7 @@ function SWEP:DefaultDeploy()
 	self:SetupModel()
 	self:SetupDefaultValues()
 	self:EnableFlashlight(false)
+	self:InitializeCooldowns()
 
 	if SERVER then
 		net.Start("gJujutsu_cl_deploy")
@@ -548,6 +552,21 @@ function SWEP:DisableReverseCursed()
 		owner:StopParticlesNamed("reverse_cursed")
 		self.ReverseCursedParticle:StopEmission()
 	end
+end
+
+function SWEP:InitializeCooldowns()
+	local cdMult = cdMultConvar:GetFloat()
+
+	self.PrimaryCD = self.PrimaryCD * cdMult
+	self.SecondaryCD = self.SecondaryCD * cdMult
+	self.BlockCD = self.BlockCD * cdMult
+	self.Ability3CD = self.Ability3CD * cdMult
+	self.Ability4CD = self.Ability4CD * cdMult
+	self.Ability5CD = self.Ability5CD * cdMult
+	self.Ability6CD = self.Ability6CD * cdMult
+	self.Ability7CD = self.Ability7CD * cdMult
+	self.Ability8CD = self.Ability8CD * cdMult
+	self.UltimateCD = self.UltimateCD * cdMult
 end
 
 --Deprecated

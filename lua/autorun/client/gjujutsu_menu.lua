@@ -260,7 +260,13 @@ function gJujutsuGeneralTab(panel)
 	panel:SetName("General")
 
 	panel:NumSlider("Brain recover limit", "gjujutsu_misc_brain_recover_limit", 0, 1000, 0)
-	panel:ControlHelp("How many times you can recover cooldowns until your brain gives up on you")
+	panel:ControlHelp("How many times you can recover cooldowns until your brain gives up on you. 0 to disable")
+	panel:NumSlider("CE aura range", "gjujutsu_misc_ce_aura_range", 0, 100000)
+	panel:ControlHelp("How far will certain users be able to see cursed energy. 0 to disable")
+	panel:NumSlider("CD mult", "gjujutsu_misc_cd_mult", 0, 1000)
+	panel:ControlHelp("Multiplies the Cooldown for all abilities. Needs re equiping weapon")
+	panel:NumSlider("CE drain mult", "gjujutsu_misc_ce_drain_mult", 0, 1000)
+	panel:ControlHelp("Multiplies the drain of cursed energy for all abilities")
 end
 
 function gJujutsuDomainTab(panel)
@@ -282,17 +288,21 @@ function gJujutsuDomainTab(panel)
 end
 
 function gJujutsuGojoTab(panel)
-	if not LocalPlayer():IsAdmin() then return end
-
 	panel:SetName("Gojo Settings")
 
-	panel:CheckBox("Unrestricted teleport", "gjujutsu_gojo_unrestricted_teleport")
-	panel:ControlHelp("Enables teleporting with abilities like reversal red and hollow purple")
-	panel:CheckBox("Infinity enabled", "gjujutsu_gojo_infinity_enabled")
-	panel:CheckBox("Detonate hollow purple", "gjujutsu_gojo_detonate_purple")
-	panel:ControlHelp("Will allow you to detonate hollow purple after firing one")
-	panel:NumSlider("Six eyes damage mult", "gjujutsu_gojo_six_eyes_damage_mult", 1, 1000)
-	panel:ControlHelp("Multiplies the damage of abilities when you have six eyes active")
+	if LocalPlayer():IsAdmin() then
+		panel:CheckBox("Unrestricted teleport", "gjujutsu_gojo_unrestricted_teleport")
+		panel:ControlHelp("Enables teleporting with abilities like reversal red and hollow purple")
+		panel:CheckBox("Infinity enabled", "gjujutsu_gojo_infinity_enabled")
+		panel:CheckBox("Infinity pushing ", "gjujutsu_gojo_infinity_pushing_enabled")
+		panel:CheckBox("Infinity crushing ", "gjujutsu_gojo_infinity_crushing_enabled")
+		panel:CheckBox("Detonate hollow purple", "gjujutsu_gojo_detonate_purple")
+		panel:ControlHelp("Will allow you to detonate hollow purple after firing one")
+		panel:NumSlider("Six eyes damage mult", "gjujutsu_gojo_six_eyes_damage_mult", 1, 1000)
+		panel:ControlHelp("Multiplies the damage of abilities when you have six eyes active")
+	end
+	panel:CheckBox("Six Eyes vision", "gjujutsu_gojo_six_eyes_vision")
+	panel:ControlHelp("Allow gojo to see in dark")
 end
 
 function gJujutsuSukunaTab(panel)

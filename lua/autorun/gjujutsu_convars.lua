@@ -17,7 +17,7 @@ CreateClientConVar("gjujutsu_block_key", 16, true, true, "Sets the block key", B
 
 -- Misc convars
 CreateConVar("gjujutsu_misc_brain_recover_limit", 5, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Maximum amounts of time you can recover your brain. 0 For disabling", 0, 1000)
-CreateConVar("gjujutsu_misc_ce_aura_range", 1000, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How far can certain characters see cursed energy. 0 For disabling", 0, 100000)
+CreateConVar("gjujutsu_misc_ce_aura_range", 5000, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "How far can certain characters see cursed energy. 0 For disabling", 0, 100000)
 CreateConVar("gjujutsu_misc_cd_mult", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Multiplies the cooldown of all abilities", 0, 100000)
 CreateConVar("gjujutsu_misc_ce_drain_mult", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Multiplies the cursed energy drain of all abilities", 0, 100000)
 
@@ -32,9 +32,11 @@ CreateConVar("gjujutsu_domain_clash_length", 10, {FCVAR_REPLICATED, FCVAR_ARCHIV
 -- Gojo convars
 CreateConVar("gjujutsu_gojo_unrestricted_teleport", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to teleport while holding other cursed techniques", 0, 1)
 CreateConVar("gjujutsu_gojo_infinity_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if infinity can be used", 0, 1)
+CreateConVar("gjujutsu_gojo_infinity_pushing_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if infinity pushes entities", 0, 1)
+CreateConVar("gjujutsu_gojo_infinity_crushing_enabled", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines if infinity crushes entities near walls", 0, 1)
 CreateConVar("gjujutsu_gojo_detonate_purple", 1, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Allows gojo to detonate hollow purple when you press the button again", 0, 1)
 CreateConVar("gjujutsu_gojo_six_eyes_damage_mult", 2.65, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines the damage multiplier when six eyes are active", 1, 1000)
-CreateClientConVar("gjujutsu_gojo_six_eyes_vision", 1, true, true, "Allows gojo to see in dark", 0, 1)
+CreateClientConVar("gjujutsu_gojo_six_eyes_vision", 0, true, true, "Allows gojo to see in dark", 0, 1)
 
 -- Sukuna convars
 CreateConVar("gjujutsu_sukuna_max_fingers", 20, {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Defines how much fingers sukuna can have", 1, 1000)

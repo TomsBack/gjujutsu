@@ -79,7 +79,7 @@ SWEP.TauntCD = 0
 
 SWEP.PrimaryCost = 0
 SWEP.SecondaryCost = {Min = 10, Max = 100}
-SWEP.Ability3Cost = 50
+SWEP.Ability3Cost = 100
 SWEP.Ability4Cost = 250
 SWEP.Ability5Cost = {Min = 500, Max = 1250}
 SWEP.Ability6Cost = 25
@@ -258,7 +258,7 @@ function SWEP:LapseBlue()
 	if self:GetCursedEnergy() < self.Ability3Cost then return end
 	local owner = self:GetOwner()
 
-	if not owner:KeyDown(IN_WALK) then
+	if not owner:KeyDown(IN_DUCK) then
 		self:SetBusy(true)
 		self:EmitSound(self.BlueActivateSound)
 		
@@ -274,7 +274,7 @@ function SWEP:LapseBlue()
 			blue:Spawn()
 		end
 
-		self:SetNextAbility3(CurTime() + self.Ability3CD)
+		self:SetNextAbility3(CurTime() + self.Ability3CD * 1.5)
 	end
 		
 	self:RemoveCursedEnergy(self.Ability3Cost)

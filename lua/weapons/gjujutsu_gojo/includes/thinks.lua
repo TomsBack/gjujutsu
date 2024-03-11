@@ -1,6 +1,8 @@
 -- TODO: Optimize infinity
 
 local sixEyesMultConvar = GetConVar("gjujutsu_gojo_six_eyes_damage_mult")
+local infinityPushingConvar = GetConVar("gjujutsu_gojo_infinity_pushing_enabled")
+local infnityCrushingConvar = GetConVar("gjujutsu_gojo_infinity_crushing_enabled")
 
 local convarCD = 0.5
 local nextConvarUpdate = 0
@@ -59,35 +61,38 @@ function SWEP:InfinityThink()
 
 	self.InfinityEnts = newEnts
 	
-	for ent, _ in pairs(self.InfinityEnts) do
-		local entPos = ent:GetPos()
-
-		local repelDirection = (entPos - ownerCenter):GetNormalized()
-		repelDirection.z = 0
-
-		-- Dealing damage
-		local traceData = {
-			start = entPos,
-			endpos = entPos + repelDirection * 10,
-			filter = ent,
-		}
-		
-		owner:LagCompensation(true)
-		local repelTrace = util.TraceLine(traceData)
-
-		if repelTrace.Hit then
-			dmgInfo:SetDamage(math.Rand(0.5, 2))
-			if SERVER then
-				SuppressHostEvents(nil)
-				ent:TakeDamageInfo(dmgInfo)
-				SuppressHostEvents(owner)
+	if infnityCrushingConvar:GetBool() then
+		for ent, _ in pairs(self.InfinityEnts) do
+			local entPos = ent:GetPos()
+			
+			local repelDirection = (entPos - ownerCenter):GetNormalized()
+			repelDirection.z = 0
+			
+			-- Dealing damage
+			local traceData = {
+				start = entPos,
+				endpos = entPos + repelDirection * 10,
+				filter = ent,
+			}
+			
+			owner:LagCompensation(true)
+			local repelTrace = util.TraceLine(traceData)
+			
+			if repelTrace.Hit then
+				dmgInfo:SetDamage(math.Rand(0.5, 2))
+				if SERVER then
+					SuppressHostEvents(nil)
+					ent:TakeDamageInfo(dmgInfo)
+					SuppressHostEvents(owner)
+				end
+				
+				continue
 			end
-
-			continue
+			owner:LagCompensation(false)
 		end
-		owner:LagCompensation(false)
 	end
-
+		
+	if not infinityPushingConvar:GetBool() then return end
 	if ownerVelocity:IsZero() then return end
 
 	for _, ent in pairs(ents.FindInCone(ownerCenter, ownerVelocity, 100, 0.2)) do

@@ -47,12 +47,20 @@ function SWEP:DrawHUD()
 			end
 			if not owner:KeyDown(IN_SPEED) then
 				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal: Red", ability4:GetInt(), self:GetNextAbility4())
-				self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse: Blue", ability3:GetInt(), self:GetNextAbility3())
+				if not owner:KeyDown(IN_DUCK) then
+					self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse: Blue", ability3:GetInt(), self:GetNextAbility3())
+				else
+					self:DrawCDAbilityBox(-5, -40, "Blue Projectile", ability3:GetInt(), self:GetNextAbility3())
+				end
 				self:DrawActivateAbilityBox(7, 80, "Reverse Cursed Technique (Inactive)", ability8:GetInt(), self:GetNextAbility8(), "Reverse Cursed Technique (Active)", self:GetReverseTechniqueEnabled())
 			end
 			if owner:KeyDown(IN_SPEED) then
 				self:DrawCDAbilityBox(-9, -80, "Cursed Technique Reversal (Projectile): Red", ability4:GetInt(), self:GetNextAbility4())
-				self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse (Around): Blue", ability3:GetInt(), self:GetNextAbility3())
+				if not owner:KeyDown(IN_DUCK) then
+					self:DrawCDAbilityBox(-5, -40, "Cursed Technique Lapse (Around): Blue", ability3:GetInt(), self:GetNextAbility3())
+				else
+					self:DrawCDAbilityBox(-5, -40, "Blue Projectile", ability3:GetInt(), self:GetNextAbility3())
+				end
 				self:DrawCDAbilityBox(7, 80, "Brain Recover", ability8:GetInt(), self:GetNextAbility8())
 			end
 			if self.InfinityConvar:GetBool() then
