@@ -364,8 +364,6 @@ function SWEP:SetupModel()
 		self:CallOnClient("SetupModel")
 	end
 
-	print("Switching models")
-
 	if owner:IsValid() then
 		self.OldModel = owner:GetModel()
 		owner:SetModel(self.Model)

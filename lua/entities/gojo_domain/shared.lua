@@ -160,9 +160,7 @@ end
 function ENT:FreezeEntity(ent)
 	if not ent:IsValid() then return end
 	if ent:Gjujutsu_IsAbility() then return end
-
-	print("Freezing", ent)
-
+	
 	local owner = self:GetDomainOwner()
 	if ent == owner then return end
 
@@ -197,8 +195,6 @@ end
 function ENT:UnfreezeEntity(ent)
 	if not ent:IsValid() then return end
 	if ent:Gjujutsu_IsAbility() then return end
-
-	print("Unfreezing", ent)
 
 	local owner = self:GetDomainOwner()
 	if ent == owner then return end

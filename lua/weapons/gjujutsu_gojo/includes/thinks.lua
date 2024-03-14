@@ -49,14 +49,12 @@ function SWEP:InfinityThink()
 		if newEnts[ent] then continue end
 
 		self:RemoveInfinityEffect(ent)
-		print("Out of infinity", ent)
 	end
 
 	for ent, _ in pairs(newEnts) do
 		if oldEnts[ent] then continue end
 
 		self:AddInfinityEffect(ent)
-		print("Entered infinity", ent)
 	end
 
 	self.InfinityEnts = newEnts

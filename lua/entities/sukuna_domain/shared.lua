@@ -209,8 +209,6 @@ function ENT:SpawnParticles()
 	if not owner:IsValid() then return end
 	local ownerPos = owner:EyePos()
 
-	print("spawning particles for domain")
-
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 end
