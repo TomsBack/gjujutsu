@@ -30,7 +30,7 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 
-SWEP.Model = Model("models/moon/ryomen_sukuna/ryomen_sukuna.mdl")
+SWEP.Model = Model("models/gjujutsu/sukuna/sukuna.mdl")
 
 SWEP.Abilities = {
 	[AbilityKey.Ability3] = "Dismantle",
