@@ -41,13 +41,15 @@ ENT.DomainThemeSound = Sound("sukuna/sfx/domain_theme.mp3")
 
 function ENT:SetupDataTables()
 	self:DefaultDataTables()
+	self:NetworkVar("Bool", 1, "SlashingMode")
+	self:NetworkVar( "Float", 2, "ModeDelay" )
 end
 
 function ENT:Initialize()
 	self.Initialized = true
 
 	local owner = self:GetDomainOwner()
-
+	
 	if owner:IsValid() then
 		local weapon = owner:GetActiveWeapon()
 
@@ -55,7 +57,7 @@ function ENT:Initialize()
 			local fingers = weapon:GetFingers()
 
 			self.Range = self.Range * (1 + fingers / 5)
-			self.SlashDamage = self.SlashDamage * (1 + fingers / 5)
+			self.SlashDamage = self.SlashDamage * (1 + fingers / 7)
 
 			gebLib.PrintDebug("Range", self.Range)
 			gebLib.PrintDebug("Slash damage", self.SlashDamage)
@@ -63,11 +65,11 @@ function ENT:Initialize()
 	end
 
 	self:DefaultInitialize()
-
 	self:SetSequence(1)
 	self:SetPlaybackRate(0)
+	self:SetModelScale(2)
 	self:DrawShadow(true)
-	
+	self:SetSlashingMode(false)
 	if CLIENT then	
 		self:SetNoDraw(true)
 		self:SetRenderBoundsWS(renderMins, renderMaxs)
@@ -75,7 +77,7 @@ function ENT:Initialize()
 		self:SetRenderClipPlaneEnabled(false)
 	end
 
-	self:SetTimedEvent("RevealShrine", 6.68)
+	self:SetTimedEvent("RevealShrine", 1.78)
 end
 
 function ENT:PostInitialize()
@@ -95,8 +97,8 @@ function ENT:Think()
     if self.Initialized and not self.PostInitialized then
         self:PostInitialize()
     end
-
-	if game.SinglePlayer() then
+	local owner = self:GetDomainOwner()
+	if game.SinglePlayer() and self:GetSlashingMode() then
 		SlashThink(self)
 	end
 
@@ -124,7 +126,7 @@ function ENT:Draw()
 end
 
 function ENT:DefaultPredictedThink(ply, mv)
-	if not game.SinglePlayer() then
+	if not game.SinglePlayer() and self:GetSlashingMode() then
 		SlashThink(self)
 	end
 	self:CheckEntsInDomain()
@@ -133,7 +135,21 @@ function ENT:DefaultPredictedThink(ply, mv)
 	self:ResetDefaultsThink()
 	self:DamageMaterialThink()
 	self:EventThink()
-	self:DrainEnergyThink()
+	if self:GetSlashingMode() then
+		self:DrainEnergyThink()
+	else
+		self:BaseDrain()
+	end
+end
+
+function ENT:BaseDrain()
+	local owner = self:GetDomainOwner()
+	if not owner:IsValid() then return end
+	local weapon = owner:GetActiveWeapon()
+
+	if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+		weapon:RemoveCursedEnergy(1)
+	end
 end
 
 function ENT:RevealShrine()
@@ -146,12 +162,11 @@ function ENT:RevealShrine()
 		self:SetNoDraw(false)
 	end
 
-	self:SetTimedEvent("StartShrine", 4.2)
+	self:SetTimedEvent("StartShrine", 1.2)
 end
 
 function ENT:StartShrine()
 	self:SetSkin(0)
-	self:SetPlaybackRate(1)
 
 	self:SetTimedEvent("StartDomain", 1)
 end
@@ -164,19 +179,6 @@ function ENT:StartDomain()
 	self:SetSpawnTime(CurTime())
 	self:SetDomainReady(true)
 
-	if SERVER and game.SinglePlayer() then
-		net.Start("gjujutsu_cl_domainParticles")
-		net.WriteEntity(self)
-		net.Broadcast()
-	end
-
-	if CLIENT then
-		self:SpawnParticles()
-		
-		if IsFirstTimePredicted() or game.SinglePlayer() then
-			owner:EmitSound(self.DomainBurstSound)
-		end
-	end
 end
 
 function ENT:OnRemove()
@@ -185,6 +187,10 @@ function ENT:OnRemove()
 
 	if owner:IsValid() then
 		owner:StopSound(self.DomainThemeSound)
+		local weapon = owner:GetActiveWeapon()
+		owner:gebLib_ResumeAction(1)
+		weapon:SetBusy(false)
+		owner:SetMoveType(MOVETYPE_WALK)
 	end
 
 	if CLIENT then
@@ -211,6 +217,91 @@ function ENT:SpawnParticles()
 
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
 	table.insert(self.Particles, CreateParticleSystemNoEntity("Shrine_Large", ownerPos))
+end
+
+function ENT:SlashController()
+	if not self:GetDomainReady() then return end
+	if CurTime() < self:GetModeDelay() then return end
+	self:SetModeDelay(CurTime() + 3)
+	local owner = self:GetDomainOwner()
+	
+	if not owner:IsValid() then return end
+
+	if self:GetSlashingMode() == false then
+		self:SlashEnable()
+	else
+		self:SlashDisable()
+	end
+
+end
+
+function ENT:SlashEnable()
+	if not self:IsValid() then return end
+	if not self:GetDomainReady() then return end
+	local owner = self:GetDomainOwner()
+	if not owner:IsValid() then return end
+	local weapon = owner:GetActiveWeapon()
+	self:SetSequence(1)
+	self:SetCycle(0)
+	self:SetPlaybackRate(1)
+	owner:gebLib_PlayAction("SukunaDomainStart", 2.5)
+	owner:SetMoveType(MOVETYPE_NONE)
+	weapon:SetBusy(true)
+	timer.Simple(0.26, function()
+		if IsValid(self) and IsValid(owner) then
+			owner:gebLib_PauseAction()
+		end
+	end)
+	self:SetTimedEvent("SwitchOn", 1.3)
+end
+
+function ENT:SwitchOn()
+	if not self:IsValid() then return end
+	if not self:GetDomainReady() then return end
+	local owner = self:GetDomainOwner()
+	if SERVER and game.SinglePlayer() then
+		net.Start("gjujutsu_cl_domainParticles")
+		net.WriteEntity(self)
+		net.Broadcast()
+	end
+
+	if CLIENT then
+		self:SpawnParticles()
+		
+		if IsFirstTimePredicted() or game.SinglePlayer() then
+			owner:EmitSound(self.DomainBurstSound)
+		end
+	end
+	self:SetSlashingMode(true)
+end
+
+function ENT:SlashDisable()
+	if not self:IsValid() then return end
+	if not self:GetDomainReady() then return end
+	self:SetSequence(3)
+	self:SetCycle(0)
+	self:SetPlaybackRate(1)
+	self:SetTimedEvent("SwitchOff", 0.27)
+end
+
+function ENT:SwitchOff()
+	local owner = self:GetDomainOwner()
+	if not self:IsValid() then return end
+	if not self:GetDomainReady() then return end
+	if not owner:IsValid() then return end
+	local weapon = owner:GetActiveWeapon()
+	owner:gebLib_ResumeAction(1)
+	weapon:SetBusy(false)
+	owner:SetMoveType(MOVETYPE_WALK)
+	if CLIENT then
+		for _, particle in ipairs(self.Particles) do
+			if not particle:IsValid() then continue end
+			particle:SetShouldDraw(true)
+			particle:StopEmission()
+		end
+	end
+	self.SpawnedParticles = false
+	self:SetSlashingMode(false)
 end
 
 -- Sukuna's domain slash. I've put this here as its shared for both sukuna's domains, so it won't get copied

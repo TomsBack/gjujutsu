@@ -50,7 +50,12 @@ function SWEP:DrawHUD()
 				self:DrawActivateAbilityBox(7, 80, "Reverse Cursed Technique (Inactive)", ability8:GetInt(), self:GetNextAbility8(), "Reverse Cursed Technique (Active)", self:GetReverseTechniqueEnabled())
 			end
 			if self.MahoragaWheelConvar:GetBool() and self:GetFingers() >= self.MahoragaWheelFingerConVar:GetInt() then 
-				self:DrawActivateAbilityBox(3, 40, "Mahoraga Wheel (Inactive)", ability7:GetInt(), self:GetNextAbility7(), "Mahoraga Wheel (Active)", self:GetMahoragaWheel():IsValid())
+				self:DrawActivateAbilityBox(3, 40, "Mahoraga Wheel (Inactive)", ability6:GetInt(), self:GetNextAbility6(), "Mahoraga Wheel (Active)", self:GetMahoragaWheel():IsValid())
+			end
+			if owner:KeyDown(IN_SPEED) then
+				self:DrawCDAbilityBox(-1, 0, "Dimensional Slash ("..self:GetDimensionalSlashState()..")", ability7:GetInt(), self:GetNextAbility7())
+			else
+				self:DrawCDAbilityBox(-1, 0, "Dismantle Slash", ability7:GetInt(), self:GetNextAbility7())
 			end
 			if owner:KeyDown(IN_SPEED) then
 				self:DrawCDAbilityBox(-5, -40, "Dismantle Barrage", ability3:GetInt(), self:GetNextAbility3())
@@ -88,4 +93,46 @@ net.Receive("gJujutsu_cl_cleave_slash", function()
 
 		ent:StopParticlesNamed("cleave")
 	end)
+end)
+
+net.Receive("gjujutsu_cl_slasheffect", function(len, ply)
+    local ply = net.ReadEntity()
+    local target = net.ReadVector()
+    local minscale = net.ReadInt(16)
+    local maxscale = net.ReadInt(16)
+
+    local startTime = CurTime()
+    local angle = 90
+    local curtime = CurTime()
+    
+    hook.Add("HUDPaint", "slashEffect" .. curtime .. '_PLAYER_' .. ply:EntIndex(), function()
+        local progress = math.Clamp((CurTime() - startTime) / 0.18, 0, 1)
+        
+        if progress < 1 then
+            surface.SetDrawColor(0, 0, 0, 110)
+            surface.DrawRect(0, 0, ScrW(), ScrH())
+            
+            local size = Lerp(progress, minscale, maxscale)
+            local targetPos = target
+            local targetScreenPos = targetPos:ToScreen()
+            
+            local height1 = Lerp(progress , 0, 3000)
+            local height2 = Lerp(progress * 0.5, 0, 3000)
+            
+            surface.SetDrawColor(255, 255, 255, 100)
+            surface.DrawTexturedRectRotated(targetScreenPos.x, targetScreenPos.y, size * 2, height1, angle)
+            
+            surface.SetDrawColor(0, 0, 0, 255)
+            surface.DrawTexturedRectRotated(targetScreenPos.x, targetScreenPos.y, size, height2, angle)
+        else
+            
+            hook.Remove("HUDPaint", "slashEffect" .. curtime .. '_PLAYER_' .. ply:EntIndex())
+            surface.SetDrawColor(0, 0, 0, 0)
+            surface.DrawRect(0, 0, ScrW(), ScrH())
+        end
+    end)
+    
+    timer.Simple(2, function()
+        hook.Remove("HUDPaint", "SlashEffect" .. curtime .. '_PLAYER_' .. ply:EntIndex())
+    end)
 end)

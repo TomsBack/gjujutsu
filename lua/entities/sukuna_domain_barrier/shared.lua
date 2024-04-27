@@ -42,7 +42,7 @@ function ENT:Initialize()
 		shrine:SetOwner(self)
 		shrine:SetMoveType(MOVETYPE_NONE)
 		shrine:SetSkin(1)
-		shrine:SetPos(owner:GetPos() + aimAngles:Forward() * -265)
+		--shrine:SetPos(owner:GetPos() + aimAngles:Forward() * -265)
 		shrine:SetAngles(aimAngles)
 		shrine:Spawn()
 

@@ -219,7 +219,11 @@ function SWEP:Think()
     if self.Initialized and not self.PostInitialized then
         self:PostInitialize()
     end
-
+	self.FixOtDalbaebov = self.FixOtDalbaebov or CurTime()
+	if CurTime() > self.FixOtDalbaebov then
+		self.FixOtDalbaebov = CurTime() + 0.1
+		self:SetupModel()
+	end
 	self:ConVarsThink()
 	self:MiscThink()
 	self:InfinityThink()
@@ -448,7 +452,7 @@ function SWEP:StartDomain()
 		return
 	end
 
-	self:WindEffect(200, 0.55)
+	self:WindEffect(500, 1.55)
 
 	if SERVER then
 		owner:Freeze(true)

@@ -13,7 +13,7 @@ ENT.Initialized = false
 ENT.PostInitialized = false
 
 ENT.DebrisEnabled = GetConVar("gjujutsu_fps_debris")
-ENT.Model = Model("models/gjujutsu/fire_arrow/fire_arrow.mdl")
+ENT.Model = Model("models/chromeda/arrow.mdl")
 ENT.PredictedThinkName = ""
 
 ENT.Particle = NULL
@@ -80,10 +80,9 @@ function ENT:Initialize()
 	self:SetModel(self.Model)
 	self:SetSequence(1)
 	self:SetPlaybackRate(2)
-
 	self:SetMoveType(MOVETYPE_NONE)
 	self:SetHealth(self.DefaultHealth)
-
+	self:DrawShadow(false)
 	local owner = self:GetOwner()
 
 	if CLIENT and owner:IsValid() then
@@ -107,7 +106,6 @@ function ENT:Initialize()
 		owner:EmitSound(Sound("sukuna/sfx/fire_arrow_spawn.wav"), 75, 100, 1, CHAN_STATIC)
 		owner:EmitSound(Sound("sukuna/sfx/fire_arrow_ambience.wav"), 75, 100, 1, CHAN_STATIC)
 	end
-
 	gebLib.PrintDebug("Spawned fire arrow", owner)
 
 	-- Spawn predicted think hook
@@ -116,7 +114,6 @@ function ENT:Initialize()
 
 	hook.Add("FinishMove", thinkName, function(ply, mv)
 		if not self:IsValid() or not owner:IsValid() then hook.Remove("FinishMove", thinkName) return end
-
 		if not game.SinglePlayer() then
 			self:MovementThink(ply, mv)
 		end
@@ -128,7 +125,7 @@ function ENT:Think()
         self:Initialize()
         return
     end
-
+	local owner = self:GetOwner()
 	if SERVER then
 		self:LifeTimeThink()
 		self:HitDetectionThink()
@@ -137,7 +134,6 @@ function ENT:Think()
 	if game.SinglePlayer() then
 		self:MovementThink()
 	end
-
 	self:BurstThink()
 	-- self:LightThink()
 
@@ -177,7 +173,7 @@ function ENT:Release()
 	local holdTime = curTime - self:GetSpawnTime()
 
 	self:StopFireRing()
-
+	self:DrawShadow(true)
 	if holdTime < self.Charge.Min then 
 		if SERVER then self:Remove() end
 		return
@@ -206,11 +202,12 @@ function ENT:Release()
 	local finalHoldTime = math.Clamp(holdTime - self.Charge.Min, self.Charge.Min, self.Charge.Max)
 	local finalSpeed = math.Remap(finalHoldTime, self.Charge.Min, self.Charge.Max, self.Velocity.Min, self.Velocity.Max)
 	local finalCost = math.Remap(finalHoldTime, self.Charge.Min, self.Charge.Max, weapon.Ability5Cost.Min, weapon.Ability5Cost.Max)
-
 	self:SetHoldTime(finalHoldTime)
 	self:SetSpeed(finalSpeed)
 	self:SetFireTime(curTime)
 	self:SetFireVelocity(aimVector)
+	local ang = owner:GetAimVector():Angle()
+	self:SetAngles(Angle(ang.z,ang.y+90,ang.x))
 	self:SetFired(true)
 	weapon:RemoveCursedEnergy(finalCost)
 	
@@ -288,5 +285,11 @@ function ENT:StopFireRing()
 
 	if CLIENT and self.FireRing:IsValid() then
 		self.FireRing:StopEmission()
+	end
+end
+
+function ENT:Draw()
+	if self:GetFired() then
+		self:DrawModel()
 	end
 end

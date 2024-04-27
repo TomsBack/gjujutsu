@@ -156,18 +156,21 @@ hook.Add("gJujutsu_DomainClashStart", "DomainClashOnlyOwner", function(owner, da
 		gJujutsuDomainClashCache[owner] = nil
 
 		local weapon = owner:GetActiveWeapon()
-
 		if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 			weapon:SetDomainClash(false)
 			weapon:SetClashStart(false)
 			weapon:SetBusy(false)
-			weapon:DomainExpansion()
+			timer.Simple(1.15, function()
+				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
+					weapon:DomainExpansion()
+					
+					-- Run domain expansion on all clients
+					net.Start("gJujutsu_cl_runDomainExpansion")
+					net.WriteEntity(weapon)
+					net.Broadcast()
+				end
+			end)
 		end
-
-		-- Run domain expansion on all clients
-		net.Start("gJujutsu_cl_runDomainExpansion")
-		net.WriteEntity(weapon)
-		net.Broadcast()
 
 		gJujutsuDomainClashes[owner] = nil
 	end
@@ -239,13 +242,13 @@ net.Receive("gJujutsu_cl_SyncClashKey", function()
 	ply.gJujutsu_ClashKey = newKey
 	ply:EmitSound(keyChangeSounds[math.random(1, #keyChangeSounds)])
 	
-	util.ScreenShake(ply:GetPos(), 25, 25, 2, 500, true)
+	--util.ScreenShake(ply:GetPos(), 15, 15, 1, 500, true)
 	
-	local weapon = ply:GetActiveWeapon()
+	--local weapon = ply:GetActiveWeapon()
 
-	if weapon:IsGjujutsuSwep() then
-		weapon:WindEffect(200, 0.55)
-	end
+	--if weapon:IsGjujutsuSwep() then
+		--weapon:WindEffect(200, 0.55)
+	--end
 end)
 
 -- Debug commands

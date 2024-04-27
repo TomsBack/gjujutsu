@@ -348,7 +348,7 @@ function SWEP:RestoreOldValues()
 	local owner = self:GetOwner()
 
 	if SERVER and owner:IsValid() then
-		owner:SetModel(self.OldModel)
+		--owner:SetModel(self.OldModel)
 	end
 
 	owner:SetSlowWalkSpeed(self.OldSlowWalk)
@@ -423,7 +423,9 @@ function SWEP:ResetCds()
 	self:SetNextAbility4(0)
 	self:SetNextAbility5(0)
 	self:SetNextAbility6(0)
-	self:SetNextAbility7(0)
+	if self:GetNextAbility7() < 30 then
+		self:SetNextAbility7(0)
+	end
 	self:SetNextAbility8(0)
 	self:SetNextUltimate(0)
 	self:SetNextTaunt(0)

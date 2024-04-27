@@ -4,7 +4,8 @@ function ENT:MovementThink(ply, mv)
 	local owner = self:GetOwner()
 	local ownerPos
 	local angles
-
+	local fixangle
+	local ang
 	if game.SinglePlayer() then
 		ownerPos = owner:GetPos()
 		angles = owner:GetAngles()
@@ -19,7 +20,9 @@ function ENT:MovementThink(ply, mv)
 	
 	if self:GetFired() then
 		finalPos = self:GetPos() + self:GetFireVelocity() * self:GetSpeed()
-		self:SetAngles(self:GetFireVelocity():Angle())
+		ang = self:GetFireVelocity():Angle()
+		fixangle = Angle(ang.z,ang.y+90,ang.x)
+		self:SetAngles(fixangle)
 	else
 		self:SetAngles(angles)
 	end
