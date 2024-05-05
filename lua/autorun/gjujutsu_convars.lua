@@ -1,4 +1,4 @@
-CreateClientConVar("gjujutsu_thirdperson_offset", "0,0,5", true, false, "The third person camera offset")
+CreateClientConVar("gjujutsu_thirdperson_offset", "0,0,18", true, false, "The third person camera offset")
 CreateConVar("gjujutsu_show_hitboxes", 0, {FCVAR_NONE, FCVAR_CHEAT}, "Shows hitboxes") 
 
 CreateClientConVar("gjujutsu_fps_debris", 1, true, false, "If enabled, then debris is going to spawn", 0, 1)

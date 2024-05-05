@@ -32,7 +32,7 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 
-SWEP.Model = Model("models/moon/ryomen_sukuna/Ryomen_Sukuna.mdl")
+SWEP.Model = Model("models/gjujutsu/sukuna/Ryomen_Sukuna.mdl")
 
 SWEP.Abilities = {
 	[AbilityKey.Ability3] = "Dismantle",
@@ -73,8 +73,8 @@ SWEP.Ability3CD = 3
 SWEP.Ability4CD = 12
 SWEP.Ability5CD = 1
 SWEP.Ability6CD = 0.5
-SWEP.Ability7CD1 = 10
-SWEP.Ability7CD2 = 120
+SWEP.Ability7CD1 = 1
+SWEP.Ability7CD2 = 1
 SWEP.Ability8CD = 0.5
 SWEP.UltimateCD = 1
 SWEP.TauntCD = 0
@@ -85,8 +85,8 @@ SWEP.Ability3Cost = 100
 SWEP.Ability4Cost = 500
 SWEP.Ability5Cost = {Min = 1000, Max = 3000}
 SWEP.Ability6Cost = 0
-SWEP.Ability7Cost1 = 1000
-SWEP.Ability7Cost2 = 10000
+SWEP.Ability7Cost1 = 1
+SWEP.Ability7Cost2 = 1
 SWEP.Ability8Cost = 0
 SWEP.UltimateCost = 1
 SWEP.TauntCost = 0
@@ -140,6 +140,7 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Bool", 1, "HoldingFireArrow")
 	self:NetworkVar("Bool", 2, "DrawingFireArrow")
 	self:NetworkVar("Bool", 3, "DomainSlashing")
+	self:NetworkVar("Bool", 4, "AllowWorldDimensional")
 
 	self:NetworkVar("Entity", 0, "FireArrow")
 	self:NetworkVar("Entity", 1, "MahoragaWheel")
@@ -241,26 +242,12 @@ function SWEP:Think()
     if self.Initialized and not self.PostInitialized then
         self:PostInitialize()
     end
-	local owner = self:GetOwner()
-	self.RepeatAnim = self.RepeatAnim or CurTime()
-	if self:GetDrawingFireArrow() then
-		if CurTime() > self.RepeatAnim then
-			self.RepeatAnim = CurTime() + 8.5
-			owner:gebLib_PlayAction("FugaCharge", 1)
-		end
+	local domain = self:GetDomain()
+	if IsValid(domain) then
+		self.domaindamagemult = 1.3
+	else
+		self.domaindamagemult = 1
 	end
-	self.FixOtDalbaebov = self.FixOtDalbaebov or CurTime()
-	if CurTime() > self.FixOtDalbaebov then
-		self.FixOtDalbaebov = CurTime() + 0.1
-		self:SetupModel()
-	end
-	self.DimensionalSlashDelay = self.DimensionalSlashDelay or CurTime()
-	if CurTime() > self:GetDimensionalSlashDelay() then
-		if self:GetDimensionalSlashState() != 0 then
-			self:SetDimensionalSlashState(0)
-		end
-	end
-
 	self:ConVarsThink()
 	self:MiscThink()
 	self:ReverseTechniqueThink()
@@ -277,6 +264,29 @@ end
 function SWEP:PrimaryAttack()
 	return false
 end
+
+function SWEP:DomainVisual()
+	local owner = self:GetOwner()
+	if CLIENT then
+		if !IsValid(self.VoidCore) then
+			local penis0 = owner:GetAngles()
+			local penis = penis0:Forward()
+			local penis2 = penis0:Up()
+			self.VoidCore = CreateParticleSystemNoEntity("void_core_clash", owner:WorldSpaceCenter() - penis * 100 + penis2 * 65)
+			self.VoidCore:SetShouldDraw(true)
+		end
+	end
+end
+
+function SWEP:DomainVisualRemoving()
+	local owner = self:GetOwner()
+	if CLIENT then
+		if IsValid(self.VoidCore) then
+			self.VoidCore:StopEmission()
+		end
+	end
+end
+
 
 function SWEP:SecondaryAttack()
 	return false
@@ -307,7 +317,7 @@ function SWEP:Dismantle()
 
 		for i = 1, 7 do
 			timer.Simple(nextSlash, function()
-				self:DismantleSlash(50 * (1 + self:GetFingers() / 3))
+				self:DismantleSlash((50 * (1 + self:GetFingers() / 3))*self.domaindamagemult)
 			end)
 			nextSlash = nextSlash + 0.1
 		end
@@ -316,7 +326,7 @@ function SWEP:Dismantle()
 
 		cd = cd * 3
 	else 
-		self:DismantleSlash(150 * (1 + self:GetFingers() / 3))
+		self:DismantleSlash((150 * (1 + self:GetFingers() / 3))*self.domaindamagemult)
 	end
 
 	self:RemoveCursedEnergy(finalCost)
@@ -440,9 +450,9 @@ function SWEP:Cleave()
 				if self:IsValid() then damageInfo:SetInflictor(self) end
 				damageInfo:SetDamageForce(force)
 				if ent:IsPlayer() and ent:GetActiveWeapon():IsValid() and ent:GetActiveWeapon():IsGjujutsuSwep() then
-					damageInfo:SetDamage(finalDamage / 2)
+					damageInfo:SetDamage((finalDamage * self.domaindamagemult) / 2)
 				else
-					damageInfo:SetDamage(finalDamage)
+					damageInfo:SetDamage(finalDamage * self.domaindamagemult)
 				end
 	
 				local customDamageType = self.DamageExceptions[ent:GetClass()]
@@ -537,7 +547,7 @@ function SWEP:FireArrowEnd()
 	self:SetNextAbility5(CurTime() + self.Ability5CD)
 	self.RepeatAnim = CurTime()
 	if not arrow:IsValid() then
-		self:SetNextAbility5(CurTime() + 1)
+		self:SetNextAbility5(CurTime() + 5)
 	end
 	local owner = self:GetOwner()
 
@@ -546,7 +556,7 @@ function SWEP:FireArrowEnd()
 		owner:SetVelocity(-owner:GetVelocity())
 		timer.Simple(1.7, function()
 			if owner:IsValid() then
-				owner:SetMoveType(self.LastMoveType)
+				owner:SetMoveType(MOVETYPE_WALK)
 			end
 		end)
 	end
@@ -597,17 +607,36 @@ function SWEP:WorldDissection()
 	local owner = self:GetOwner()
 	if not owner:gebLib_ValidAndAlive() then return end
 
-	if !owner:KeyDown(IN_SPEED) then
-		if self:GetCursedEnergy() < self.Ability7Cost1 then return end
-		self:SetNextAbility7(CurTime() + self.Ability7CD1)
-		self:RemoveCursedEnergy(self.Ability7Cost1)
-		owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
-		owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
+	if self:GetAllowWorldDimensional() then
+		if !owner:KeyDown(IN_SPEED) then
+			self:SimpleSlash()
+		else
+			self:WorldDissectionFunction()
+		end
+	else
+		self:SimpleSlash()
+	end
+end
+
+function SWEP:WorldDissectionFunction()
+	local owner = self:GetOwner()
+	if self:GetCursedEnergy() < self.Ability7Cost2 then return end
+	self:SetDimensionalSlashStateDelay(CurTime() + 0.65)
+	if SERVER and self:GetDimensionalSlashState() < 3 then
+		self:SetDimensionalSlashState(self:GetDimensionalSlashState() + 1)
+		owner:EmitSound(Sound("sukuna/sfx/Dimensional Slash"..self:GetDimensionalSlashState()..".wav"))
+		self:SetDimensionalSlashDelay(CurTime() + 1)
+		owner:Say(DimensionalSlashPhrases[self:GetDimensionalSlashState()])
+	elseif self:GetDimensionalSlashState() == 3 then
+		self:SetNextAbility7(CurTime() + self.Ability7CD2)
+		self:SetDimensionalSlashState(0)
+		owner:EmitSound(Sound("sukuna/sfx/Dimensional Slash Final.wav"))
+		self:RemoveCursedEnergy(self.Ability7Cost2)
 		self.touchedents = {}
 		if SERVER then
-			local targets = ents.FindInSphere(owner:GetPos(), 1000 )
+			local targets = ents.FindInSphere(owner:GetPos(), 7000 )
 			for _, v in ipairs(targets) do
-				if (v:IsPlayer() or v:IsNPC() or v:GetClass() == "prop_physics") and v ~= owner and !self.touchedents[v] then
+				if (v:IsPlayer() or v:IsNPC() or v:GetClass() == "prop_physics" or v:GetClass() == "prop_ragdoll" or v:GetClass() == "prop_physics" or v:IsNPC() or v:GetClass() == "prop_static" or v:GetClass() == "prop_dynamic" or v:GetClass() == "props_foliage" or v:GetClass() == "props_rooftop" or v:GetClass() == "skerion" or v:IsVehicle()) and v ~= owner and !self.touchedents[v] then
 					self.touchedents[v] = true
 					local direction = (v:GetPos() - owner:GetPos()):GetNormalized()
 					local dotProduct = owner:GetAimVector():Dot(direction)
@@ -624,7 +653,7 @@ function SWEP:WorldDissection()
 						damageInfo:SetDamageType(5)
 						if owner:IsValid() then damageInfo:SetAttacker(owner) end
 						if self:IsValid() then damageInfo:SetInflictor(self) end
-						damageInfo:SetDamage(350 * (1 + self:GetFingers() / 3))
+						damageInfo:SetDamage((1250 * (1 + self:GetFingers() / 3))*self.domaindamagemult)
 						damageInfo:SetDamageForce(force)
 					
 						owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
@@ -648,14 +677,28 @@ function SWEP:WorldDissection()
 							end
 							if owner:IsValid() then damageInfo:SetAttacker(owner) end
 							if self:IsValid() then damageInfo:SetInflictor(self) end
-							damageInfo:SetDamage(350 * (1 + self:GetFingers() / 3))
+							damageInfo:SetDamage((1250 * (1 + self:GetFingers() / 3))*self.domaindamagemult)
 							damageInfo:SetDamageForce(force)
 					
 							SuppressHostEvents(nil)
+							if v:IsPlayer() then
+								local weapon = v:GetActiveWeapon()
+								if weapon:Gjujutsu_IsGojo() and weapon:GetInfinity() and !v.afterworldslash then
+									weapon:SetInfinity(false)
+									v.afterworldslash = true
+								end
+							end
 							v:TakeDamageInfo(damageInfo)
 							SuppressHostEvents(owner)
 					
 							gJujutsuSlash(owner, v, 0, math.random(6, 9))
+							if v:IsPlayer() and v.afterworldslash then
+								v.afterworldslash = false
+								local weapon = v:GetActiveWeapon()
+								if weapon:Gjujutsu_IsGojo() and !weapon:GetInfinity() then
+									weapon:SetInfinity(true)
+								end
+							end
 								
 							v:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
 								
@@ -680,94 +723,90 @@ function SWEP:WorldDissection()
 				end
 			end
 		end
-	else
-		if self:GetCursedEnergy() < self.Ability7Cost2 then return end
-		self:SetDimensionalSlashStateDelay(CurTime() + 0.65)
-		if SERVER and self:GetDimensionalSlashState() < 3 then
-			self:SetDimensionalSlashState(self:GetDimensionalSlashState() + 1)
-			owner:EmitSound(Sound("sukuna/sfx/Dimensional Slash"..self:GetDimensionalSlashState()..".wav"))
-			self:SetDimensionalSlashDelay(CurTime() + 1)
-			owner:Say(DimensionalSlashPhrases[self:GetDimensionalSlashState()])
-		elseif self:GetDimensionalSlashState() == 3 then
-			self:SetNextAbility7(CurTime() + self.Ability7CD2)
-			self:SetDimensionalSlashState(0)
-			owner:EmitSound(Sound("sukuna/sfx/Dimensional Slash Final.wav"))
-			self:RemoveCursedEnergy(self.Ability7Cost2)
-			self.touchedents = {}
-			if SERVER then
-				local targets = ents.FindInSphere(owner:GetPos(), 7000 )
-				for _, v in ipairs(targets) do
-					if (v:IsPlayer() or v:IsNPC() or v:GetClass() == "prop_physics") and v ~= owner and !self.touchedents[v] then
-						self.touchedents[v] = true
-						local direction = (v:GetPos() - owner:GetPos()):GetNormalized()
-						local dotProduct = owner:GetAimVector():Dot(direction)
-						local angle = math.deg(math.acos(dotProduct))
-		
-						if SERVER and angle <= 40 then
-							local ownerPos = owner:GetPos()
-							local eyePos = owner:EyePos()
-							local aimVector = owner:GetAimVector()
-						
-							local force = aimVector * 50000
-						
-							local damageInfo = DamageInfo()
+	end
+end
+
+function SWEP:SimpleSlash()
+	if self:GetCursedEnergy() < self.Ability7Cost1 then return end
+	local owner = self:GetOwner()
+	self:SetNextAbility7(CurTime() + self.Ability7CD1)
+	self:RemoveCursedEnergy(self.Ability7Cost1)
+	owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
+	owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
+	self.touchedents = {}
+	if SERVER then
+		local targets = ents.FindInSphere(owner:GetPos(), 1000 )
+		for _, v in ipairs(targets) do
+			if (v:IsPlayer() or v:IsNPC() or v:GetClass() == "prop_physics" or v:GetClass() == "prop_ragdoll" or v:GetClass() == "prop_physics" or v:IsNPC() or v:GetClass() == "prop_static" or v:GetClass() == "prop_dynamic" or v:GetClass() == "props_foliage" or v:GetClass() == "props_rooftop" or v:GetClass() == "skerion" or v:IsVehicle()) and v ~= owner and !self.touchedents[v] then
+				self.touchedents[v] = true
+				local direction = (v:GetPos() - owner:GetPos()):GetNormalized()
+				local dotProduct = owner:GetAimVector():Dot(direction)
+				local angle = math.deg(math.acos(dotProduct))
+
+				if SERVER and angle <= 40 then
+					local ownerPos = owner:GetPos()
+					local eyePos = owner:EyePos()
+					local aimVector = owner:GetAimVector()
+				
+					local force = aimVector * 50000
+				
+					local damageInfo = DamageInfo()
+					damageInfo:SetDamageType(5)
+					if owner:IsValid() then damageInfo:SetAttacker(owner) end
+					if self:IsValid() then damageInfo:SetInflictor(self) end
+					damageInfo:SetDamage((350 * (1 + self:GetFingers() / 3))*self.domaindamagemult)
+					damageInfo:SetDamageForce(force)
+				
+					owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
+					--owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
+				
+					owner:ViewPunch(angleKnockback)
+				
+					owner:LagCompensation(true)
+					--for _, ent in ipairs(ents.FindInCone(eyePos - owner:GetForward() * 25, aimVector, self.DismantleRange, self.DismantleAngle)) do
+						if gebLib_ClassBlacklist[v:GetClass()] then continue end
+						if v == self or v == owner then continue end
+						if v:GetOwner() == owner then continue end
+						if v == self:GetDomain() then continue end
+							
+						local customDamageType = self.DamageExceptions[v:GetClass()]
+							
+						if customDamageType ~= nil then
+							damageInfo:SetDamageType(customDamageType)
+						else
 							damageInfo:SetDamageType(5)
-							if owner:IsValid() then damageInfo:SetAttacker(owner) end
-							if self:IsValid() then damageInfo:SetInflictor(self) end
-							damageInfo:SetDamage(1250 * (1 + self:GetFingers() / 3))
-							damageInfo:SetDamageForce(force)
-						
-							owner:EmitSound(Sound("misc/cloth_whoosh_1.wav"))
-							--owner:EmitSound(Sound("sukuna/sfx/dismantle_slash.wav"))
-						
-							owner:ViewPunch(angleKnockback)
-						
-							owner:LagCompensation(true)
-							--for _, ent in ipairs(ents.FindInCone(eyePos - owner:GetForward() * 25, aimVector, self.DismantleRange, self.DismantleAngle)) do
-								if gebLib_ClassBlacklist[v:GetClass()] then continue end
-								if v == self or v == owner then continue end
-								if v:GetOwner() == owner then continue end
-								if v == self:GetDomain() then continue end
-									
-								local customDamageType = self.DamageExceptions[v:GetClass()]
-									
-								if customDamageType ~= nil then
-									damageInfo:SetDamageType(customDamageType)
-								else
-									damageInfo:SetDamageType(5)
-								end
-								if owner:IsValid() then damageInfo:SetAttacker(owner) end
-								if self:IsValid() then damageInfo:SetInflictor(self) end
-								damageInfo:SetDamage(1250 * (1 + self:GetFingers() / 3))
-								damageInfo:SetDamageForce(force)
-						
-								SuppressHostEvents(nil)
-								v:TakeDamageInfo(damageInfo)
-								SuppressHostEvents(owner)
-						
-								gJujutsuSlash(owner, v, 0, math.random(6, 9))
-									
-								v:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
-									
-								if v:gebLib_IsPerson() then
-									v:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
-								end
-									
-								if v:gebLib_IsProp() then
-									v:SetVelocity(force)
-										
-									local phys = v:GetPhysicsObject()
-										
-									if phys:IsValid() then
-										phys:SetVelocity(force)
-									end
-										
-									SukunaPropCut(owner, v, -180)
-								end
-							--end
-							owner:LagCompensation(false)
 						end
-					end
+						if owner:IsValid() then damageInfo:SetAttacker(owner) end
+						if self:IsValid() then damageInfo:SetInflictor(self) end
+
+						damageInfo:SetDamage((350 * (1 + self:GetFingers() / 3))*self.domaindamagemult)
+						damageInfo:SetDamageForce(force)
+				
+						SuppressHostEvents(nil)
+						v:TakeDamageInfo(damageInfo)
+						SuppressHostEvents(owner)
+				
+						gJujutsuSlash(owner, v, 0, math.random(6, 9))
+							
+						v:EmitSound(Sound("sukuna/sfx/slash_prop_hit1.wav"))
+							
+						if v:gebLib_IsPerson() then
+							v:EmitSound(Sound("sukuna/sfx/slash_body_hit" .. math.random(1, 2) .. ".wav"))
+						end
+							
+						if v:gebLib_IsProp() then
+							v:SetVelocity(force)
+								
+							local phys = v:GetPhysicsObject()
+								
+							if phys:IsValid() then
+								phys:SetVelocity(force)
+							end
+								
+							SukunaPropCut(owner, v, -180)
+						end
+					--end
+					owner:LagCompensation(false)
 				end
 			end
 		end
@@ -988,206 +1027,4 @@ end
 
 function SWEP:DrawWorldModel()
 	--self:DrawModel()
-end
-
-
-local screenMat = Material("models/limitless/matsdomainsukuna")
-
-function SWEP:DomainExpansionCinematic()
-	local ply = self:GetOwner()
-	local owner = ply
-	local ownerPos = owner:GetPos()
-	local aimAngles = owner:GetAimVector():Angle()
-
-	local weapon = self
-
-	self:SetBusy(true)
-	self:SetBlockCamera(true)
-	self:SetInCinematic(true)
-	
-	if SERVER then
-		owner:Freeze(true)
-	end
-
-	local camera = gebLib_Camera.New("Sukuna_Domain", ply, 60, 250)
-	owner.gJujutsu_Camera = camera
-
-	local copy = camera.Copy
-	ply.gJujutsu_Copy = copy
-	local plyPos = nil
-	local headPos = nil
-	local forw = nil
-
-	if CLIENT then
-		copy:SetSequence(owner:LookupSequence("SukunaDomainStart"))
-		copy:SetCycle(1)
-	end
-
-	local caughtInDomain = false
-
-	local localPlayer = NULL
-	local localPlayerPos = NULL
-
-	if CLIENT then
-		localPlayer = LocalPlayer()
-		localPlayerPos = localPlayer:GetPos()
-
-		plyPos = copy:GetPos()
-		headPos = plyPos + copy:GetUp() * 70
-		forw = copy:GetForward()
-
-		caughtInDomain = false
-	end
-
-	local fps = 21
-	local animRate = 1 / fps
-	local interval = CurTime() + animRate
-	local currentFrame = 9
-
-	local playedClap = false
-	local playedGif = false
-	local screenEffectPaused = true
-	local playedTheme = false
-
-	hook.Add("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect", function()
-		if not localPlayer:gebLib_Alive() then hook.Remove("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect") return end
-		if localPlayer ~= owner then return end
-		if screenEffectPaused then return end
-
-		local curTime = CurTime()
-
-		render.SetMaterial(screenMat)
-		if curTime > interval then
-			interval = curTime + animRate
-			currentFrame = currentFrame - 1
-
-			screenMat:SetInt("$frame", currentFrame)
-		end
-		render.DrawScreenQuad()
-	end)
-
-	camera:SetThink(function()
-		if not camera:IsValid() then camera:Stop() return end
-
-		if SERVER and not weapon:GetDomain():IsValid() then
-			camera:Stop()
-
-			net.Start("gJujutsu_cl_clearCamera")
-			net.WriteEntity(ply)
-			net.Broadcast()
-			return 
-		end
-
-		if camera.CurFrame > 69 and not playedClap then
-			playedClap = true
-			if SERVER then
-				owner:EmitSound("sukuna/voice/sukuna_domain_ending.wav")
-			end
-			--if CLIENT then
-				--owner:EmitSound(Sound("sukuna/sfx/clap.wav"))
-			--end
-		end
-
-		if camera.CurFrame > 95 and not playedGif and screenEffectPaused then
-			playedGif = true
-			screenEffectPaused = false
-		end
-
-		if camera.CurFrame > 300 and not playedTheme then
-			playedTheme = true
-
-			--if CLIENT then
-				--owner:EmitSound(Sound("sukuna/sfx/domain_theme.mp3"))
-			--end
-		end
-
-		if camera.CurFrame > 125 and not screenEffectPaused then
-			screenEffectPaused = true
-		end
-
-		if not weapon:IsValid() then return end
-
-		local domain = weapon:GetDomain()
-
-		if not domain:IsValid() then return end
-    end)
-
-	camera:SetEnd(function()
-		hook.Remove("RenderScreenspaceEffects", tostring(self) .. "_SukunaHudEffect")
-
-		if SERVER then
-			owner:Freeze(false)
-		end
-
-		if self:IsValid() then
-			self:SetBusy(false)
-			self:SetBlockCamera(false)
-			self:SetInCinematic(false)
-
-			local domain = self:GetDomain()
-	
-			if domain:IsValid() then
-				domain:SetSpawnTime(CurTime())
-
-				domain:StartDomain()
-			end
-		end
-
-		owner.gJujutsu_Camera = nil
-    end)
-
-	if SERVER then
-		camera:Play()
-	end
-
-	if SERVER then return end
-    
-    local head = copy:LookupBone("ValveBiped.Bip01_Head1")
-    local rightHand = copy:LookupBone("ValveBiped.Bip01_R_Hand")
-    local headPos = copy:GetPos() + copy:GetUp() * 60
-
-    local rotateStart = 0
-
-    local scaleMin = 0
-    local scaleMax = 1
-    local speed = 3
-
-    local firstStartPos = copy:GetPos() + copy:GetForward() * 15 + copy:GetUp() * 62.5 + copy:GetRight() * -0.5
-    local zoomOutPos = firstStartPos + copy:GetForward() * 150
-
-    camera:AddEvent(0, 250, function(ply, pos, ang, fov)
-        local initialAng = ang
-		ang = copy:EyeAngles()
-        if camera.CurFrame >= 1 and camera	.CurFrame <= 150 then
-            pos = LerpVector(camera:GetTime(1, 150), firstStartPos, firstStartPos)
-        end
-        if camera.CurFrame >= 150 and camera.CurFrame <= 250 then
-            --ang:RotateAroundAxis(ang:Up(), Lerp(math.ease.OutExpo(camera:GetTime(250, 450)), 0, 0))
-            pos = LerpVector(math.ease.InOutQuart(camera:GetTime(150, 190)), firstStartPos, zoomOutPos)
-        end
-        ang:RotateAroundAxis(ang:Up(), 180)
-
-        /*if camera.CurFrame >= 700 and camera.CurFrame <= 1100 then
-            if camera:FrameFirstTime(700) then
-                rotateStart = SysTime()
-            end
-
-            pos = math.QuadraticBezier(math.ease.InOutQuart(math.min((SysTime() - rotateStart) / 2, 1)), zoomOutPos, headPos - copy:GetRight() * 90, headPos - copy:GetForward() * 100)
-            ang = (headPos - pos):Angle()
-        end*/
-
-        /*if camera.CurFrame >= 1100 then
-            local startPos = backPos + copy:GetForward() * 25 - copy:GetUp() * 40
-            pos = LerpVector(math.ease.OutExpo(camera:GetTime(1100, 1150)), startPos, startPos - copy:GetForward() * 80 - copy:GetRight() * 70)
-            ang:RotateAroundAxis(ang:Up(), 180)
-            ang:RotateAroundAxis(ang:Up(), Lerp(math.ease.OutExpo(camera:GetTime(1100, 1150)), 0, -5))
-        end*/
-        return pos, ang
-    end)
-    
-    if localPlayer == ply then
-        camera:Play()
-    else
-        camera:Play(true)
-    end
 end

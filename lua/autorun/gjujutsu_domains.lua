@@ -1,6 +1,8 @@
 if SERVER then
 	util.AddNetworkString("gJujutsu_cl_runDomainExpansion")
 	util.AddNetworkString("gJujutsu_cl_SyncClashKey")
+	util.AddNetworkString("gJujutsu_cl_runDomainExpansionClashVisual")
+	util.AddNetworkString("gJujutsu_cl_runDomainExpansionClashVisualRemove")
 end
 
 gjujutsu_ClashWindUp = 2
@@ -119,7 +121,13 @@ hook.Add("Tick", "gJujutsu_DomainHandling", function()
 				if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 					if ply == winner then
 						weapon:SetGlobalCD(0.5)
+						net.Start("gJujutsu_cl_runDomainExpansionClashVisualRemove")
+						net.WriteEntity(weapon)
+						net.Broadcast()
 					else
+						net.Start("gJujutsu_cl_runDomainExpansionClashVisualRemove")
+						net.WriteEntity(weapon)
+						net.Broadcast()
 						weapon:SetGlobalCD(10)
 						weapon:SetNextUltimate(CurTime() + weapon.UltimateCD)
 					end
@@ -187,6 +195,9 @@ hook.Add("gJujutsu_DomainClashStart", "DomainClashStart", function(owner, data)
 		if weapon:IsValid() and weapon:IsGjujutsuSwep() then
 			weapon:SetDomainClash(true)
 			weapon:SetBusy(true)
+			net.Start("gJujutsu_cl_runDomainExpansionClashVisual")
+			net.WriteEntity(weapon)
+			net.Broadcast()
 		end
 
 		local newKey = GenerateNewKey()
@@ -224,6 +235,22 @@ end)
 if SERVER then return end
 
 -- Handling nets
+
+net.Receive("gJujutsu_cl_runDomainExpansionClashVisual", function()
+	local weapon = net.ReadEntity()
+	
+	if weapon:IsValid() then
+		weapon:DomainVisual()
+	end
+end)
+
+net.Receive("gJujutsu_cl_runDomainExpansionClashVisualRemove", function()
+	local weapon = net.ReadEntity()
+	
+	if weapon:IsValid() then
+		weapon:DomainVisualRemoving()
+	end
+end)
 
 net.Receive("gJujutsu_cl_runDomainExpansion", function()
 	local weapon = net.ReadEntity()

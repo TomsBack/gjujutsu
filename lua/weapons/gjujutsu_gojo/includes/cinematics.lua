@@ -1,3 +1,5 @@
+
+-- Adding hooks
 if SERVER then
 	util.AddNetworkString("gJujutsu_cl_sixEyesCinematic")
 end
@@ -44,11 +46,13 @@ function SWEP:SixEyesCinematic()
     local copy = camera.Copy
 	owner.gJujutsu_Copy = copy
 	copy:SetSequence(owner:LookupSequence("gojo_idle"))
+	copy:SetBodygroup(1, 0)
 	local headPos = copy:GetPos() + copy:GetUp() * 70
 
 	local bandage = ClientsideModel(Model("models/gjujutsu/gojo_bandage/gojo_bandage.mdl"))
 	bandage:SetOwner(copy)
 	bandage:SetAngles(copy:GetAngles())
+	bandage:SetModelScale(0.9)
 	bandage.RenderOverride = function(self)
         bandage:DrawModel()
         bandage:FrameAdvance()
@@ -63,7 +67,7 @@ function SWEP:SixEyesCinematic()
 		boneAng:RotateAroundAxis(boneAng:Right(), -90)
 		boneAng:RotateAroundAxis(boneAng:Up(), -90)
 
-        bandage:SetPos(copy:GetBonePosition(headBone) + copy:GetForward() * 2.5 + copy:GetUp() * 3)
+        bandage:SetPos(copy:GetBonePosition(headBone) + copy:GetForward() * 1.25 + copy:GetUp() * 2)
     end) 
 
     camera:AddEvent(0, 250, function(ply, pos, ang, fov)
@@ -155,7 +159,10 @@ function SWEP:DomainExpansionCinematic()
 	local forw = nil
 
 	if CLIENT then
-		copy:SetSequence(owner:LookupSequence("gojo_domain_anim"))
+		copy:SetSequence(owner:LookupSequence("gojo_domain_anim2"))
+		copy:SetPlaybackRate(0)
+		copy:SetCycle(0.5)
+		copy:SetBodygroup(1, 0)
 	end
 	
 	local targetEnt = NULL
@@ -389,25 +396,36 @@ function SWEP:DomainExpansionCinematic()
 	local copyRight = copyEyeAngles:Right()
 	local copyUp = copyEyeAngles:Up()
 
-    local firstStartPos = copyPos + copyForw * 7.5 + copyUp * 40
-    local firstEndPos = firstStartPos + copyUp * 40
-    local zoomOutPos = firstEndPos - copyUp * 40
-    local zoomOutPos2 = zoomOutPos + copyForw * 150
-    local firstonce = firstStartPos + copyRight * 15
-    local firstonce2 = copyPos + copyForw * 20 + copyUp * 65
-    local firstonce3 = copyPos + copyForw * 900 + copyUp * 65 + copyRight * 50
-    local firstonce4 = copyPos + copyForw * 1050 + copyUp * 65 + copyRight * 50
+
+
+	local firstStartPos = copy:GetPos() + copy:GetForward() * 35 + copy:GetUp() * 66
+    local zoomOutPos = firstStartPos + copy:GetForward() * 80
+	local zoomOutPos2 = copy:GetPos() + copy:GetForward() * 20 + copy:GetUp() * 66 - copy:GetRight() * 0.5
+
+	local firstStartPos2 = copy:GetPos() - copy:GetForward() * 500 + copy:GetUp() * 95
+	local firstStartPos3 = copy:GetPos() + copy:GetForward() * 1000 + copy:GetUp() * 60
+
+	local firstonce4 = copyPos + copyForw * 1050 + copyUp * 65 + copyRight * 50
     local firstonce5 = copyPos + copyForw * 1050 + copyUp * 65 + copyRight * 120
     local firstonce6 = copyPos + copyForw * 1050 + copyUp * 65 + copyRight * 90
+
 
     camera:AddEvent(0, 1441, function(cameraPly, pos, ang, fov)
 		local curFrame = camera.CurFrame
 		ang = copy:EyeAngles()
-        if curFrame >= 0 and curFrame <= 15 then
-            ang:RotateAroundAxis(ang:Up(),120)
-            pos = LerpVector(camera:GetTime(100, 200), firstonce, firstonce)
+        if curFrame >= 0 and curFrame <= 200 then
+            ang:RotateAroundAxis(ang:Up(),180)
+            pos = LerpVector(math.ease.InOutQuart(camera:GetTime(0, 200)), zoomOutPos, firstStartPos)
         end
-        if curFrame >= 15 and curFrame <= 560 then
+		if curFrame >= 200 and curFrame <= 560 then
+            ang:RotateAroundAxis(ang:Up(),180)
+            pos = LerpVector(math.ease.InOutQuart(camera:GetTime(200, 560)), zoomOutPos2, zoomOutPos2)
+        end
+		if curFrame >= 560 and curFrame <= 1180 then
+            ang:RotateAroundAxis(ang:Up(),0)
+            pos = LerpVector(math.ease.InOutQuart(camera:GetTime(260, 1480)), firstStartPos2, firstStartPos3)
+		end
+        /*if curFrame >= 15 and curFrame <= 560 then
             pos = LerpVector(camera:GetTime(100, 200), firstonce, firstonce2)
             ang:RotateAroundAxis(ang:Up(),120)
             ang:RotateAroundAxis(ang:Up(), Lerp(math.ease.OutExpo(camera:GetTime(100, 200)), 0, 60))
@@ -418,7 +436,7 @@ function SWEP:DomainExpansionCinematic()
 			if curFrame >= 570 then
 				ang:RotateAroundAxis(ang:Up(), Lerp(math.ease.OutExpo(camera:GetTime(570, 950)), 0, -150))
 			end
-        end
+        end*/
         if curFrame >= 1180 and curFrame <= 1450 then
             pos = LerpVector(camera:GetTime(1180, 1450), firstonce4, firstonce5)
             ang:RotateAroundAxis(ang:Up(),150)
@@ -466,8 +484,6 @@ function SWEP:DomainExpansionCinematic()
 end
 
 if SERVER then return end
-
--- Handling nets
 
 net.Receive("gJujutsu_cl_sixEyesCinematic", function()
 	local weapon = gebLib_net.ReadEntity()

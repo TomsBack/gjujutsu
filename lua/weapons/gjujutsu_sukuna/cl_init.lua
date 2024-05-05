@@ -52,7 +52,7 @@ function SWEP:DrawHUD()
 			if self.MahoragaWheelConvar:GetBool() and self:GetFingers() >= self.MahoragaWheelFingerConVar:GetInt() then 
 				self:DrawActivateAbilityBox(3, 40, "Mahoraga Wheel (Inactive)", ability6:GetInt(), self:GetNextAbility6(), "Mahoraga Wheel (Active)", self:GetMahoragaWheel():IsValid())
 			end
-			if owner:KeyDown(IN_SPEED) then
+			if owner:KeyDown(IN_SPEED) and self:GetAllowWorldDimensional() then
 				self:DrawCDAbilityBox(-1, 0, "Dimensional Slash ("..self:GetDimensionalSlashState()..")", ability7:GetInt(), self:GetNextAbility7())
 			else
 				self:DrawCDAbilityBox(-1, 0, "Dismantle Slash", ability7:GetInt(), self:GetNextAbility7())
@@ -136,3 +136,29 @@ net.Receive("gjujutsu_cl_slasheffect", function(len, ply)
         hook.Remove("HUDPaint", "SlashEffect" .. curtime .. '_PLAYER_' .. ply:EntIndex())
     end)
 end)
+
+local material = Material('hud/targetCursor.png')
+function SWEP:DoDrawCrosshair(x,y)
+	local owner = self:GetOwner()
+	if IsValid(owner) and IsValid(LocalPlayer()) and !IsValid(LocalPlayer().targetPlayer)then
+		local tr = util.TraceLine( {
+			start = owner:EyePos(),
+			endpos = owner:EyePos() + owner:GetAimVector() * 1500,
+			filter = {owner},
+			mask = MASK_SHOT_HULL
+		} )
+		local pos = tr.HitPos
+		
+		local pos2d = pos:ToScreen()
+		if pos2d.visible then
+			surface.SetMaterial( material )
+			local clr = Color(255,255,255,255)
+			local h,s,v = ColorToHSV(clr)
+			h = h - 180
+			clr = HSVToColor(h,s,v)
+			surface.SetDrawColor( clr )
+			surface.DrawTexturedRect( pos2d.x - 32, pos2d.y - 32, 64, 64 )
+		end
+		return true
+	end
+end

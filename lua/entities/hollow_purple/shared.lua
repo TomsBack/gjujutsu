@@ -425,7 +425,7 @@ function ENT:DoDamage()
     for _, v in ipairs(ents.FindInSphere(purplePos, finalHitbox)) do
 		if not v:IsValid() then continue end
 		if v == self or v == owner or v:GetOwner() == owner then continue end
-		if weapon:IsGjujutsuSwep() and v == weapon:GetDomain() then continue end
+		if weapon != nil and IsValid(weapon) and weapon:IsGjujutsuSwep() and v == weapon:GetDomain() then continue end
 		if gJujutsu_EntsBlacklist[v:GetClass()] then continue end
 		if self.Weapon:IsValid() and v == self.Weapon:GetDomain() then continue end
 		if self.DamagedList[v] then continue end
@@ -517,7 +517,9 @@ function ENT:ExplosionDamage(size, damageMin, damageMax, defaultDamageType)
 		if SERVER then
 			owner:LagCompensation(true)
 			SuppressHostEvents(nil)
-			ent:TakeDamageInfo(dmg)
+			if ent != owner then
+				ent:TakeDamageInfo(dmg)
+			end
 			SuppressHostEvents(owner)
 			owner:LagCompensation(false)
 		end

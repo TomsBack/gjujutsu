@@ -67,14 +67,23 @@ function ENT:SpawnParticles()
 
 	local owner = self:GetDomainOwner()
 
-	local voidCoreParticle = CreateParticleSystemNoEntity("void_core", owner:EyePos() + owner:GetForward() * 2500)
+	local voidCoreParticle = CreateParticleSystemNoEntity("void_core", owner:EyePos() + owner:GetForward() * 6500)
 	voidCoreParticle:SetShouldDraw(false)
 
 	self.VoidCore = voidCoreParticle
 end
 
 local domainMat = Material("models/limitless/mats_domain")
-
+local m1 = Material( "sgm/playercircle" )
+local m2 = Material( "particle/particle_ring_wave_additive" )
+local m3 = Material( "particle/smokestack" )
+local m4 = Material( "particle/warp3_warp_noz" )
+local m5 = Material( "particle/smokesprites_0012" )
+local m6 = Material( "particle/smokesprites_0016" )
+local m7 = Material( "particle/particle_ring_blur" )
+local m8 = Material( "models/limitless/gojodomainsmoke1" )
+local m9 = Material( "models/limitless/gojodomainsmoke2" )
+local m10 = Material( "models/limitless/gojodomainsmoke3" )
 function ENT:Draw()
 	local ply = LocalPlayer()
 	local domainPos = self:GetPos()
@@ -91,7 +100,7 @@ function ENT:Draw()
 	if not weapon:GetInCinematic() and self:IsInDomain(ply) and not self.AfterCinematic then
 		self.AfterCinematic = true
 
-		local domainSplattersParticle = CreateParticleSystemNoEntity("domain_splatters", self:GetPos())
+		local domainSplattersParticle = CreateParticleSystemNoEntity("domain_splatters", domainPos)
 		domainSplattersParticle:SetShouldDraw(false)
 		self.DomainSplatters = domainSplattersParticle
 
@@ -114,6 +123,10 @@ function ENT:Draw()
 		if self.DomainSplatters:IsValid() then
 			self.DomainSplatters:Render()
 		end
+
+
+		--air white c*m
+		--if v:GetNWBool("GojoCumBlast1") == true and v == LocalPlayer() then
 
 		if self.VoidCore:IsValid() then
 			self.VoidCore:Render()
@@ -147,7 +160,11 @@ function ENT:OnRemove()
 	end
 
 	self:StopSound(domainAmbienceSound)
-
+	local owner = self:GetDomainOwner()
+	local weapon = owner:GetActiveWeapon()
+	if owner != nil and IsValid(owner) and IsValid(weapon) then
+		weapon:BlueRemove()
+	end
 	for ent, _ in pairs(self.EntsInDomain) do
 		if not ent:IsValid() then continue end
 

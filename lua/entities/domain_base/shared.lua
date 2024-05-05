@@ -125,7 +125,6 @@ function ENT:DefaultInitialize()
 
 		self:SetMaterial(self.BarrierMaterial)
 		self:SetModelScale(self.DefaultScale, 0)
-		self:Activate()
 
 		-- Creating domain floor
 		if SERVER then
@@ -135,6 +134,7 @@ function ENT:DefaultInitialize()
 			domainFloor:SetPos(owner:GetPos() - owner:GetUp() * 12)
 			domainFloor:Spawn()
 		end
+		self:Activate()
 	end
 	
 	local phys = self:GetPhysicsObject()

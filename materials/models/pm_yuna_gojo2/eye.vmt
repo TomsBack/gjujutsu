@@ -1,0 +1,12 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/pm_yuna_gojo2/Eye"
+	 $alphatest 1
+	 $nocull 1
+                 $halflambert 1
+                 $lightwarptexture "models/pm_yuna_gojo2/toon_n"
+                "$ambientocclusion" "0"
+    	"$selfillum" "1"
+    	"$selfillumtint" "[3 3 3]"
+           
+}

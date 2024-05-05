@@ -52,6 +52,7 @@ function ENT:Initialize()
 
 	if owner:IsValid() then
 		self:FollowBone(owner, owner:LookupBone("ValveBiped.Bip01_Head1"))
+		--self:SetPos(owner:WorldSpaceCenter() + Vector(0, 0, 42.5))
 		self:SetLocalAngles(angle_zero)
 		self:SetLocalPos(vector_origin + Vector(13, 3, 0))
 	end
@@ -68,6 +69,13 @@ function ENT:PostInitialize()
 		util.Effect("spawn_effect", effectData)
 		self:SetNoDraw(false)
 	end
+end
+
+function ENT:SpinThink()
+	local lerpTime = (CurTime() - self:GetSpinTime()) / self.SpinSpeed
+	local lerpedAngles = Lerp(math.ease.InOutBack(lerpTime), self:GetOriginalAngle(), self:GetDesiredAngle())
+	lerpedAngles:Normalize()
+	self:SetAngles(lerpedAngles)
 end
 
 function ENT:Think()
@@ -113,6 +121,10 @@ function ENT:Adapt()
 			if SERVER and owner:IsValid() and adaptData.Percentage >= 100 and not adaptData.ShownMessage then
 				adaptData.ShownMessage = true
 				owner:PrintMessage(HUD_PRINTTALK, "Adapted to " .. tostring(ent) .. " Damage Type " .. tostring(dmgType))
+				if !weapon:GetAllowWorldDimensional() then
+					owner:PrintMessage(HUD_PRINTTALK, "You have received a new ability - World Dimensional. [Shift+G for 4 times]")
+				end
+				weapon:SetAllowWorldDimensional(true)
 			end
 		end
 	end
@@ -247,5 +259,6 @@ if SERVER then
 end
 
 function ENT:Draw()
+	self:SpinThink()
 	self:DrawModel()
 end

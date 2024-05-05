@@ -25,7 +25,7 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 
-SWEP.Model = Model("models/gjujutsu/gojo/gojo.mdl")
+SWEP.Model = Model("models/gjujutsu/gojo/Gojo2.mdl")
 
 SWEP.PurpleAnimation = false
 SWEP.PurpleAnimationStart = 0
@@ -70,11 +70,11 @@ SWEP.PrimaryCD = 0
 SWEP.SecondaryCD = 3
 SWEP.Ability3CD = 5
 SWEP.Ability4CD = 8
-SWEP.Ability5CD = 25
+SWEP.Ability5CD = 4
 SWEP.Ability6CD = 0.5
 SWEP.Ability7CD = 0.5
 SWEP.Ability8CD = 0.5
-SWEP.UltimateCD = 50
+SWEP.UltimateCD = 1
 SWEP.TauntCD = 0
 
 SWEP.PrimaryCost = 0
@@ -85,7 +85,7 @@ SWEP.Ability5Cost = {Min = 500, Max = 1250}
 SWEP.Ability6Cost = 25
 SWEP.Ability7Cost = 0
 SWEP.Ability8Cost = 0
-SWEP.UltimateCost = 750
+SWEP.UltimateCost = 1
 SWEP.TauntCost = 0
 
 SWEP.BrainRecover = true
@@ -136,6 +136,7 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Bool", 3, "HoldingTeleport")
 	self:NetworkVar("Bool", 4, "HoldingPurple")
 	self:NetworkVar("Bool", 5, "Flying")
+	self:NetworkVar("Bool", 6, "PurpleProcess")
 
 	self:NetworkVar("Entity", 0, "Blue")
 	self:NetworkVar("Entity", 1, "Red")
@@ -161,7 +162,7 @@ function SWEP:PostInitialize()
 	local owner = self:GetOwner()
 
 	if owner:IsValid() then
-		owner:SetBodygroup(1, 0)
+		owner:SetBodygroup(1, 1)
 	end
 end
 
@@ -240,7 +241,33 @@ function SWEP:Think()
 end
 
 function SWEP:PrimaryAttack()
+	if self.VoidCore != nil and !IsValid(self.VoidCore) then
+		self:DomainVisual()
+	else
+		self:DomainVisualRemoving()
+	end
+end
 
+function SWEP:DomainVisual()
+	local owner = self:GetOwner()
+	if CLIENT then
+		if !IsValid(self.VoidCore) then
+			local penis0 = owner:GetAngles()
+			local penis = penis0:Forward()
+			local penis2 = penis0:Up()
+			self.VoidCore = CreateParticleSystemNoEntity("void_core_clash", owner:WorldSpaceCenter() - penis * 100 + penis2 * 65)
+			self.VoidCore:SetShouldDraw(true)
+		end
+	end
+end
+
+function SWEP:DomainVisualRemoving()
+	local owner = self:GetOwner()
+	if CLIENT then
+		if IsValid(self.VoidCore) then
+			self.VoidCore:StopEmission()
+		end
+	end
 end
 
 function SWEP:SecondaryAttack()
@@ -314,12 +341,12 @@ function SWEP:HollowPurple()
 	if self:GetBusy() and not detonatePurple:GetBool() then return end
 	if self:GetCursedEnergy() < self.Ability5Cost.Min then return end
 	if self:GetHoldingPurple() then return end
-
 	local hollowPurple = self:GetHollowPurple()
 
 	-- TODO: Fix hollow purple when explosion is turned off, only blue gets summoned
 	if hollowPurple:IsValid() and hollowPurple:GetFired() then
 		hollowPurple:Explode()
+		--self:SetPurpleProcess(false)
 		return
 	end
 
@@ -372,7 +399,7 @@ function SWEP:SixEyesActivate()
 	local owner = self:GetOwner()
 
 	if self:GetSixEyes() then
-		owner:SetBodygroup(1, 1)
+		owner:SetBodygroup(1, 0)
 		
 		if owner:PredictedOrDifferentPlayer() or game.SinglePlayer() then
 			self:SixEyesCinematic()
@@ -388,7 +415,7 @@ function SWEP:SixEyesActivate()
 
 		self:SetCursedEnergyRegen(self.SixEyesCursedEnergyRegen)
 	else
-		owner:SetBodygroup(1, 0)
+		owner:SetBodygroup(1, 1)
 
 		self.DamageMultiplier = self.DefaultDamageMultiplier
 		self.HealthGain = self.DefaultHealthGain
@@ -446,7 +473,12 @@ function SWEP:StartDomain()
 	if self:GetCursedEnergy() < self.UltimateCost and not domain:IsValid() then return end
 
 	local owner = self:GetOwner()
-
+	owner:gebLib_PlayAction("gojo_domain_anim2", 2.5)
+	timer.Simple(0.46, function()
+		if IsValid(self) and IsValid(owner) then
+			owner:gebLib_PauseAction()
+		end
+	end)
 	if not self.DomainClashConvar:GetBool() then
 		self:DomainExpansion()
 		return
@@ -562,7 +594,7 @@ function SWEP:CreateTeleportIndicator()
 		local angles = owner:GetAngles()
 		angles.x = 0
 
-		local indicator = ClientsideModel(Model("models/gjujutsu/gojo/gojo.mdl"))
+		local indicator = ClientsideModel(Model("models/gjujutsu/gojo/Gojo2.mdl"))
 		indicator:SetMaterial("models/spawn_effect2")
 		indicator:SetSequence(owner:GetSequence())
 		indicator:SetAngles(angles)
@@ -715,6 +747,7 @@ end
 
 function SWEP:HollowPurpleFire()
 	-- if not self:GetHollowPurple():IsValid() then return end
+	--if self:GetPurpleProcess() then return end
 	if CurTime() < self:GetNextAbility5() then return end
 	if not self:GetHoldingPurple() then return end
 	if not IsFirstTimePredicted() then return end
@@ -726,7 +759,6 @@ function SWEP:HollowPurpleFire()
 	
 	if not hollowPurple:IsValid() then return end
 
-	self:SetBusy(false)
 
 	if SERVER then
 		if not hollowPurple:GetFullOutput() then
@@ -747,16 +779,19 @@ function SWEP:HollowPurpleFire()
 				
 				hollowPurple:EmitSound(Sound("gjujutsu_kaisen/sfx/gojo/hollow_purple_fire.wav"))
 				owner:EmitSound(Sound("gjujutsu_kaisen/sfx/gojo/hollow_ost.mp3"))
+				self:SetBusy(false)
 			end)
 		end
 	end
 
 	if not hollowPurple:GetFullOutput() then
+		self:SetNextAbility5(CurTime() + self.Ability5CD)
 		self:SetTimedEvent("FireHollowPurple", 1)
 		owner:gebLib_ResumeAction(1.75)
 	end
 
 	if hollowPurple:GetFullOutput() then
+		self:SetNextAbility5(CurTime() + self.Ability5CD)
 		self:SetTimedEvent("FireHollowPurple", 1.75)
 		owner:gebLib_ResumeAction(1.25)
 	end
@@ -826,5 +861,3 @@ end
 function SWEP:EndBlock()
 	self:DefaultEndBlock()
 end
-
--- Adding hooks

@@ -81,7 +81,7 @@ hook.Add("EntityTakeDamage", "gJujutsu_DamageInsideDomain", function(ent, dmg)
 	if dmg:GetInflictor().Base ~= "domain_base" then return end
 	local weapon = ent:GetActiveWeapon()
 
-	if not weapon:IsGjujutsuSwep() then return end
+	if IsValid(weapon) and not weapon:IsGjujutsuSwep() then return end
 	local domain = weapon:GetDomain()
 
 	if domain:IsValid() and domain:IsInDomain(ent) then

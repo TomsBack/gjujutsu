@@ -1,4 +1,7 @@
 function SWEP:HollowPurpleBegin()
+	if CurTime() < self:GetNextAbility5() then return end
+	if self:GetPurpleProcess() then return end
+	self:SetPurpleProcess(true)
 	local owner = self:GetOwner()
 	self:SetBusy(true)
 
@@ -176,6 +179,7 @@ function SWEP:SpawnHollowPurple()
 
 	if not self:GetHoldingPurple() then
 		owner:gebLib_ResumeAction(1.75)
+		self:SetNextAbility5(CurTime() + self.Ability5CD)
 		self:SetTimedEvent("FireHollowPurple", 1)
 	end
 end
@@ -186,9 +190,8 @@ function SWEP:FireHollowPurple()
 	local hollowPurple = self:GetHollowPurple()
 
 	self:SetBusy(false)
-	self:SetNextAbility5(CurTime() + self.Ability5CD)
 	self:SetHoldingPurple(false)
-
+	self:SetPurpleProcess(false)
 
 	if hollowPurple:IsValid() and hollowPurple:GetFired() then
 		return

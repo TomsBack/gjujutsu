@@ -304,7 +304,7 @@ function ENT:Explode()
 
 	local owner = self:GetOwner()
 	local weapon = owner:GetActiveWeapon()
-	local ownerPos = owner:GetPos()
+	local ownerPos = owner:WorldSpaceCenter()
 	local eyeAngles = owner:EyeAngles()
 	
 	self:FireEffects()

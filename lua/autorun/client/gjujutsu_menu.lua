@@ -335,3 +335,207 @@ function gJujutsuMenu()
 end
 
 hook.Add("PopulateToolMenu", "gJujutsuMenu", gJujutsuMenu)
+
+hook.Add( "OnPlayerChat", "gJujutsu_Open_Edit_Menu", function( ply, strText ) 
+    if ( ply != LocalPlayer() ) then return end
+	strText = string.lower( strText )
+	if ( strText == "/gjujutsueditor" ) then
+		gJujutsuEditMenu()
+		return gJujutsuEditMenu
+	end
+end)
+local function relativeW(px)
+    return ScrW() * px/1920
+end
+
+local function relativeH(px)
+    return ScrH() * px/1080
+end
+
+function gJujutsuEditMenu()
+	if ShopMenuFrame then return end
+	ShopMenuFrame = vgui.Create( "DFrame" )
+	ShopMenuFrame:SetTitle( "" )
+	ShopMenuFrame:SetSize( relativeW( 295 ), relativeH( 210 ) )
+	ShopMenuFrame:SetAlpha( 0 )
+	ShopMenuFrame:AlphaTo( 255, 0.2, 0 )
+	ShopMenuFrame:Center()
+	ShopMenuFrame:MakePopup( true )
+	ShopMenuFrame:SetKeyboardInputEnabled( false )
+	ShopMenuFrame:ShowCloseButton( false )
+	function ShopMenuFrame:Paint( w, h )
+		draw.RoundedBox( 12, 0, 0, w, h, Color( 0, 0, 0, 150 ) )
+		draw.SimpleText( "gJujutsu Editor", "gJujutsuFont2", relativeW( 10 ), relativeH( 22.5 ), color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+	end
+	local PanelLeft = vgui.Create( "DPanel", ShopMenuFrame )
+	PanelLeft:Dock( LEFT )
+	PanelLeft:SetWide( relativeW( 285 ) )
+	PanelLeft:DockMargin( 0, relativeH( 15 ), 0, 0)
+	function PanelLeft:Paint( w, h )
+		draw.RoundedBox( 2, 0, 0, w, h, Color( 0, 0, 0, 150 ) )
+	end	
+	local PanelCloseB = vgui.Create( "DPanel", ShopMenuFrame )
+	PanelCloseB:SetPos( relativeW( 260 ), relativeH( 8 ) ) 
+	PanelCloseB:SetSize( relativeW( 32 ), relativeH( 32 ) )
+	function PanelCloseB:Paint( w, h )
+		draw.RoundedBox( 2, 0, 0, w, h, Color( 0, 0, 0, 0 ) )
+	end	
+	local ButtonClose = vgui.Create( "DImageButton", PanelCloseB )	
+	ButtonClose:SetImage( "vgui/cross.png" ) 
+	ButtonClose:Dock( FILL )
+	ButtonClose:DockMargin( relativeW( 5 ), relativeH( 5 ), relativeW( 5 ), relativeH( 5 ) )	
+	ButtonClose.DoClick = function()
+		ShopMenuFrame:Close()
+		ShopMenuFrame = nil
+	end
+	function ButtonClose:Paint( w, h )
+	end	
+	function ButtonClose:Think()
+		if self:IsHovered() and self:GetAlpha() == 255 then
+			self:AlphaTo( 150, 0.05 )
+		elseif !self:IsHovered() and self:GetAlpha() != 255 then
+			self:AlphaTo( 255, 0.05 )
+		end
+	end
+	local DScrollPanel = vgui.Create("DScrollPanel", ShopMenuFrame)
+	DScrollPanel:SetSize( relativeW( 275 ), relativeH( 410 ) )
+	DScrollPanel:SetPos( relativeW( 10 ), relativeH( 60 ) ) 
+	local sbar = DScrollPanel:GetVBar()
+	function sbar:Paint(w, h)
+		draw.RoundedBox(12, 0, 0, 3, 4, Color(0, 0, 0, 100))
+	end
+	function sbar.btnUp:Paint(w, h)
+		draw.RoundedBox(0, 0, 0, 3, h, Color(1, 1, 1))
+	end
+	function sbar.btnDown:Paint(w, h)
+		draw.RoundedBox(0, 0, 0, 3, h, Color(1, 1, 1))
+	end
+	function sbar.btnGrip:Paint(w, h)
+		draw.RoundedBox(0, 0, 0, 3, h, Color(255, 255, 255))
+	end
+	stuff = {
+		[1] = {
+			name = "General",
+			id = "1",
+		},
+		[2] = {
+			name = "Characters",
+			id = "2",
+		},
+		[3] = {
+			name = "Client",
+			id = "3",
+		},
+	}
+	  for key, value in ipairs(stuff) do
+		local button = DScrollPanel:Add( "DButton" )
+		button:SetText( " " )
+		button:Dock( TOP )
+		button:SetTall(40)
+		button:DockMargin( 0, 2, 0, 2 )
+		button:SetTextColor(Color(255,255,255,255)) 
+		button.Paint = function( self, w, h )
+		  draw.RoundedBox(0, 0, 0, w, h, Color(128,128,128,200))
+		  draw.SimpleText( value.name, "gJujutsuFont2", relativeW(7.5 ), relativeH( 10 ), color_white )
+		end
+		local edit_button = vgui.Create("DButton", button)
+		edit_button:SetText("Edit")
+		edit_button:SetFont("gJujutsuFont2")
+		edit_button:SetPos( relativeW( 212 ), relativeH( 5	 ) ) 
+		edit_button:SetSize( relativeW( 60 ), relativeH( 30 ) )
+		edit_button:SetTextColor(Color(255,255,255,255)) 
+		edit_button.DoClick = function()
+			ShopMenuFrame:Close()
+			ShopMenuFrame = nil
+			if value.id == "1" then
+				GeneralEditMenu()
+			end
+			if value.id == "2" then
+				--AtumEditMenu()
+			end
+			if value.id == "3" then
+				--AtumEditMenu()
+			end
+		end
+		edit_button.Paint = function( self, w, h )
+		draw.RoundedBox(0, 0, 0, w, h, Color(0,0,0,220))
+		end
+	end
+end
+
+function GeneralEditMenu()
+	if GeneralMenuFrame then return end
+	GeneralMenuFrame = vgui.Create( "DFrame" )
+	GeneralMenuFrame:SetTitle( "" )
+	GeneralMenuFrame:SetSize( relativeW( 355 ), relativeH( 170 ) )
+	GeneralMenuFrame:SetAlpha( 0 )
+	GeneralMenuFrame:AlphaTo( 255, 0.2, 0 )
+	GeneralMenuFrame:Center()
+	GeneralMenuFrame:MakePopup( true )
+	GeneralMenuFrame:SetKeyboardInputEnabled( false )
+	GeneralMenuFrame:ShowCloseButton( false )
+	function GeneralMenuFrame:Paint( w, h )
+		draw.RoundedBox( 12, 0, 0, w, h, Color( 0, 0, 0, 150 ) )
+		draw.SimpleText( "gJujutsu General Editor", "gJujutsuFont2", relativeW( 10 ), relativeH( 22.5 ), color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+	end
+	local PanelCloseB = vgui.Create( "DPanel", GeneralMenuFrame )
+	PanelCloseB:SetPos( relativeW( 320 ), relativeH( 4 ) ) 
+	PanelCloseB:SetSize( relativeW( 32 ), relativeH( 32 ) )
+	function PanelCloseB:Paint( w, h )
+		draw.RoundedBox( 2, 0, 0, w, h, Color( 0, 0, 0, 0 ) )
+	end	
+	local ButtonClose = vgui.Create( "DImageButton", PanelCloseB )	
+	ButtonClose:SetImage( "vgui/cross.png" ) 
+	ButtonClose:Dock( FILL )
+	ButtonClose:DockMargin( relativeW( 5 ), relativeH( 5 ), relativeW( 5 ), relativeH( 5 ) )	
+	ButtonClose.DoClick = function()
+		GeneralMenuFrame:Close()
+		GeneralMenuFrame = nil
+	end
+	function ButtonClose:Paint( w, h )
+	end	
+	function ButtonClose:Think()
+		if self:IsHovered() and self:GetAlpha() == 255 then
+			self:AlphaTo( 150, 0.05 )
+		elseif !self:IsHovered() and self:GetAlpha() != 255 then
+			self:AlphaTo( 255, 0.05 )
+		end
+	end
+	local PanelLeft = vgui.Create( "DPanel", GeneralMenuFrame )
+	PanelLeft:Dock( LEFT )
+	PanelLeft:SetWide( relativeW( 345 ) )
+	PanelLeft:DockMargin( 0, relativeH( 10 ), 0, 0)
+	function PanelLeft:Paint( w, h )
+		draw.RoundedBox( 12, 0, 0, w, h, Color( 128, 128, 128, 200 ) )
+	end	
+	local DermaNumSlider = vgui.Create( "DNumSlider", GeneralMenuFrame )
+	DermaNumSlider:SetPos( relativeW( 8 ), relativeH( 35 ) )			
+	DermaNumSlider:SetSize( relativeW( 310 ), relativeH( 40 )) 
+	DermaNumSlider:SetText( "Brain recover limit" )	
+	DermaNumSlider:SetMin( 0 )				 
+	DermaNumSlider:SetMax( 25 )	
+	DermaNumSlider:SetDefaultValue( 5 )
+	DermaNumSlider:SetDecimals( 0 )				
+	DermaNumSlider:SetConVar( "gjujutsu_misc_brain_recover_limit" )	
+	local DermaNumSlider2 = vgui.Create( "DNumSlider", GeneralMenuFrame )
+	DermaNumSlider2:SetPos( relativeW( 8 ), relativeH( 55 ) )			
+	DermaNumSlider2:SetSize( relativeW( 310 ), relativeH( 40 )) 
+	DermaNumSlider2:SetText( "CE aura range" )	
+	DermaNumSlider2:SetMin( 200 )				 
+	DermaNumSlider2:SetMax( 35000 )	
+	DermaNumSlider:SetDefaultValue( 5000 )
+	DermaNumSlider2:SetDecimals( 0 )				
+	DermaNumSlider2:SetConVar( "gjujutsu_misc_ce_aura_range" )	
+end
+
+
+/*
+	panel:NumSlider("Brain recover limit", "gjujutsu_misc_brain_recover_limit", 0, 1000, 0)
+	panel:ControlHelp("How many times you can recover cooldowns until your brain gives up on you. 0 to disable")
+	panel:NumSlider("CE aura range", "gjujutsu_misc_ce_aura_range", 0, 100000)
+	panel:ControlHelp("How far will certain users be able to see cursed energy. 0 to disable")
+	panel:NumSlider("CD mult", "gjujutsu_misc_cd_mult", 0, 1000)
+	panel:ControlHelp("Multiplies the Cooldown for all abilities. Needs re equiping weapon")
+	panel:NumSlider("CE drain mult", "gjujutsu_misc_ce_drain_mult", 0, 1000)
+	panel:ControlHelp("Multiplies the drain of cursed energy for all abilities")
+	/*

@@ -95,5 +95,33 @@ local function DisableSixEyesVision()
 	render.SetLightingMode(0)
 end
 
+
 hook.Add("PostRender", "gJujutsu_DisableSixEyesVision", DisableSixEyesVision)
 hook.Add("PreDrawHUD", "gJujutsu_DisableSixEyesVision", DisableSixEyesVision)
+
+
+local material = Material('hud/targetCursor.png')
+function SWEP:DoDrawCrosshair(x,y)
+	local owner = self:GetOwner()
+	if IsValid(owner) and IsValid(LocalPlayer()) and !IsValid(LocalPlayer().targetPlayer)then
+		local tr = util.TraceLine( {
+			start = owner:EyePos(),
+			endpos = owner:EyePos() + owner:GetAimVector() * 1500,
+			filter = {owner},
+			mask = MASK_SHOT_HULL
+		} )
+		local pos = tr.HitPos
+		
+		local pos2d = pos:ToScreen()
+		if pos2d.visible then
+			surface.SetMaterial( material )
+			local clr = Color(255,255,255,255)
+			local h,s,v = ColorToHSV(clr)
+			h = h - 180
+			clr = HSVToColor(h,s,v)
+			surface.SetDrawColor( clr )
+			surface.DrawTexturedRect( pos2d.x - 32, pos2d.y - 32, 64, 64 )
+		end
+		return true
+	end
+end
